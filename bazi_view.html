@@ -7,7 +7,7 @@
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #0f172a; color: #e2e8f0; margin: 0; padding: 0; box-sizing: border-box; }
         .container { max-width: 1280px; margin: 0 auto; padding-bottom: 30px; }
-        
+
         .page-section { display: none; }
         .page-section.active { display: block; }
 
@@ -36,7 +36,7 @@
         .info-label { color: #94a3b8; width: 110px; flex-shrink: 0; }
         .info-val { color: #f8fafc; font-weight: 600; text-align: left; }
 
-        /* 🏥 先天体检：紧凑流式自适应网格（文字与数字紧挨着，绝不空出一大块） */
+        /* 🏥 先天体检：紧凑流式自适应网格 */
         .tijian-flex { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
         .tijian-chip { background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: 6px 12px; display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem; }
         .tijian-name { color: #38bdf8; font-weight: 600; }
@@ -54,7 +54,7 @@
         .grid-wrapper { display: flex; width: 100%; }
         .grid-col { border-right: 1px solid #334155; text-align: center; display: flex; flex-direction: column; flex: 1; min-width: 0; }
         .grid-col:last-child { border-right: none; }
-        
+
         .col-header { background: #1e293b; color: #38bdf8; font-size: 0.72rem; padding: 8px 1px; font-weight: bold; border-bottom: 1px solid #334155; height: 22px; display: flex; align-items: center; justify-content: center; white-space: nowrap; overflow: hidden; }
         .cell-mainstar { color: #f43f5e; font-weight: bold; font-size: 0.82rem; border-bottom: 1px solid #334155; height: 38px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .cell-ganzhi-box { border-bottom: 1px solid #334155; height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #111827; }
@@ -79,13 +79,13 @@
         .dayun-table { width: 100%; border-collapse: collapse; text-align: center; background: #0f172a; font-size: 0.82rem; margin-top: 10px; table-layout: fixed; }
         .dayun-table th, .dayun-table td { border: 1px solid #334155; padding: 9px 2px; word-break: break-all; }
         .dayun-table th { background: #334155; color: #38bdf8; font-size: 0.8rem; }
-        
+
         .dayun-row { transition: background 0.2s; }
         .dayun-row.clickable { cursor: pointer; }
         .dayun-row.clickable:hover { background: rgba(56, 189, 248, 0.15); }
         .dayun-row.locked { opacity: 0.45; cursor: not-allowed; background: #0b1120; }
         .dayun-row.active-dayun { background: rgba(244, 63, 94, 0.2); border-left: 4px solid #f43f5e; }
-        
+
         .star-cell-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
         .current-limit-tag { background: #f43f5e; color: #fff; padding: 1px 3px; border-radius: 3px; font-size: 0.6rem; font-weight: normal; white-space: nowrap; }
         .locked-tag { background: #475569; color: #94a3b8; padding: 1px 3px; border-radius: 3px; font-size: 0.6rem; }
@@ -103,6 +103,12 @@
         .sub-page-title { font-size: 1.2rem; color: #f59e0b; font-weight: bold; margin-bottom: 12px; border-bottom: 2px solid #334155; padding-bottom: 8px; }
         .sub-page-content { font-size: 0.95rem; line-height: 1.75; color: #e2e8f0; margin-bottom: 15px; white-space: pre-wrap; background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #334155; }
         .sub-page-tips { background: rgba(245, 158, 11, 0.15); border-left: 4px solid #f59e0b; padding: 12px; border-radius: 6px; color: #fde68a; font-size: 0.9rem; line-height: 1.65; margin-top: 12px; white-space: pre-wrap; }
+
+        /* 📁 历史档案模态框样式 */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: #1e293b; border: 1px solid #334155; border-radius: 12px; width: 90%; max-width: 500px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-height: 80vh; overflow-y: auto; }
+        .record-item { background: #0f172a; border: 1px solid #334155; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.2s; }
+        .record-item:hover { border-color: #38bdf8; background: #1a2744; }
 
         @media (max-width: 768px) {
             body { padding: 0; }
@@ -132,6 +138,10 @@
                 <div class="form-group"><label>出生时辰 (0-23 或如 1730)</label><input type="number" id="input-hour" placeholder="例: 1730 或 17"></div>
             </div>
             <button class="btn-submit" onclick="calculateAndSaveBazi()">🚀 生成专业排盘与详批报告</button>
+            <div style="text-align: center; margin-top: 15px;">
+                <button class="btn-home" onclick="openRecordsModal()" style="background: #0f172a; color: #f59e0b; border: 1px solid #f59e0b;">📁 查看云端历史档案库</button>
+                <a href="index.html" class="btn-home" style="display:inline-block; margin-left:10px; background:#1e293b; color:#38bdf8; border:1px solid #38bdf8; text-decoration:none;">🏠 返回综合导航首页</a>
+            </div>
         </div>
     </div>
 
@@ -145,6 +155,7 @@
             <div class="nav-tab" onclick="switchTab('tab-dayun', this)">📈 专业大限详批</div>
             <div class="nav-tab" onclick="switchTab('tab-liunian', this)">📅 专业流年及流月详批</div>
             <div class="nav-tab" onclick="switchTab('tab-taisui', this)">🛡️ 今年犯太岁生肖</div>
+            <div class="nav-tab" onclick="switchTab('tab-luckguide', this)">✨ 专属开运指南</div>
         </div>
 
         <div class="home-bar">
@@ -191,14 +202,12 @@
                     <div style="font-weight:bold; color:#f59e0b; margin-bottom:12px; border-bottom:1px solid #334155; padding-bottom:6px;">⚖️ 喜用神与五行生克旺衰</div>
                     <div class="info-row"><span class="info-label">用喜闲仇忌</span><span class="info-val" id="info-yongxi" style="color:#38bdf8;">-</span></div>
                     <div class="info-row"><span class="info-label">旺相死囚休</span><span class="info-val" id="info-wangxiang" style="color:#a7f3d0;">-</span></div>
+                    <div class="info-row"><span class="info-label">旺衰学术明细</span><span class="info-val" id="info-strength-details" style="color:#fde68a; font-size:0.85rem;">-</span></div>
                 </div>
 
                 <div class="info-card">
                     <div style="font-weight:bold; color:#f59e0b; margin-bottom:12px; border-bottom:1px solid #334155; padding-bottom:6px;">🏥 先天体检（五行个数与身体）</div>
-                    <!-- 🛠️ 紧凑贴合的标签流布局，文字与数值紧靠，不强行撕开大空白 -->
-                    <div class="tijian-flex" id="info-tijian-grid">
-                        <!-- 动态渲染注入 -->
-                    </div>
+                    <div class="tijian-flex" id="info-tijian-grid"></div>
                 </div>
             </div>
 
@@ -287,6 +296,13 @@
                             <div class="cell-lbl cell-nayin">纳音</div>
                         </div>
                     </div>
+                </div>
+
+                <div class="box-panel" style="margin-top: 15px;">
+                    <div class="box-title">⚡ 原局干支刑冲合害与神煞扫描</div>
+                    <ul id="pillar-scan-list" style="margin: 0; padding-left: 20px; color: #cbd5e1; font-size: 0.88rem; line-height: 1.6;">
+                        <li>扫描加载中...</li>
+                    </ul>
                 </div>
             </div>
 
@@ -435,6 +451,36 @@
                     </div>
                 </div>
             </div>
+
+            <!-- TAB 7: 专属开运指南 -->
+            <div id="tab-luckguide" class="tab-pane" style="display:none;">
+                <div class="box-panel" style="border: 1px solid #10b981;">
+                    <div class="box-title" style="color:#10b981;">✨ 命主专属开运色彩、数字与风水指南</div>
+                    <div style="font-size: 0.9rem; line-height: 1.6; color: #e2e8f0; margin-bottom: 15px; background: rgba(16, 185, 129, 0.08); padding: 12px; border-radius: 8px; border-left: 4px solid #10b981;">
+                        根据您的八字喜用神与五行磁场，为您量身定制的日常穿搭、数字能量与居家风水开运方案：
+                    </div>
+                    <div class="info-card">
+                        <div class="info-row"><span class="info-label">核心喜用五行</span><span class="info-val" id="guide-yongxi" style="color:#38bdf8;">-</span></div>
+                        <div class="info-row"><span class="info-label">开运幸运色彩</span><span class="info-val" id="guide-colors" style="color:#10b981;">-</span></div>
+                        <div class="info-row"><span class="info-label">幸运数字与楼层</span><span class="info-val" id="guide-numbers" style="color:#f59e0b;">-</span></div>
+                        <div class="info-row"><span class="info-label">事业财源方位</span><span class="info-val" id="guide-directions" style="color:#facc15;">-</span></div>
+                        <div class="info-row"><span class="info-label">健康调理重点</span><span class="info-val" id="guide-health" style="color:#f43f5e;">-</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 📁 云端历史档案弹窗模态框 -->
+<div id="records-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 8px;">
+            <h3 style="color: #f59e0b; margin: 0; font-size: 1.1rem;">📁 云端历史测算档案库</h3>
+            <button onclick="closeRecordsModal()" style="background: none; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer;">✕</button>
+        </div>
+        <div id="records-list-container">
+            <div style="color: #64748b; text-align: center; padding: 20px;">正在加载历史档案...</div>
         </div>
     </div>
 </div>
@@ -442,6 +488,24 @@
 <script>
     let globalDayunList = [];
     let globalReportData = null;
+
+    // 🚀 页面加载时：自动同步 index.html 传递过来的通用生辰档案
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedProfile = localStorage.getItem('metaphysics_common_profile');
+        if (savedProfile) {
+            try {
+                const p = JSON.parse(savedProfile);
+                if (p.name && document.getElementById('input-name')) document.getElementById('input-name').value = p.name;
+                if (p.gender && document.getElementById('input-gender')) document.getElementById('input-gender').value = p.gender;
+                if (p.year && document.getElementById('input-year')) document.getElementById('input-year').value = p.year;
+                if (p.month && document.getElementById('input-month')) document.getElementById('input-month').value = p.month;
+                if (p.day && document.getElementById('input-day')) document.getElementById('input-day').value = p.day;
+                if (p.hour && document.getElementById('input-hour')) document.getElementById('input-hour').value = p.hour;
+            } catch (e) {
+                console.error("加载本地通用档案失败", e);
+            }
+        }
+    });
 
     function switchTab(tabId, el) {
         document.querySelectorAll('.tab-pane').forEach(pane => pane.style.display = 'none');
@@ -500,10 +564,38 @@
         }
     }
 
+    async function openRecordsModal() {
+        document.getElementById('records-modal').style.display = 'flex';
+        const container = document.getElementById('records-list-container');
+        container.innerHTML = `<div style="color: #64748b; text-align: center; padding: 20px;">正在加载历史档案...</div>`;
+        try {
+            const res = await fetch('/api/records');
+            const result = await res.json();
+            if (result.status === 'success' && result.data.length > 0) {
+                container.innerHTML = result.data.map(rec => `
+                    <div class="record-item" onclick="alert('已选中档案: ${rec.user_name} (${rec.birth_hour})'); closeRecordsModal();">
+                        <div>
+                            <strong style="color: #f8fafc; font-size: 0.95rem;">${rec.user_name}</strong> (${rec.gender})
+                            <div style="color: #94a3b8; font-size: 0.78rem; margin-top: 2px;">出生时间: ${rec.birth_hour}</div>
+                        </div>
+                        <div style="color: #38bdf8; font-size: 0.8rem; font-weight: bold;">查看 ➡️</div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = `<div style="color: #94a3b8; text-align: center; padding: 20px;">暂无云端历史测算档案</div>`;
+            }
+        } catch (err) {
+            container.innerHTML = `<div style="color: #f43f5e; text-align: center; padding: 20px;">加载历史档案失败</div>`;
+        }
+    }
+
+    function closeRecordsModal() {
+        document.getElementById('records-modal').style.display = 'none';
+    }
+
     function renderMasterDashboard(record, strengthStr) {
         document.getElementById('strength-display').innerHTML = `命主格局：${strengthStr} (2026虚岁：${record.virtual_age}岁)`;
 
-        // 基本信息填充
         document.getElementById('info-name').innerText = record.user_name;
         document.getElementById('info-gender').innerText = record.gender;
         document.getElementById('info-solar').innerText = record.birth_hour;
@@ -522,8 +614,17 @@
 
             document.getElementById('info-yongxi').innerText = ex.yong_xi || '用:水金 | 喜:木火 | 闲仇忌:土';
             document.getElementById('info-wangxiang').innerText = ex.wang_xiang || '旺:火土 | 相:金水 | 死囚休:木';
+            document.getElementById('info-strength-details').innerText = ex.strength_details || '同党得分适配中';
 
-            // 🛠️ 紧凑流式渲染（文字与数值紧紧贴合）
+            document.getElementById('guide-yongxi').innerText = ex.yong_xi || '-';
+            document.getElementById('guide-colors').innerText = '绿色、青色、红色、紫色 (助旺喜用神)';
+            document.getElementById('guide-numbers').innerText = '幸运数字: 3、8、2、7 | 吉祥楼层: 3楼、8楼、2楼、7楼';
+            document.getElementById('guide-directions').innerText = '东方、东南方、正南方';
+            document.getElementById('guide-health').innerText = '保持规律作息，注重心脑血管及筋骨关节保养';
+
+            const scanList = ex.pillar_scan || ['✨ 原局气场清畅，无剧烈刑冲破害交战。'];
+            document.getElementById('pillar-scan-list').innerHTML = scanList.map(s => `<li>${s}</li>`).join('');
+
             const tijianData = [
                 {name: '甲 (胆)', val: 3}, {name: '乙 (肝)', val: 1},
                 {name: '丙 (小肠)', val: 1}, {name: '丁 (心)', val: 2},
@@ -562,7 +663,7 @@
             if(k !== 'day') document.getElementById(`pill-${k}-shishen`).innerText = p.shishen || '';
             document.getElementById(`pill-${k}-gan`).innerHTML = `${p.gan}<span class="elem-tag">${p.gan_elem}</span>`;
             document.getElementById(`pill-${k}-zhi`).innerHTML = `${p.zhi}<span class="elem-tag">${p.zhi_elem}</span>`;
-            
+
             if(Array.isArray(p.cangan_details)) {
                 document.getElementById(`pill-${k}-cangan-gan`).innerText = p.cangan_details.map(c => c.gan).join(' ');
                 document.getElementById(`pill-${k}-cangan-star`).innerText = p.cangan_details.map(c => c.star).join(' ');
