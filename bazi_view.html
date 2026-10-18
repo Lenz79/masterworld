@@ -90,11 +90,11 @@
         .current-limit-tag { background: #f43f5e; color: #fff; padding: 1px 3px; border-radius: 3px; font-size: 0.6rem; font-weight: normal; white-space: nowrap; }
         .locked-tag { background: #475569; color: #94a3b8; padding: 1px 3px; border-radius: 3px; font-size: 0.6rem; }
 
-        /* 🌟 两两左右并排、上下流式滚动的网格布局 */
+        /* 🌟 核心修改：两列固定并排，上下顺畅滑动 */
         .report-section-grid-2col {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            gap: 12px;
             margin-top: 12px;
         }
 
@@ -128,8 +128,8 @@
         .record-item { background: #0f172a; border: 1px solid #334155; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.2s; }
         .record-item:hover { border-color: #38bdf8; background: #1a2744; }
 
-        @media (max-width: 768px) {
-            .report-section-grid-2col { grid-template-columns: 1fr; } /* 极窄屏幕自动单列防挤压 */
+        @media (max-width: 480px) {
+            .report-section-grid-2col { grid-template-columns: 1fr; } /* 超小屏自动单列 */
         }
 
         /* 🌟 专门适配导出 PDF / 打印的排版样式 */
