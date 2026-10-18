@@ -2,66 +2,81 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>AI 智能玄学 SaaS 平台 - 综合预测导航中心</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 智能玄学 SaaS 平台 - 账号注册与登录中心</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #0f172a; color: #e2e8f0; margin: 0; padding: 40px 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #0f172a; color: #e2e8f0; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; padding-bottom: 40px; }
 
-        .header { text-align: center; margin-bottom: 50px; }
-        .header h1 { color: #f59e0b; font-size: 2.5rem; margin-bottom: 10px; }
-        .header p { color: #94a3b8; font-size: 1.1rem; }
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h1 { color: #f59e0b; font-size: 2.2rem; margin-bottom: 8px; }
+        .header p { color: #94a3b8; font-size: 1rem; }
 
-        /* 功能卡片矩阵网格 */
-        .modules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
-
-        .module-card {
-            background: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 14px;
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+        /* 🔐 登录/注册卡片容器 */
+        .auth-card {
+            background: #1e293b; border: 1px solid #334155; border-radius: 14px;
+            padding: 30px; max-width: 550px; margin: 0 auto 35px auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4); box-sizing: border-box;
         }
 
-        .module-card:hover {
-            transform: translateY(-5px);
-            border-color: #f59e0b;
-            box-shadow: 0 12px 30px rgba(245, 158, 11, 0.15);
-            background: #233248;
+        .auth-tabs { display: flex; border-bottom: 2px solid #334155; margin-bottom: 20px; }
+        .auth-tab-btn {
+            flex: 1; padding: 12px; text-align: center; font-weight: bold; font-size: 1rem;
+            color: #94a3b8; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s;
         }
+        .auth-tab-btn.active { color: #f59e0b; border-bottom-color: #f59e0b; }
 
-        .module-icon { font-size: 3rem; margin-bottom: 15px; }
-        .module-title { font-size: 1.3rem; font-weight: bold; color: #f8fafc; margin-bottom: 10px; }
-        .module-desc { font-size: 0.9rem; color: #94a3b8; line-height: 1.5; margin-bottom: 20px; }
+        .auth-form { display: none; }
+        .auth-form.active { display: block; }
 
-        .module-btn {
-            display: inline-block;
-            background: #334155;
-            color: #38bdf8;
-            padding: 8px 20px;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            font-weight: bold;
+        /* 📋 完善生辰档案弹窗/表单区 (注册成功后填写) */
+        .profile-card {
+            display: none; background: #1e293b; border: 2px solid #f59e0b; border-radius: 14px;
+            padding: 24px; max-width: 650px; margin: 0 auto 35px auto; box-sizing: border-box;
+        }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .form-group { display: flex; flex-direction: column; margin-bottom: 8px; }
+        .form-group.full-width { grid-column: span 2; }
+        .form-group label { font-size: 0.85rem; color: #38bdf8; margin-bottom: 6px; font-weight: 600; }
+        .form-group input, .form-group select { padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 0.95rem; width: 100%; box-sizing: border-box; }
+
+        .btn-submit {
+            width: 100%; background: #f59e0b; color: #0f172a; border: none; padding: 14px;
+            font-size: 1.05rem; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 12px;
             transition: background 0.2s;
         }
-        .module-card:hover .module-btn {
-            background: #f59e0b;
-            color: #0f172a;
+        .btn-submit:hover { background: #d97706; color: #fff; }
+
+        /* 👤 登录后的个人账号状态栏 */
+        .user-status-card {
+            display: none; background: #131d31; border: 1px solid #10b981; border-radius: 12px;
+            padding: 16px 20px; max-width: 650px; margin: 0 auto 35px auto; text-align: center;
         }
 
-        .badge-soon {
-            position: absolute;
-            top: 15px;
-            right: -30px;
-            background: #334155;
-            color: #94a3b8;
-            font-size: 0.75rem;
-            padding: 4px 30px;
-            transform: rotate(45deg);
-            font-weight: bold;
+        /* 🔮 功能卡片矩阵网格 */
+        .modules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .module-card {
+            background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 25px;
+            text-align: center; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden;
+        }
+        .module-card:hover {
+            transform: translateY(-5px); border-color: #f59e0b;
+            box-shadow: 0 12px 30px rgba(245, 158, 11, 0.15); background: #233248;
+        }
+        .module-icon { font-size: 2.8rem; margin-bottom: 12px; }
+        .module-title { font-size: 1.25rem; font-weight: bold; color: #f8fafc; margin-bottom: 8px; }
+        .module-desc { font-size: 0.88rem; color: #94a3b8; line-height: 1.5; margin-bottom: 18px; }
+        .module-btn {
+            display: inline-block; background: #334155; color: #38bdf8; padding: 8px 18px;
+            border-radius: 6px; font-size: 0.88rem; font-weight: bold; transition: background 0.2s;
+        }
+        .module-card:hover .module-btn { background: #f59e0b; color: #0f172a; }
+        .badge-soon { position: absolute; top: 15px; right: -30px; background: #334155; color: #94a3b8; font-size: 0.75rem; padding: 4px 30px; transform: rotate(45deg); font-weight: bold; }
+        .badge-ready { position: absolute; top: 12px; right: 12px; background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; font-size: 0.72rem; padding: 3px 8px; border-radius: 4px; font-weight: bold; }
+
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .form-group.full-width { grid-column: span 1; }
         }
     </style>
 </head>
@@ -70,73 +85,326 @@
 <div class="container">
     <div class="header">
         <h1>🔮 AI 智能玄学 SaaS 平台</h1>
-        <p>集成传统东方命理与西方神秘学的全维度 AI 预测与推演系统</p>
+        <p>集成传统东方命理与西方神秘学的全维度 AI 预测系统</p>
+    </div>
+
+    <!-- 1. 登录 / 注册 切换选项卡卡片 -->
+    <div class="auth-card" id="auth-box">
+        <div class="auth-tabs">
+            <div class="auth-tab-btn active" onclick="switchAuthTab('signup', this)">📝 账号注册 (Sign Up)</div>
+            <div class="auth-tab-btn" onclick="switchAuthTab('login', this)">🔑 账号登录 (Log In)</div>
+        </div>
+
+        <!-- 注册表单 -->
+        <div id="form-signup" class="auth-form active">
+            <div class="form-group" style="margin-bottom: 12px;">
+                <label>您的 Google 邮箱或账号</label>
+                <input type="text" id="su-email" placeholder="输入您的邮箱，例如 myname@gmail.com" autocomplete="off">
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label>设置登录密码</label>
+                <input type="password" id="su-pwd" placeholder="设置您的登录密码" autocomplete="off">
+            </div>
+            <button class="btn-submit" onclick="proceedToProfileSetup()">下一步：填写生辰档案 ➔</button>
+        </div>
+
+        <!-- 登录表单 -->
+        <div id="form-login" class="auth-form">
+            <div class="form-group" style="margin-bottom: 12px;">
+                <label>Google 邮箱或账号</label>
+                <input type="text" id="li-email" placeholder="输入注册时的邮箱" autocomplete="off">
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label>登录密码</label>
+                <input type="password" id="li-pwd" placeholder="输入密码" autocomplete="off">
+            </div>
+            <button class="btn-submit" onclick="handleLogin()">🔑 立即登录</button>
+        </div>
+    </div>
+
+    <!-- 2. 注册第二步：完善生辰档案表单区 (初始隐藏) -->
+    <div class="profile-card" id="profile-card-box">
+        <h3 style="color: #f59e0b; margin-top: 0; text-align: center; margin-bottom: 6px;">📝 完善您的通用生辰八字档案</h3>
+        <p style="color: #94a3b8; font-size: 0.85rem; text-align: center; margin-bottom: 18px;">账号注册成功！请填写您的生辰八字资料（存入数据库，全平台术数通用）：</p>
+
+        <div class="form-grid">
+            <div class="form-group full-width">
+                <label>当前注册账号</label>
+                <input type="text" id="reg-account-display" readonly style="color: #10b981; font-weight: bold;">
+            </div>
+            <div class="form-group">
+                <label>真实姓名</label>
+                <input type="text" id="reg-name" placeholder="请输入真实姓名" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label>性别</label>
+                <select id="reg-gender">
+                    <option value="" disabled selected>请选择性别</option>
+                    <option value="男">男 (乾造)</option>
+                    <option value="女">女 (坤造)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>出生年份 (公历)</label>
+                <input type="number" id="reg-year" placeholder="例: 1988" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label>出生月份</label>
+                <input type="number" id="reg-month" placeholder="例: 8" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label>出生日期</label>
+                <input type="number" id="reg-day" placeholder="例: 18" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label>出生时辰 (0-23 或如 1000)</label>
+                <input type="number" id="reg-hour" placeholder="例: 10 或 1030" autocomplete="off">
+            </div>
+        </div>
+        <button class="btn-submit" onclick="saveUserDatabaseAndEnter()">🚀 提交注册并保存数据库</button>
+    </div>
+
+    <!-- 3. 已登录状态：顶部账号状态栏 -->
+    <div class="user-status-card" id="user-status-box">
+        <div style="font-size: 1.05rem; color: #10b981; font-weight: bold; margin-bottom: 4px;">
+            👤 已登录账号：<span id="display-auth-user">-</span>
+        </div>
+        <div style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 10px;">
+            绑定生辰：<span id="display-user-bazi" style="color: #f59e0b; font-weight: bold;">-</span>
+        </div>
+        <button onclick="handleLogOut()" style="background: #334155; color: #f43f5e; border: 1px solid #f43f5e; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold;">退出登录</button>
+    </div>
+
+    <!-- 🔮 各大术数功能卡片矩阵 -->
+    <div style="text-align:center; margin-bottom:20px; color:#f8fafc; font-weight:bold; font-size:1.1rem;">
+        👇 选择调用的专业术数推演引擎
     </div>
 
     <div class="modules-grid">
         <!-- 1. 八字 (已连通) -->
-        <div class="module-card" onclick="location.href='bazi_view.html'">
+        <div class="module-card" onclick="openModule('bazi_view.html')">
+            <div class="badge-ready">已连通</div>
             <div class="module-icon">📜</div>
             <div class="module-title">八字推演 (四柱命理)</div>
-            <div class="module-desc">传统高阶 Master Grid 排盘、日主旺度分析、九步大运及十年流年精细化推演。</div>
+            <div class="module-desc">传统高阶 Master Grid 排盘、日主旺度、九步大运及十年流年精细化推演。</div>
             <div class="module-btn">进入系统 ➔</div>
         </div>
 
         <!-- 2. 紫微斗数 -->
-        <div class="module-card" onclick="alert('🚀 紫微斗数排盘模块正在加紧研发中，敬请期待！')">
+        <div class="module-card" onclick="openModule('ziwei')">
             <div class="badge-soon">开发中</div>
             <div class="module-icon">⭐</div>
             <div class="module-title">紫微斗数</div>
             <div class="module-desc">十二宫位全景星盘、三方四正格局剖析、星曜庙旺利陷深度解读。</div>
-            <div class="module-btn">敬请期待</div>
+            <div class="module-btn">调用账号档案</div>
         </div>
 
         <!-- 3. 奇门遁甲 -->
-        <div class="module-card" onclick="alert('🚀 奇门遁甲排盘模块正在加紧研发中，敬请期待！')">
+        <div class="module-card" onclick="openModule('qimen')">
             <div class="badge-soon">开发中</div>
             <div class="module-icon">☯️</div>
             <div class="module-title">奇门遁甲</div>
             <div class="module-desc">时家奇门、排局布盘、九星八门八神与三奇六仪吉凶克应推演。</div>
-            <div class="module-btn">敬请期待</div>
+            <div class="module-btn">调用账号档案</div>
         </div>
 
         <!-- 4. 六爻起卦 -->
-        <div class="module-card" onclick="alert('🚀 六爻起卦模块正在加紧研发中，敬请期待！')">
+        <div class="module-card" onclick="openModule('liuyao')">
             <div class="badge-soon">开发中</div>
             <div class="module-icon">🪙</div>
             <div class="module-title">六爻起卦</div>
             <div class="module-desc">铜钱摇卦、纳甲装卦、世应六亲发动与应期精准占断。</div>
-            <div class="module-btn">敬请期待</div>
+            <div class="module-btn">调用账号档案</div>
         </div>
 
         <!-- 5. 扑克牌起卦 -->
-        <div class="module-card" onclick="alert('🚀 扑克牌起卦模块正在加紧研发中，敬请期待！')">
+        <div class="module-card" onclick="openModule('poker')">
             <div class="badge-soon">开发中</div>
             <div class="module-icon">🃏</div>
             <div class="module-title">扑克牌起卦</div>
             <div class="module-desc">融合数字灵动与西方牌阵密码的快速心灵直觉预测系统。</div>
-            <div class="module-btn">敬请期待</div>
+            <div class="module-btn">调用账号档案</div>
         </div>
 
         <!-- 6. 塔罗牌 -->
-        <div class="module-card" onclick="alert('🚀 塔罗牌占卜模块正在加紧研发中，敬请期待！')">
+        <div class="module-card" onclick="openModule('tarot')">
             <div class="badge-soon">开发中</div>
             <div class="module-icon">🔮</div>
             <div class="module-title">塔罗牌占卜</div>
             <div class="module-desc">圣三角阵、凯尔特十字阵，大阿卡纳与小阿卡纳潜意识深度心理剖析。</div>
-            <div class="module-btn">敬请期待</div>
+            <div class="module-btn">调用账号档案</div>
         </div>
 
-        <!-- 7. 风水堪舆 -->
-        <div class="module-card" onclick="alert('🚀 风水堪舆模块正在加紧研发中，敬请期待！')">
-            <div class="badge-soon">开发中</div>
+        <!-- 7. 风水堪舆 (已连通) -->
+        <div class="module-card" onclick="openModule('fengshui_view.html')">
+            <div class="badge-ready">已连通</div>
             <div class="module-icon">🏠</div>
             <div class="module-title">阳宅风水堪舆</div>
-            <div class="module-desc">龙门八局、九星飞泊、方位吉凶化解与住宅能量场布局优化。</div>
-            <div class="module-btn">敬请期待</div>
+            <div class="module-desc">透明罗盘拖拽、户型图对齐、24山度数微调、八宅与玄空飞星九宫吉凶深度剖析。</div>
+            <div class="module-btn">进入系统 ➔</div>
         </div>
     </div>
 </div>
+
+<script>
+    window.addEventListener('DOMContentLoaded', checkLoginState);
+
+    let tempSignupEmail = "";
+    let tempSignupPwd = "";
+
+    // 切换登录/注册卡片 Tab
+    function switchAuthTab(tab, btnEl) {
+        document.querySelectorAll('.auth-tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+        if(btnEl) btnEl.classList.add('active');
+        document.getElementById(`form-${tab}`).classList.add('active');
+    }
+
+    // 注册第一步：验证邮箱与密码
+    function proceedToProfileSetup() {
+        const email = document.getElementById('su-email').value.trim();
+        const pwd = document.getElementById('su-pwd').value.trim();
+
+        if (!email || !pwd) {
+            alert("⚠️ 请输入您的 Google 邮箱和登录密码！");
+            return;
+        }
+
+        // 检查数据库是否已存在该账号
+        if (localStorage.getItem(`saas_user_${email}`)) {
+            alert("❌ 该邮箱已被注册，请直接前往“账号登录”！");
+            return;
+        }
+
+        tempSignupEmail = email;
+        tempSignupPwd = pwd;
+
+        // 隐藏登录注册卡片，展开空白生辰档案填写表单
+        document.getElementById('auth-box').style.display = 'none';
+        document.getElementById('profile-card-box').style.display = 'block';
+        document.getElementById('reg-account-display').value = email;
+
+        // 清空表单
+        document.getElementById('reg-name').value = "";
+        document.getElementById('reg-gender').value = "";
+        document.getElementById('reg-year').value = "";
+        document.getElementById('reg-month').value = "";
+        document.getElementById('reg-day').value = "";
+        document.getElementById('reg-hour').value = "";
+    }
+
+    // 注册第二步：保存完整账号、密码与生辰档案到模拟数据库
+    function saveUserDatabaseAndEnter() {
+        const profile = {
+            email: tempSignupEmail,
+            name: document.getElementById('reg-name').value.trim(),
+            gender: document.getElementById('reg-gender').value,
+            year: document.getElementById('reg-year').value.trim(),
+            month: document.getElementById('reg-month').value.trim(),
+            day: document.getElementById('reg-day').value.trim(),
+            hour: document.getElementById('reg-hour').value.trim()
+        };
+
+        if (!profile.name || !profile.gender || !profile.year || !profile.month || !profile.day || profile.hour === "") {
+            alert("⚠️ 请完整填写生辰八字所需的全部资料！");
+            return;
+        }
+
+        // 将密码和个人档案一并存入模拟数据库
+        const dbRecord = {
+            password: tempSignupPwd,
+            profile: profile
+        };
+
+        localStorage.setItem(`saas_user_${tempSignupEmail}`, JSON.stringify(dbRecord));
+        localStorage.setItem('current_saas_user', tempSignupEmail);
+        localStorage.setItem('metaphysics_common_profile', JSON.stringify(profile));
+
+        alert("🎉 注册成功！已成功将您的账号与生辰档案存入数据库。");
+        checkLoginState();
+    }
+
+    // 登录验证逻辑
+    function handleLogin() {
+        const email = document.getElementById('li-email').value.trim();
+        const pwd = document.getElementById('li-pwd').value.trim();
+
+        if (!email || !pwd) {
+            alert("⚠️ 请输入邮箱和登录密码！");
+            return;
+        }
+
+        const recordStr = localStorage.getItem(`saas_user_${email}`);
+        if (!recordStr) {
+            alert("❌ 该账号不存在，请先进行“账号注册 (Sign Up)”！");
+            return;
+        }
+
+        const record = JSON.parse(recordStr);
+        if (record.password !== pwd) {
+            alert("❌ 密码错误，请核对后重试！");
+            return;
+        }
+
+        // 登录成功，设置当前会话
+        localStorage.setItem('current_saas_user', email);
+        localStorage.setItem('metaphysics_common_profile', JSON.stringify(record.profile));
+
+        alert(`🔑 登录成功！欢迎回来，${record.profile.name}`);
+        checkLoginState();
+    }
+
+    // 检查当前登录状态
+    function checkLoginState() {
+        const currentUser = localStorage.getItem('current_saas_user');
+        const authBox = document.getElementById('auth-box');
+        const profileCardBox = document.getElementById('profile-card-box');
+        const userStatusBox = document.getElementById('user-status-box');
+
+        if (currentUser) {
+            const recordStr = localStorage.getItem(`saas_user_${currentUser}`);
+            if (recordStr) {
+                const record = JSON.parse(recordStr);
+                const p = record.profile;
+
+                authBox.style.display = 'none';
+                profileCardBox.style.display = 'none';
+                userStatusBox.style.display = 'block';
+
+                document.getElementById('display-auth-user').innerText = `${p.name} (${p.email})`;
+                document.getElementById('display-user-bazi').innerText = `${p.year}年${p.month}月${p.day}日 ${p.hour}时 (${p.gender})`;
+                return;
+            }
+        }
+
+        authBox.style.display = 'block';
+        profileCardBox.style.display = 'none';
+        userStatusBox.style.display = 'none';
+    }
+
+    // 退出登录
+    function handleLogOut() {
+        localStorage.removeItem('current_saas_user');
+        alert("👋 已安全退出登录。");
+        checkLoginState();
+    }
+
+    // 术数模块拦截检查
+    function openModule(target) {
+        const currentUser = localStorage.getItem('current_saas_user');
+        if (!currentUser) {
+            alert("⚠️ 请先登录您的账号！");
+            return;
+        }
+
+        if (target.endsWith('.html')) {
+            location.href = target;
+        } else {
+            const profile = JSON.parse(localStorage.getItem('metaphysics_common_profile') || '{}');
+            alert(`🚀 已成功调用 [${profile.name || '当前账号'}] 的通用生辰档案！\n\n【${target.toUpperCase()}】专业推演模块正在加紧研发中，敬请期待！`);
+        }
+    }
+</script>
 
 </body>
 </html>
