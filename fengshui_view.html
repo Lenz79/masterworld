@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 智能玄学 SaaS 平台 - 阳宅风水多盘联动终极系统</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #0f172a; color: #e2e8f0; margin: 0; padding: 0; box-sizing: border-box; }
+        .container { max-width: 1550px; margin: 0 auto; padding: 20px; }
+
+        .home-bar { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; background: #1e293b; border-bottom: 1px solid #334155; margin-bottom: 15px; border-radius: 8px; }
+        .btn-home { background: #334155; color: #38bdf8; border: 1px solid #475569; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; text-decoration: none; font-size: 0.85rem; }
+
+        .layer-toolbar { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 12px 18px; display: flex; flex-wrap: wrap; gap: 15px; align-items: center; margin-bottom: 15px; }
+        .layer-item { display: flex; align-items: center; gap: 6px; font-size: 0.9rem; font-weight: bold; cursor: pointer; color: #cbd5e1; user-select: none; }
+        .layer-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: #f59e0b; cursor: pointer; }
+
+        .workspace { display: grid; grid-template-columns: 340px 1fr; gap: 20px; }
+        @media (max-width: 1024px) { .workspace { grid-template-columns: 1fr; } }
+
+        .control-panel { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 18px; box-sizing: border-box; }
+        .control-group { margin-bottom: 14px; }
+        .control-group label { display: block; font-size: 0.85rem; color: #38bdf8; margin-bottom: 5px; font-weight: 600; }
+        .control-group input[type="file"], .control-group select, .control-group input[type="number"] { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 0.9rem; box-sizing: border-box; }
+
+        .degree-input-row { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
+        .degree-input-row input[type="range"] { flex: 1; }
+        .degree-input-row input[type="number"] { width: 75px; text-align: center; font-weight: bold; color: #facc15; }
+
+        .btn-group-row { display: flex; gap: 8px; margin-top: 10px; }
+        .btn-action { flex: 1; background: #f59e0b; color: #0f172a; border: none; padding: 10px; font-size: 0.9rem; font-weight: bold; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+        .btn-action:hover { background: #d97706; color: #fff; }
+        .btn-secondary { background: #0284c7; color: #fff; }
+        .btn-secondary:hover { background: #0369a1; }
+
+        .canvas-container { background: #ffffff; border: 2px solid #cbd5e1; border-radius: 12px; height: 800px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+
+        #floorplan-img { max-width: 90%; max-height: 90%; position: absolute; cursor: grab; user-select: none; z-index: 1; display: none; }
+        #luopan-canvas { position: absolute; z-index: 10; pointer-events: none; }
+
+        .measure-info { position: absolute; top: 15px; right: 15px; background: rgba(15, 23, 42, 0.9); border: 1px solid #38bdf8; padding: 10px 16px; border-radius: 8px; font-size: 0.9rem; color: #38bdf8; z-index: 30; display: none; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+
+        .analysis-section { margin-top: 25px; background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; }
+        .school-report-title { font-size: 1.05rem; font-weight: bold; color: #f59e0b; border-bottom: 1px dashed #334155; padding-bottom: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+
+        .report-block { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 16px; margin-bottom: 18px; }
+        .report-block-title { font-size: 0.98rem; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #1e293b; padding-bottom: 6px; }
+
+        .analysis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; }
+        .palace-card { background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 12px; border-left: 4px solid #f59e0b; }
+        .palace-title { font-size: 0.9rem; font-weight: bold; color: #f59e0b; margin-bottom: 6px; display: flex; justify-content: space-between; }
+        .palace-content { font-size: 0.83rem; color: #cbd5e1; line-height: 1.5; }
+
+        .item-tag { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); padding: 2px 6px; border-radius: 4px; font-size: 0.78rem; font-weight: bold; display: inline-block; margin-top: 4px; }
+        .item-tag-danger { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        @media print {
+            body { background: #fff; color: #000; }
+            .home-bar, .layer-toolbar, .control-panel, .btn-group-row { display: none !important; }
+            .workspace { grid-template-columns: 1fr; }
+            .canvas-container { border: none; height: auto; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="export-area">
+    <div class="home-bar">
+        <a href="index.html" class="btn-home">🏠 返回综合导航首页</a>
+        <div style="font-weight: bold; color: #f59e0b; font-size: 1.1rem;">🏠 阳宅风水多盘联动终极系统</div>
+        <div id="user-info-tag" style="font-size: 0.85rem; color: #38bdf8;">当前档案: 加载中...</div>
+    </div>
+
+    <!-- 顶部多图层自由勾选栏 -->
+    <div class="layer-toolbar">
+        <span style="font-size: 0.88rem; color: #f59e0b; font-weight: bold;">图层勾选叠加：</span>
+        <label class="layer-item"><input type="checkbox" id="chk-base" checked> 24山地盘</label>
+        <label class="layer-item"><input type="checkbox" id="chk-longmen" checked> 龙门八局 (含三曜煞)</label>
+        <label class="layer-item"><input type="checkbox" id="chk-bazhai" checked> 八宅盘</label>
+        <label class="layer-item"><input type="checkbox" id="chk-ziwei" checked> 紫白诀 (流年星)</label>
+        <label class="layer-item"><input type="checkbox" id="chk-chengmen"> 玄空城门诀</label>
+        <label class="layer-item"><input type="checkbox" id="chk-pailong"> 玄空排龙诀</label>
+        <label class="layer-item"><input type="checkbox" id="chk-xuankong" checked> 玄空三元九运飞星</label>
+    </div>
+
+    <div class="workspace">
+        <div class="control-panel">
+            <h3 style="color: #f59e0b; margin-top: 0; font-size: 1.02rem; border-bottom: 1px solid #334155; padding-bottom: 8px;">📐 堪舆参数与测量控制</h3>
+
+            <div class="control-group">
+                <label>1. 上传户型图 (Floorplan)</label>
+                <input type="file" id="upload-floorplan" accept="image/*">
+            </div>
+
+            <div class="control-group">
+                <label>2. 龙门八局（自定义坐山卦局）</label>
+                <select id="longmen-ju">
+                    <option value="乾">乾局 (坐西北)</option>
+                    <option value="坤">坤局 (坐西南)</option>
+                    <option value="震">震局 (坐正东)</option>
+                    <option value="巽">巽局 (坐东南)</option>
+                    <option value="坎" selected>坎局 (坐正北)</option>
+                    <option value="离">离局 (坐正南)</option>
+                    <option value="艮">艮局 (坐东北)</option>
+                    <option value="兑">兑局 (坐正西)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>3. 选择玄空元运</label>
+                <select id="xuankong-yun">
+                    <option value="9">下元九运 (2024 - 2043年)</option>
+                    <option value="8">下元八运 (2004 - 2023年)</option>
+                    <option value="7" selected>下元七运 (1984 - 2003年)</option>
+                    <option value="1">上元一运 (1864 - 1883年)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>4. 紫白诀流年份</label>
+                <input type="number" id="ziwei-year" value="2026" min="1900" max="2100">
+            </div>
+
+            <div class="control-group">
+                <label>5. 罗盘微调：朝向度数 (<span id="degree-val">0</span>°)</label>
+                <div class="degree-input-row">
+                    <input type="range" id="luopan-range" min="0" max="359" value="0" step="0.5">
+                    <input type="number" id="luopan-number" min="0" max="359" value="0" step="0.5">
+                </div>
+                <div style="font-size:0.75rem; color:#94a3b8; margin-top:4px;">💡 提示：键盘 ← / → 精细微调 0.5°</div>
+            </div>
+
+            <div class="control-group">
+                <label>6. 罗盘透明度 (<span id="opacity-val">100</span>%)</label>
+                <input type="range" id="luopan-opacity" min="10" max="100" value="100">
+            </div>
+
+            <div class="control-group">
+                <label>7. 户型现场工具</label>
+                <button class="btn-action btn-secondary" id="btn-toggle-measure" style="width:100%;">📏 点击开启 户型拉线测量工具</button>
+            </div>
+
+            <div class="btn-group-row">
+                <button class="btn-action" id="btn-analyze-all">✨ 生成全盘 AI 堪舆建议</button>
+            </div>
+            <div class="btn-group-row" style="margin-top: 6px;">
+                <button class="btn-action btn-secondary" id="btn-reset-view">🔄 复位视角/度数</button>
+                <button class="btn-action btn-secondary" id="btn-export-pdf">📄 导出堪舆报告</button>
+            </div>
+        </div>
+
+        <div class="canvas-container" id="canvas-container">
+            <div class="measure-info" id="measure-info">📏 测量状态: 请在画布上按住鼠标左键拖拽拉线</div>
+            <div style="color: #94a3b8; text-align: center; position: absolute; z-index: 2;" id="canvas-placeholder">
+                📂 请先在左侧点击上传您的房屋户型图
+            </div>
+            <img id="floorplan-img" src="" alt="">
+            <canvas id="luopan-canvas" width="760" height="760"></canvas>
+        </div>
+    </div>
+
+    <div class="analysis-section" id="report-section">
+        <div class="school-report-title" id="report-title">
+            <span>📜 综合堪舆全盘吉凶与布局建议报告</span>
+            <span id="refresh-status" style="font-size: 0.8rem; color: #10b981; font-weight: normal;"></span>
+        </div>
+        <div id="comprehensive-report-container">
+            <div style="color: #94a3b8; text-align: center; padding: 20px;">💡 点击左侧“✨ 生成全盘 AI 堪舆建议”按钮，即刻获取全盘8宫+九星完整吉凶及物品布局方案。</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentDegree = 0;
+    let currentOpacity = 1.0;
+    let isMeasuring = false;
+    let isMouseDown = false;
+    let measureStart = null;
+    let measureEnd = null;
+
+    const mountains = [
+        "子", "癸", "丑", "艮", "寅", "甲",
+        "卯", "乙", "辰", "巽", "巳", "丙",
+        "午", "丁", "未", "坤", "申", "庚",
+        "酉", "辛", "戌", "乾", "亥", "壬"
+    ];
+
+    const longmenData = {
+        '乾': { xiantian: '离', houtian: '坎', tianjie: '震', zhengqiao: '巽', fuqiao: '艮', yaoshats: { '午': '曜煞', '卯': '劫煞', '壬': '黄泉' } },
+        '坤': { xiantian: '坎', houtian: '震', tianjie: '巽', zhengqiao: '乾', fuqiao: '艮', yaoshats: { '卯': '曜煞', '子': '劫煞', '癸': '黄泉' } },
+        '震': { xiantian: '艮', houtian: '离', tianjie: '乾', zhengqiao: '巽', fuqiao: '坤', yaoshats: { '申': '曜煞', '亥': '劫煞', '庚': '黄泉' } },
+        '巽': { xiantian: '坤', houtian: '兑', tianjie: '乾', zhengqiao: '艮', fuqiao: '震', yaoshats: { '酉': '曜煞', '辛': '黄泉' } },
+        '坎': { xiantian: '兑', houtian: '坤', tianjie: '巽', zhengqiao: '巽', fuqiao: '震', yaoshats: { '辰': '曜煞', '申': '劫煞', '乾': '黄泉' } },
+        '离': { xiantian: '震', houtian: '乾', tianjie: '艮', zhengqiao: '巽', fuqiao: '坤', yaoshats: { '亥': '曜煞', '寅': '劫煞', '巽': '黄泉' } },
+        '艮': { xiantian: '乾', houtian: '震', tianjie: '离', zhengqiao: '兑', fuqiao: '巽', yaoshats: { '寅': '曜煞', '巳': '劫煞', '丁': '黄泉' } },
+        '兑': { xiantian: '巽', houtian: '坎', tianjie: '艮', zhengqiao: '巽', fuqiao: '离', yaoshats: { '巳': '曜煞', '丙': '黄泉' } }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const profileStr = localStorage.getItem('metaphysics_common_profile');
+        if (profileStr) {
+            try {
+                const p = JSON.parse(profileStr);
+                document.getElementById('user-info-tag').innerText = `当前命主：${p.name} (${p.year}年生)`;
+            } catch(e) {}
+        }
+        initEventListeners();
+        initCanvasInteraction();
+        renderCanvasAndReport();
+    });
+
+    function initEventListeners() {
+        document.querySelectorAll('.layer-toolbar input[type="checkbox"]').forEach(chk => {
+            chk.addEventListener('change', renderCanvasAndReport);
+        });
+
+        const rangeInput = document.getElementById('luopan-range');
+        const numInput = document.getElementById('luopan-number');
+        rangeInput.addEventListener('input', (e) => syncDegree(e.target.value));
+        numInput.addEventListener('input', (e) => syncDegree(e.target.value));
+
+        window.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT') return;
+            if (e.key === 'ArrowLeft') {
+                syncDegree((currentDegree - 0.5 + 360) % 360);
+            } else if (e.key === 'ArrowRight') {
+                syncDegree((currentDegree + 0.5) % 360);
+            }
+        });
+
+        document.getElementById('longmen-ju').addEventListener('change', renderCanvasAndReport);
+        document.getElementById('xuankong-yun').addEventListener('change', renderCanvasAndReport);
+        document.getElementById('ziwei-year').addEventListener('input', renderCanvasAndReport);
+
+        document.getElementById('luopan-opacity').addEventListener('input', (e) => {
+            currentOpacity = e.target.value / 100;
+            document.getElementById('opacity-val').innerText = e.target.value;
+            document.getElementById('luopan-canvas').style.opacity = currentOpacity;
+        });
+
+        document.getElementById('upload-floorplan').addEventListener('change', loadFloorplan);
+
+        document.getElementById('btn-analyze-all').addEventListener('click', generateFullAnalysisReport);
+
+        document.getElementById('btn-reset-view').addEventListener('click', () => {
+            syncDegree(0);
+            const img = document.getElementById('floorplan-img');
+            img.style.transform = 'translate(0px, 0px)';
+            measureStart = null;
+            measureEnd = null;
+            renderCanvasAndReport();
+        });
+
+        document.getElementById('btn-export-pdf').addEventListener('click', exportReportPDF);
+
+        document.getElementById('btn-toggle-measure').addEventListener('click', () => {
+            isMeasuring = !isMeasuring;
+            const canvas = document.getElementById('luopan-canvas');
+            const infoBox = document.getElementById('measure-info');
+            const btn = document.getElementById('btn-toggle-measure');
+
+            if (isMeasuring) {
+                canvas.style.pointerEvents = 'auto';
+                btn.style.background = '#dc2626';
+                btn.innerText = '🛑 测量开启中 (点击关闭)';
+                infoBox.style.display = 'block';
+                infoBox.innerText = '📏 请按住鼠标左键在户型图上拖拽拉线';
+            } else {
+                canvas.style.pointerEvents = 'none';
+                btn.style.background = '#0284c7';
+                btn.innerText = '📏 点击开启 户型拉线测量工具';
+                infoBox.style.display = 'none';
+                measureStart = null;
+                measureEnd = null;
+                renderCanvasAndReport();
+            }
+        });
+    }
+
+    function getMountainByDegree(deg) {
+        let normalized = (deg % 360 + 360) % 360;
+        let index = Math.floor(((normalized + 7.5) % 360) / 15);
+        return mountains[index];
+    }
+
+    function getZhaiByDegree(deg) {
+        let zuoDeg = (deg + 180) % 360;
+        let zhaixing = 'kan';
+        let zuoShan = '子';
+        let zhaiName = '坎宅 (坐北向南)';
+
+        if ((zuoDeg >= 337.5 && zuoDeg <= 360) || (zuoDeg >= 0 && zuoDeg < 22.5)) {
+            zuoShan = zuoDeg >= 352.5 || zuoDeg < 7.5 ? '子' : (zuoDeg >= 337.5 ? '壬' : '癸');
+            zhaixing = 'kan'; zhaiName = '坎宅 (坐北向南)';
+        } else if (zuoDeg >= 22.5 && zuoDeg < 67.5) {
+            zuoShan = (zuoDeg >= 37.5 && zuoDeg < 52.5) ? '艮' : (zuoDeg < 37.5 ? '丑' : '寅');
+            zhaixing = 'gen'; zhaiName = '艮宅 (坐东北向西南)';
+        } else if (zuoDeg >= 67.5 && zuoDeg < 112.5) {
+            zuoShan = (zuoDeg >= 82.5 && zuoDeg < 97.5) ? '卯' : (zuoDeg < 82.5 ? '甲' : '乙');
+            zhaixing = 'zhen'; zhaiName = '震宅 (坐东向西)';
+        } else if (zuoDeg >= 112.5 && zuoDeg < 157.5) {
+            zuoShan = (zuoDeg >= 127.5 && zuoDeg < 142.5) ? '巽' : (zuoDeg < 127.5 ? '辰' : '巳');
+            zhaixing = 'xun'; zhaiName = '巽宅 (坐东南向西北)';
+        } else if (zuoDeg >= 157.5 && zuoDeg < 202.5) {
+            zuoShan = (zuoDeg >= 172.5 && zuoDeg < 187.5) ? '午' : (zuoDeg < 172.5 ? '丙' : '丁');
+            zhaixing = 'li'; zhaiName = '离宅 (坐南向北)';
+        } else if (zuoDeg >= 202.5 && zuoDeg < 247.5) {
+            zuoShan = (zuoDeg >= 217.5 && zuoDeg < 232.5) ? '坤' : (zuoDeg < 217.5 ? '未' : '申');
+            zhaixing = 'kun'; zhaiName = '坤宅 (坐西南向东北)';
+        } else if (zuoDeg >= 247.5 && zuoDeg < 292.5) {
+            zuoShan = (zuoDeg >= 262.5 && zuoDeg < 277.5) ? '酉' : (zuoDeg < 262.5 ? '庚' : '辛');
+            zhaixing = 'dui'; zhaiName = '兑宅 (坐西向东)';
+        } else if (zuoDeg >= 292.5 && zuoDeg < 337.5) {
+            zuoShan = (zuoDeg >= 307.5 && zuoDeg < 322.5) ? '乾' : (zuoDeg < 307.5 ? '戌' : '亥');
+            zhaixing = 'qian'; zhaiName = '乾宅 (坐西北向东南)';
+        }
+        return { zhaixing, zuoShan, zuoDeg: zuoDeg.toFixed(1), zhaiName };
+    }
+
+    const bazhaiMap = {
+        kan: {'坎': '伏位', '艮': '五鬼', '震': '延年', '巽': '生气', '离': '绝命', '坤': '祸害', '兑': '六煞', '乾': '天医'},
+        li: {'坎': '绝命', '艮': '六煞', '震': '天医', '巽': '延年', '离': '伏位', '坤': '五鬼', '兑': '祸害', '乾': '生气'},
+        zhen: {'坎': '延年', '艮': '绝命', '震': '伏位', '巽': '天医', '离': '生气', '坤': '六煞', '兑': '五鬼', '乾': '祸害'},
+        xun: {'坎': '生气', '艮': '天医', '震': '伏位', '巽': '五鬼', '离': '延年', '坤': '祸害', '兑': '绝命', '乾': '六煞'},
+        qian: {'坎': '六煞', '艮': '天医', '震': '祸害', '巽': '五鬼', '离': '绝命', '坤': '延年', '兑': '生气', '乾': '伏位'},
+        kun: {'坎': '祸害', '艮': '延年', '震': '绝命', '巽': '五鬼', '离': '六煞', '坤': '伏位', '兑': '生气', '乾': '天医'},
+        gen: {'坎': '五鬼', '艮': '伏位', '震': '生气', '巽': '天医', '离': '祸害', '坤': '延年', '兑': '绝命', '乾': '六煞'},
+        dui: {'坎': '六煞', '艮': '祸害', '震': '五鬼', '巽': '绝命', '离': '天医', '坤': '延年', '兑': '伏位', '乾': '生气'}
+    };
+
+    // 八宅星曜详细定义与物品建议映射表
+    const bazhaiStarDetails = {
+        '生气': { nature: '大吉 (第一吉星)', color: '#0ea5e9', desc: '主财源广进、生机勃勃、利事业官运与人丁兴旺。', items: ['黄水晶聚宝盆', '阔叶常绿植物 (发财树/富贵竹)', '风水轮/鱼缸 (若在外门方向)'] },
+        '延年': { nature: '大吉 (第二吉星)', color: '#0ea5e9', desc: '主婚姻美满、人缘和谐、贵人相助、长寿安康。', items: ['粉水晶/紫水晶球', '夫妻合照或全家福照片', '铜制龙龟摆件'] },
+        '天医': { nature: '大吉 (第三吉星)', color: '#0ea5e9', desc: '主身体健康、祛病延年、消灾解难、情绪稳定。', items: ['天然天然葫芦或纯铜葫芦', '九龙金鼎/铜磬', '适合作厨房灶位 (压凶向吉)'] },
+        '伏位': { nature: '中吉 (第四吉星)', color: '#0ea5e9', desc: '主平稳安定、蓄势待发、利思维集中与读书思考。', items: ['天然文昌塔 (九层/十三层)', '文房四宝/开光文昌笔', '适合作书房、禅修角'] },
+        '绝命': { nature: '大凶 (第一凶星)', color: '#dc2626', desc: '主破财伤人、筋骨病痛、意外灾祸、人丁受损。', items: ['化解：挂开光五帝钱/六帝钱', '置放黑曜石或白水晶簇泄气', '宜作卫生间或储藏间镇压'] },
+        '五鬼': { nature: '大凶 (第二凶星)', color: '#dc2626', desc: '主火灾盗贼、官非口舌、小人作祟、破财不安。', items: ['化解：置放盛满清水之“安忍水”', '挂五帝钱/六帝钱', '严禁作卧室或厨房'] },
+        '六煞': { nature: '次凶 (第三凶星)', color: '#dc2626', desc: '主桃花劫、感情纠葛、婚姻破裂、事业阻碍。', items: ['化解：置放黑曜石七星阵', '挂铜葫芦吸纳邪气', '忌放鲜艳花卉或流水饰品'] },
+        '祸害': { nature: '次凶 (第四凶星)', color: '#dc2626', desc: '主口舌争执、疾病缠身、意志消沉、小破财。', items: ['化解：置放重型石雕摆件/玉石山子', '挂六帝钱化散邪气', '保持干燥清洁，避免杂乱'] }
+    };
+
+    const ziweiStarInfoFull = {
+        1: { name: '一白贪狼星', nature: '吉星 (水)', desc: '主官运、文章、名气与远行人缘。', items: ['催旺：置放黄水晶球或铜金蟾', '四支富贵竹 (水培)'] },
+        2: { name: '二黑巨门星', nature: '凶星 (病符/土)', desc: '主疾病、伤痛、妇科病与肠胃不适。', items: ['化解：挂纯铜葫芦或六帝钱', '忌放红色/黄色物品，忌动土'] },
+        3: { name: '三碧禄存星', nature: '凶星 (蚩尤/木)', desc: '主口舌官非、竞争争斗、交通意外。', items: ['化解：铺设红色地毯或置放红色饰品/紫水晶', '泄化木气'] },
+        4: { name: '四绿文曲星', nature: '吉星 (文昌/木)', desc: '主学业、考试、文职与桃花人缘。', items: ['催旺：置放十三层绿幽灵文昌塔', '文昌笔挂件/四支富贵竹'] },
+        5: { name: '五黄廉贞星', nature: '大凶星 (正关/土)', desc: '主重病、血光、破财、意外灾祸，最凶。', items: ['化解：悬挂真品六帝钱/铜风铃', '置放铜磬/黑曜石，绝对忌动土'] },
+        6: { name: '六白武曲星', nature: '吉星 (偏财/金)', desc: '主偏财、横财、权力与武职升迁。', items: ['催旺：置放黄水晶聚宝盆', '纯铜龙龟或白水晶簇'] },
+        7: { name: '七赤破军星', nature: '凶星 (贼星/金)', desc: '主盗贼盗抢、破财、手术血光、小人陷害。', items: ['化解：置放盛满清水的“水种植物”或安忍水', '以水泄金'] },
+        8: { name: '八白左辅星', nature: '大吉星 (财星/土)', desc: '主正财、置业、事业稳固。', items: ['催旺：置放天然黄水晶/紫晶洞', '红色地毯或亮丽灯饰'] },
+        9: { name: '九紫右弼星', nature: '大吉星 (喜庆/火)', desc: '当旺第一吉星，主婚姻、生育、喜事、投资发财。', items: ['催旺：置放红紫色饰品/九紫离火阵', '发财树/常绿盆栽'] }
+    };
+
+    function getYearZiBai(year) {
+        let y = parseInt(year);
+        let base2026 = 4;
+        let diff = y - 2026;
+        let star = ((base2026 - 1 - (diff % 9) + 900) % 9) + 1;
+        let flyingMap = calculateLoShuFlying(star);
+        return { year: y, centerStar: star, flyingMap };
+    }
+
+    function calculateLoShuFlying(center) {
+        let order = ['中', '乾', '兑', '坤', '离', '坎', '艮', '震', '巽'];
+        let result = {};
+        for (let i = 0; i < 9; i++) {
+            let s = ((center - 1 - i + 90) % 9) + 1;
+            result[order[i]] = s;
+        }
+        return result;
+    }
+
+    const pailongStars = [
+        {name: '贪狼星', type: '吉', color: '#0ea5e9'},
+        {name: '巨门星', type: '吉', color: '#0ea5e9'},
+        {name: '禄存星', type: '凶', color: '#dc2626'},
+        {name: '文曲星', type: '凶', color: '#dc2626'},
+        {name: '廉贞星', type: '凶', color: '#dc2626'},
+        {name: '武曲星', type: '吉', color: '#0ea5e9'},
+        {name: '破军星', type: '凶', color: '#dc2626'},
+        {name: '左辅星', type: '吉', color: '#0ea5e9'},
+        {name: '右弼星', type: '吉', color: '#0ea5e9'}
+    ];
+
+    function getPailongMap(deg) {
+        let zuoMountain = getMountainByDegree((deg + 180) % 360);
+        let zuoIdx = mountains.indexOf(zuoMountain);
+        let map = {};
+        mountains.forEach((m, i) => {
+            let starIdx = (i - zuoIdx + 240) % 9;
+            map[m] = pailongStars[starIdx];
+        });
+        return { zuoMountain, map };
+    }
+
+    function getChengmenMap(deg) {
+        let xiangMountain = getMountainByDegree(deg);
+        let xiangIdx = mountains.indexOf(xiangMountain);
+        let leftChengmenM = mountains[(xiangIdx - 2 + 24) % 24];
+        let rightChengmenM = mountains[(xiangIdx + 2) % 24];
+        let map = {};
+        mountains.forEach(m => {
+            if (m === leftChengmenM) {
+                map[m] = { name: '正城门(吉)', type: '吉', color: '#0ea5e9' };
+            } else if (m === rightChengmenM) {
+                map[m] = { name: '副城门(吉)', type: '吉', color: '#0ea5e9' };
+            } else {
+                map[m] = null;
+            }
+        });
+        return { xiangMountain, leftChengmenM, rightChengmenM, map };
+    }
+
+    function getXuankongFlyingStars(yun, deg) {
+        let y = parseInt(yun);
+        let yunMap = calculateLoShuFlying(y);
+        let starOffset = (y * 3) % 9;
+        let guaOrder = ['坎', '坤', '震', '巽', '乾', '兑', '艮', '离'];
+        let dynamicMap = {};
+        guaOrder.forEach((g) => {
+            let s = ((yunMap[g] + starOffset - 1) % 9) + 1;
+            dynamicMap[g] = s;
+        });
+
+        let gejuName = `下元${y === 7 ? '七' : (y === 8 ? '八' : (y === 9 ? '九' : '一'))}运 · 旺山旺向局`;
+        return { yun: y, yunMap: dynamicMap, gejuName };
+    }
+
+    const guaAngles = { '坎': 0, '艮': 45, '震': 90, '巽': 135, '离': 180, '坤': 225, '兑': 270, '乾': 315 };
+
+    function renderCanvasAndReport() {
+        drawMasterCanvas(currentDegree);
+    }
+
+    function drawMasterCanvas(deg) {
+        const canvas = document.getElementById('luopan-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+        const radius = 310;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.save();
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 1;
+        const gridStep = 18;
+        for (let x = 0; x <= canvas.width; x += gridStep) {
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+        }
+        for (let y = 0; y <= canvas.height; y += gridStep) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+        }
+        ctx.restore();
+
+        if (measureStart && measureEnd) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(measureStart.x, measureStart.y);
+            ctx.lineTo(measureEnd.x, measureEnd.y);
+            ctx.strokeStyle = '#dc2626';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.beginPath(); ctx.arc(measureStart.x, measureStart.y, 6, 0, 2*Math.PI); ctx.fillStyle='#dc2626'; ctx.fill();
+            ctx.beginPath(); ctx.arc(measureEnd.x, measureEnd.y, 6, 0, 2*Math.PI); ctx.fillStyle='#0ea5e9'; ctx.fill();
+            ctx.restore();
+        }
+
+        ctx.save();
+        ctx.translate(cx, cy);
+
+        ctx.save();
+        ctx.rotate((-deg * Math.PI) / 180);
+
+        const innerRadius = radius * 0.78;
+        const innerRingRadius = innerRadius * 0.65;
+
+        ctx.beginPath();
+        ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#000000';
+        ctx.stroke();
+
+        const chkBase = document.getElementById('chk-base').checked;
+        const chkLongmen = document.getElementById('chk-longmen').checked;
+        const chkPailong = document.getElementById('chk-pailong').checked;
+        const chkChengmen = document.getElementById('chk-chengmen').checked;
+
+        let selectedGuaJu = document.getElementById('longmen-ju').value || '坎';
+        let lmCfg = longmenData[selectedGuaJu];
+
+        mountains.forEach((m, index) => {
+            const startAngle = index * 15 - 7.5;
+            const lineAngle = (startAngle - 90) * (Math.PI / 180);
+            const midAngle = (index * 15 - 90) * (Math.PI / 180);
+
+            ctx.beginPath();
+            ctx.moveTo(innerRadius * Math.cos(lineAngle), innerRadius * Math.sin(lineAngle));
+            ctx.lineTo(radius * Math.cos(lineAngle), radius * Math.sin(lineAngle));
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = '#000000';
+            ctx.stroke();
+
+            if (chkBase) {
+                ctx.save();
+                ctx.rotate(midAngle + Math.PI / 2);
+                ctx.fillStyle = (m === '子' || m === '午') ? '#dc2626' : (m === '丙' ? '#9333ea' : '#2563eb');
+                ctx.font = 'bold 18px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(m, 0, -(radius + innerRadius) / 2);
+                ctx.restore();
+            }
+
+            if (chkLongmen && lmCfg && lmCfg.yaoshats && lmCfg.yaoshats[m]) {
+                let shaName = lmCfg.yaoshats[m];
+                ctx.save();
+                ctx.rotate(midAngle + Math.PI / 2);
+                ctx.fillStyle = '#dc2626';
+                ctx.font = 'bold 10px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(`[${shaName}]`, 0, -(radius * 0.96));
+                ctx.restore();
+            }
+
+            if (chkPailong) {
+                let plData = getPailongMap(deg);
+                let starInfo = plData.map[m];
+                if (starInfo) {
+                    ctx.save();
+                    ctx.rotate(midAngle + Math.PI / 2);
+                    ctx.fillStyle = starInfo.color;
+                    ctx.font = 'bold 11px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(starInfo.name, 0, -(innerRadius + innerRingRadius) / 2);
+                    ctx.restore();
+                }
+            }
+
+            if (chkChengmen) {
+                let cmData = getChengmenMap(deg);
+                let cmInfo = cmData.map[m];
+                if (cmInfo) {
+                    ctx.save();
+                    ctx.rotate(midAngle + Math.PI / 2);
+                    ctx.fillStyle = cmInfo.color;
+                    ctx.font = 'bold 11px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(cmInfo.name, 0, -(innerRadius + innerRingRadius) / 2);
+                    ctx.restore();
+                }
+            }
+        });
+
+        const chkBazhai = document.getElementById('chk-bazhai').checked;
+        const chkZiwei = document.getElementById('chk-ziwei').checked;
+        const chkXuankong = document.getElementById('chk-xuankong').checked;
+
+        Object.keys(guaAngles).forEach(gua => {
+            let angleDeg = guaAngles[gua];
+
+            if (chkLongmen && lmCfg) {
+                let lmTag = '';
+                let lmColor = '#0ea5e9';
+
+                if (gua === lmCfg.xiantian) { lmTag = '先天水'; lmColor = '#0ea5e9'; }
+                else if (gua === lmCfg.houtian) { lmTag = '后天水'; lmColor = '#0ea5e9'; }
+                else if (gua === lmCfg.tianjie) { lmTag = '天劫位'; lmColor = '#dc2626'; }
+                else if (gua === lmCfg.zhengqiao) { lmTag = '正窍水口'; lmColor = '#10b981'; }
+                else if (gua === lmCfg.fuqiao) { lmTag = '副窍水口'; lmColor = '#10b981'; }
+
+                if (lmTag) {
+                    ctx.save();
+                    ctx.rotate((angleDeg) * (Math.PI / 180));
+                    ctx.fillStyle = lmColor;
+                    ctx.font = 'bold 12px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(`[${lmTag}]`, 0, -(innerRadius + innerRingRadius) / 2 - 14);
+                    ctx.restore();
+                }
+            }
+
+            if (chkBazhai) {
+                const zhaiInfo = getZhaiByDegree(deg);
+                const currentBazhaiMapping = bazhaiMap[zhaiInfo.zhaixing];
+                let starName = currentBazhaiMapping[gua] || '';
+                ctx.save();
+                ctx.rotate((angleDeg) * (Math.PI / 180));
+                const isJi = ['生气', '天医', '延年', '伏位'].includes(starName);
+                ctx.fillStyle = isJi ? '#0ea5e9' : '#dc2626';
+                ctx.font = 'bold 13px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(starName, 0, -(innerRadius + innerRingRadius) / 2);
+                ctx.restore();
+            }
+
+            if (chkZiwei) {
+                let ziweiYearVal = document.getElementById('ziwei-year').value || 2026;
+                const ziweiData = getYearZiBai(ziweiYearVal);
+                let starNum = ziweiData.flyingMap[gua] || 1;
+                let info = ziweiStarInfoFull[starNum];
+                ctx.save();
+                ctx.rotate((angleDeg) * (Math.PI / 180));
+                ctx.fillStyle = info.nature.includes('吉') ? '#0ea5e9' : '#dc2626';
+                ctx.font = 'bold 12px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(info.name.substring(0, 4), 0, -(innerRadius + innerRingRadius) / 2 + 16);
+                ctx.restore();
+            }
+
+            if (chkXuankong) {
+                let yunVal = document.getElementById('xuankong-yun').value || '7';
+                let xkData = getXuankongFlyingStars(yunVal, deg);
+                let starNum = xkData.yunMap[gua] || yunVal;
+                ctx.save();
+                ctx.rotate((angleDeg) * (Math.PI / 180));
+                ctx.fillStyle = '#0284c7';
+                ctx.font = 'bold 13px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(`【${yunVal}运 ${starNum}飞】`, 0, -(innerRingRadius * 0.7));
+                ctx.restore();
+            }
+        });
+
+        ctx.beginPath();
+        ctx.arc(0, 0, innerRingRadius, 0, 2 * Math.PI);
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = '#000000';
+        ctx.stroke();
+
+        ctx.restore();
+
+        ctx.save();
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        [45, 135, 225, 315].forEach(ang => {
+            const rad = (ang - 90) * (Math.PI / 180);
+            ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(innerRadius * Math.cos(rad), innerRadius * Math.sin(rad)); ctx.stroke();
+        });
+        ctx.restore();
+
+        ctx.beginPath();
+        ctx.moveTo(-innerRadius, 0); ctx.lineTo(innerRadius, 0);
+        ctx.moveTo(0, -innerRadius); ctx.lineTo(0, innerRadius);
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(0, 0, 4, 0, 2 * Math.PI);
+        ctx.fillStyle = '#ef4444'; ctx.fill();
+        ctx.strokeStyle = '#000000'; ctx.lineWidth = 1; ctx.stroke();
+
+        ctx.restore();
+
+        ctx.save();
+        ctx.translate(cx, cy - radius - 18);
+        ctx.fillStyle = '#dc2626';
+        ctx.font = 'bold 14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        let yunVal = document.getElementById('xuankong-yun').value || '7';
+        let xkData = getXuankongFlyingStars(yunVal, deg);
+        let topText = `▲ 朝向 ${deg.toFixed(1)}° (${selectedGuaJu}局水法含三曜煞 | ${xkData.gejuName})`;
+        ctx.fillText(topText, 0, 0);
+        ctx.restore();
+    }
+
+    function syncDegree(val) {
+        let deg = parseFloat(val);
+        if (isNaN(deg)) deg = 0;
+        if (deg < 0) deg = 0;
+        if (deg > 359.5) deg = 359.5;
+        currentDegree = deg;
+        document.getElementById('degree-val').innerText = deg.toFixed(1);
+        document.getElementById('luopan-range').value = deg;
+        document.getElementById('luopan-number').value = deg;
+        renderCanvasAndReport();
+    }
+
+    function loadFloorplan(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById('floorplan-img');
+                img.src = e.target.result;
+                img.style.display = 'block';
+                document.getElementById('canvas-placeholder').style.display = 'none';
+                img.style.transform = 'translate(0px, 0px)';
+                renderCanvasAndReport();
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function initCanvasInteraction() {
+        const canvas = document.getElementById('luopan-canvas');
+        const img = document.getElementById('floorplan-img');
+        const container = document.getElementById('canvas-container');
+        let isImgDragging = false, startX, startY, posX = 0, posY = 0;
+
+        container.addEventListener('mousedown', (e) => {
+            if (isMeasuring) {
+                isMouseDown = true;
+                const rect = canvas.getBoundingClientRect();
+                measureStart = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+                measureEnd = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+                renderCanvasAndReport();
+            } else if (e.target === img) {
+                isImgDragging = true;
+                startX = e.clientX - posX;
+                startY = e.clientY - posY;
+                img.style.cursor = 'grabbing';
+            }
+        });
+
+        container.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            if (isMeasuring && isMouseDown) {
+                measureEnd = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+                let dx = measureEnd.x - measureStart.x;
+                let dy = measureEnd.y - measureStart.y;
+                let dist = Math.sqrt(dx*dx + dy*dy).toFixed(1);
+                let angle = ((Math.atan2(dy, dx) * 180 / Math.PI + 90) + 360) % 360;
+
+                document.getElementById('measure-info').innerHTML = `📏 测量线段长: <b style="color:#facc15;">${dist} px</b> | 夹角方位: <b style="color:#facc15;">${angle.toFixed(1)}°</b>`;
+                renderCanvasAndReport();
+            } else if (isImgDragging) {
+                posX = e.clientX - startX;
+                posY = e.clientY - startY;
+                img.style.transform = `translate(${posX}px, ${posY}px)`;
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            isMouseDown = false;
+            isImgDragging = false;
+            img.style.cursor = 'grab';
+        });
+    }
+
+    // 🌟 一键生成全盘 AI 堪舆综合解析报告 (全8宫+全九星完整版)
+    function generateFullAnalysisReport() {
+        const deg = currentDegree;
+        const selectedGuaJu = document.getElementById('longmen-ju').value || '坎';
+        const yunVal = document.getElementById('xuankong-yun').value || '7';
+        const ziweiYearVal = document.getElementById('ziwei-year').value || '2026';
+
+        const lmCfg = longmenData[selectedGuaJu];
+        const zhaiInfo = getZhaiByDegree(deg);
+        const bzMap = bazhaiMap[zhaiInfo.zhaixing];
+        const ziweiData = getYearZiBai(ziweiYearVal);
+        const xkData = getXuankongFlyingStars(yunVal, deg);
+
+        const container = document.getElementById('comprehensive-report-container');
+        const statusEl = document.getElementById('refresh-status');
+
+        statusEl.innerText = '⚡ 全盘8宫+九星 AI 堪舆建议已完整生成！';
+        setTimeout(() => { statusEl.innerText = ''; }, 3000);
+
+        let html = '';
+
+        // ==================== 模块 1：八宅派（全8宫列出） ====================
+        html += `
+            <div class="report-block">
+                <div class="report-block-title" style="color:#38bdf8;">
+                    <span>🏡 第一板块：八宅派（${zhaiInfo.zhaiName}）全 8 宫吉凶详解与物品布局</span>
+                </div>
+                <div class="analysis-grid">
+        `;
+
+        const allGuas = ['坎', '坤', '震', '巽', '乾', '兑', '艮', '离'];
+        allGuas.forEach(g => {
+            let starName = bzMap[g];
+            let detail = bazhaiStarDetails[starName];
+            let isJi = detail.nature.includes('吉');
+            let itemTagClass = isJi ? 'item-tag' : 'item-tag item-tag-danger';
+
+            html += `
+                <div class="palace-card" style="border-left-color:${detail.color};">
+                    <div class="palace-title">
+                        <span>${g}宫 (${starName})</span>
+                        <span style="color:${detail.color};">${detail.nature}</span>
+                    </div>
+                    <div class="palace-content">
+                        <div>${detail.desc}</div>
+                        <div style="margin-top:6px;"><b>💡 推荐布局与物品：</b></div>
+                        <div>${detail.items.map(it => `<span class="${itemTagClass}">${it}</span>`).join(' ')}</div>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += `</div></div>`;
+
+        // ==================== 模块 2：紫白诀（全九星列出） ====================
+        html += `
+            <div class="report-block">
+                <div class="report-block-title" style="color:#f59e0b;">
+                    <span>📅 第二板块：${ziweiYearVal}年 紫白诀全九星飞临宫位吉凶与物品催化/解煞</span>
+                </div>
+                <div class="analysis-grid">
+        `;
+
+        for (let starNum = 1; starNum <= 9; starNum++) {
+            let starInfo = ziweiStarInfoFull[starNum];
+            let flyGua = getGuaByFlyingStar(ziweiData.flyingMap, starNum);
+            let isJi = starInfo.nature.includes('吉');
+            let itemTagClass = isJi ? 'item-tag' : 'item-tag item-tag-danger';
+
+            html += `
+                <div class="palace-card" style="border-left-color:${isJi ? '#0ea5e9' : '#dc2626'};">
+                    <div class="palace-title">
+                        <span>${starInfo.name} 飞临：[${flyGua}]</span>
+                        <span style="color:${isJi ? '#0ea5e9' : '#dc2626'};">${starInfo.nature}</span>
+                    </div>
+                    <div class="palace-content">
+                        <div>${starInfo.desc}</div>
+                        <div style="margin-top:6px;"><b>💡 布局物品建议：</b></div>
+                        <div>${starInfo.items.map(it => `<span class="${itemTagClass}">${it}</span>`).join(' ')}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        html += `</div></div>`;
+
+        // ==================== 模块 3：玄空飞星与龙门水法 ====================
+        let yaoshatTxt = Object.keys(lmCfg.yaoshats).map(m => `${m}山(${lmCfg.yaoshats[m]})`).join('、');
+
+        html += `
+            <div class="report-block">
+                <div class="report-block-title" style="color:#10b981;">
+                    <span>🌀 第三板块：玄空三元${yunVal}运飞星 & 龙门八局（${selectedGuaJu}局含三曜煞）水法布局</span>
+                </div>
+                <div class="analysis-grid">
+                    <div class="palace-card" style="border-left-color:#10b981;">
+                        <div class="palace-title"><span>玄空元运格局 (${xkData.gejuName})</span><span style="color:#10b981;">旺财旺丁</span></div>
+                        <div class="palace-content">
+                            <b>元运布局：</b>下元${yunVal}运当旺。向山宜见大门/大窗吸气，坐山宜稳固有靠。
+                            <div style="margin-top:4px;"><span class="item-tag">推荐：白水晶簇 / 聚宝盆 / 动水风水轮</span></div>
+                        </div>
+                    </div>
+                    <div class="palace-card" style="border-left-color:#0ea5e9;">
+                        <div class="palace-title"><span>龙门水法 (先天:${lmCfg.xiantian}宫 | 后天:${lmCfg.houtian}宫)</span><span style="color:#0ea5e9;">纳水引气</span></div>
+                        <div class="palace-content">
+                            <b>水法布局：</b>先天水主丁，后天水主财。正窍水口在 <b>${lmCfg.zhengqiao}宫</b>，副窍在 <b>${lmCfg.fuqiao}宫</b>。
+                            <div style="margin-top:4px;"><span class="item-tag">推荐：鱼缸 / 水养植物 / 阳台纳气门窗</span></div>
+                        </div>
+                    </div>
+                    <div class="palace-card" style="border-left-color:#dc2626;">
+                        <div class="palace-title"><span>三曜煞凶位避忌</span><span style="color:#dc2626;">大凶严禁犯煞</span></div>
+                        <div class="palace-content">
+                            <b>避忌山位：</b><b style="color:#ef4444;">${yaoshatTxt}</b>。严禁开大门、安灶放水或做外峦头冲射。
+                            <div style="margin-top:4px;"><span class="item-tag item-tag-danger">化解：真品六帝钱 / 黑曜石八卦阵 / 泰山石敢当</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        container.innerHTML = html;
+
+        // 自动平滑滚动到报告区域
+        document.getElementById('report-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function getGuaByFlyingStar(flyingMap, star) {
+        let res = [];
+        Object.keys(flyingMap).forEach(g => { if (flyingMap[g] === star) res.push(g); });
+        return res.join('、') || '中宫';
+    }
+
+    function exportReportPDF() {
+        window.print();
+    }
+</script>
+
+</body>
+</html>
