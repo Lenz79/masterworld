@@ -103,6 +103,41 @@ def calc_ming_ge(day_gan, month_star, month_zhi):
         return "羊刃格" if month_zhi == yangren_map.get(day_gan) else "建禄格"
     return f"{month_star}格"
 
+# 🛠️ 新增：动态精准计算“用、喜、闲、仇、忌”标准算法
+def calc_yong_xi(day_gan_elem, is_strong):
+    sheng_map = {"木": "水", "火": "木", "土": "火", "金": "土", "水": "金"}
+    ke_map = {"木": "金", "火": "水", "土": "木", "金": "火", "水": "土"}
+    elements = ["木", "火", "土", "金", "水"]
+    
+    if is_strong:
+        yong = ke_map[day_gan_elem]
+        idx = elements.index(yong)
+        xi = elements[(idx + 1) % 5]
+        xian = elements[(idx + 2) % 5]
+        chou = elements[(idx + 3) % 5]
+        ji = sheng_map[day_gan_elem]
+    else:
+        yong = sheng_map[day_gan_elem]
+        idx = elements.index(yong)
+        xi = elements[(idx + 1) % 5]
+        xian = elements[(idx + 2) % 5]
+        chou = elements[(idx + 3) % 5]
+        ji = ke_map[day_gan_elem]
+        
+    return f"用:{yong} | 喜:{xi} | 闲:{xian} | 仇:{chou} | 忌:{ji}"
+
+# 🛠️ 新增：动态计算月令“旺、相、死、囚、休”
+def calc_wang_xiang(month_zhi):
+    zhi_elem = ZHI_ELEMENTS.get(month_zhi, "木")
+    elements = ["木", "火", "土", "金", "水"]
+    idx = elements.index(zhi_elem)
+    wang = zhi_elem
+    xiang = elements[(idx + 1) % 5]
+    si = elements[(idx + 2) % 5]
+    qiu = elements[(idx + 3) % 5]
+    xiu = elements[(idx + 4) % 5]
+    return f"旺:{wang} | 相:{xiang} | 死:{si} | 囚:{qiu} | 休:{xiu}"
+
 def get_liunian_shensha(day_gan, birth_year_zhi, ly_zhi):
     shensha_list = []
     tianyi_map = {"甲":["丑","未"], "戊":["丑","未"], "庚":["丑","未"], "乙":["子","申"], "己":["子","申"], "丙":["亥","酉"], "丁":["亥","酉"], "辛":["午","寅"], "壬":["卯","巳"], "癸":["卯","巳"]}
@@ -290,17 +325,7 @@ class BaziAPIHandler(SimpleHTTPRequestHandler):
                 month_star = month_p["shishen"]
                 calculated_ming_ge = calc_ming_ge(day_gan, month_star, month_zhi)
 
-                extra_p = {
-                    "tai_xi": {"gan": tx_gan, "zhi": tx_zhi, "star": get_shishen(day_gan, tx_gan)},
-                    "tai_yuan": {"gan": ty_gan, "zhi": ty_zhi, "yongshi": "人元用事"},
-                    "ming_ge": calculated_ming_ge,
-                    "ming_gong": {"gan": mg_gan, "zhi": mg_zhi},
-                    "day_kong": get_kongwang(day_gan, day_zhi),
-                    "year_kong": get_kongwang(birth_year_gan, birth_year_zhi)
-                }
-
-                chart = {"year_pillar": year_p, "month_pillar": month_p, "day_pillar": day_p, "hour_pillar": hour_p, "extra": extra_p}
-
+                # ⚙️ 计算身强身弱，以便动态配合用喜神
                 elem_scores = {"金": 0, "木": 0, "水": 0, "火": 0, "土": 0}
                 for g in [birth_year_gan, month_gan, day_gan, time_gan]: elem_scores[GAN_ELEMENTS.get(g, "土")] += 100
                 for idx, z in enumerate([birth_year_zhi, month_zhi, day_zhi, time_zhi]): elem_scores[ZHI_ELEMENTS.get(z, "土")] += (300 if idx == 1 else 100)
@@ -318,6 +343,23 @@ class BaziAPIHandler(SimpleHTTPRequestHandler):
 
                 is_strong = plus_score >= (total_score * 0.42)
                 strength_text = "🔥 【身强】" if is_strong else "💧 【身弱】"
+
+                # 🛠️ 接入动态计算好的用喜闲仇忌与旺相死囚休
+                dynamic_yong_xi = calc_yong_xi(day_gan_elem, is_strong)
+                dynamic_wang_xiang = calc_wang_xiang(month_zhi)
+
+                extra_p = {
+                    "tai_xi": {"gan": tx_gan, "zhi": tx_zhi, "star": get_shishen(day_gan, tx_gan)},
+                    "tai_yuan": {"gan": ty_gan, "zhi": ty_zhi, "yongshi": "人元用事"},
+                    "ming_ge": calculated_ming_ge,
+                    "ming_gong": {"gan": mg_gan, "zhi": mg_zhi},
+                    "day_kong": get_kongwang(day_gan, day_zhi),
+                    "year_kong": get_kongwang(birth_year_gan, birth_year_zhi),
+                    "yong_xi": dynamic_yong_xi,         # 👈 返回用喜闲仇忌
+                    "wang_xiang": dynamic_wang_xiang     # 👈 返回旺相死囚休
+                }
+
+                chart = {"year_pillar": year_p, "month_pillar": month_p, "day_pillar": day_p, "hour_pillar": hour_p, "extra": extra_p}
 
                 ys_info = SHISHEN_DATABASE.get(year_p["shishen"], {"meaning": "主社会交往与祖业缘分。", "pros": "做事稳重", "cons": "略显保守"})
                 ms_info = SHISHEN_DATABASE.get(month_star, {"meaning": "月令核心星曜，主中年事业与性格核心。", "pros": "事业心强", "cons": "压力较大"})
