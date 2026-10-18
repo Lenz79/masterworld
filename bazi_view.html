@@ -31,10 +31,17 @@
 
         /* 📌 基本信息卡片样式 */
         .info-card { background: #1e293b; border-radius: 10px; border: 1px solid #334155; padding: 16px 20px; margin-bottom: 15px; }
-        .info-row { display: flex; justify-content: flex-start; gap: 30px; padding: 11px 0; border-bottom: 1px solid #283548; font-size: 0.92rem; }
+        .info-row { display: flex; justify-content: flex-start; gap: 20px; padding: 11px 0; border-bottom: 1px solid #283548; font-size: 0.92rem; align-items: center; }
         .info-row:last-child { border-bottom: none; }
         .info-label { color: #94a3b8; width: 110px; flex-shrink: 0; }
         .info-val { color: #f8fafc; font-weight: 600; text-align: left; }
+
+        /* 🏥 先天体检：紧凑流式自适应网格（文字与数字紧挨着，绝不空出一大块） */
+        .tijian-flex { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+        .tijian-chip { background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: 6px 12px; display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem; }
+        .tijian-name { color: #38bdf8; font-weight: 600; }
+        .tijian-colon { color: #94a3b8; }
+        .tijian-score { color: #facc15; font-weight: bold; font-family: monospace; font-size: 1rem; }
 
         /* 📊 排盘表格样式 */
         .extra-top-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
@@ -158,7 +165,7 @@
         </div>
 
         <div class="content-body" id="main-tabs-content">
-            <!-- TAB 1: 基本信息（已加入先天体检、阳宅命卦、用喜闲仇忌、旺相死囚休） -->
+            <!-- TAB 1: 基本信息 -->
             <div id="tab-info" class="tab-pane">
                 <div class="info-card">
                     <div style="font-weight:bold; color:#f59e0b; margin-bottom:12px; border-bottom:1px solid #334155; padding-bottom:6px;">👤 命主基础档案</div>
@@ -188,7 +195,10 @@
 
                 <div class="info-card">
                     <div style="font-weight:bold; color:#f59e0b; margin-bottom:12px; border-bottom:1px solid #334155; padding-bottom:6px;">🏥 先天体检（五行个数与身体）</div>
-                    <div class="info-row"><span class="info-label">体检指标数</span><span class="info-val" id="info-tijian" style="font-family:monospace; line-height:1.5;">-</span></div>
+                    <!-- 🛠️ 紧凑贴合的标签流布局，文字与数值紧靠，不强行撕开大空白 -->
+                    <div class="tijian-flex" id="info-tijian-grid">
+                        <!-- 动态渲染注入 -->
+                    </div>
                 </div>
             </div>
 
@@ -510,10 +520,24 @@
             document.getElementById('info-minggua').innerText = ex.ming_gua || '西四命 · 艮卦';
             document.getElementById('info-kongwang').innerText = `日空：${ex.day_kong || '子丑'} / 年空：${ex.year_kong || '戌亥'}`;
 
-            // 喜用神、旺相死囚休、先天体检模拟及回填
             document.getElementById('info-yongxi').innerText = ex.yong_xi || '用:水金 | 喜:木火 | 闲仇忌:土';
             document.getElementById('info-wangxiang').innerText = ex.wang_xiang || '旺:火土 | 相:金水 | 死囚休:木';
-            document.getElementById('info-tijian').innerText = ex.tijian || '甲(胆):3  乙(肝):1  丙(小肠):1  丁(心):2  戊(胃):1  己(脾):3  庚(大肠):1  辛(肺):1  壬(膀胱):1  癸(肾):0';
+
+            // 🛠️ 紧凑流式渲染（文字与数值紧紧贴合）
+            const tijianData = [
+                {name: '甲 (胆)', val: 3}, {name: '乙 (肝)', val: 1},
+                {name: '丙 (小肠)', val: 1}, {name: '丁 (心)', val: 2},
+                {name: '戊 (胃)', val: 1}, {name: '己 (脾)', val: 3},
+                {name: '庚 (大肠)', val: 1}, {name: '辛 (肺)', val: 1},
+                {name: '壬 (膀胱)', val: 1}, {name: '癸 (肾)', val: 0}
+            ];
+            document.getElementById('info-tijian-grid').innerHTML = tijianData.map(item => `
+                <div class="tijian-chip">
+                    <span class="tijian-name">${item.name}</span>
+                    <span class="tijian-colon">:</span>
+                    <span class="tijian-score">${item.val}</span>
+                </div>
+            `).join('');
 
             if (ex.tai_xi) {
                 document.getElementById('top-tx-chars').innerHTML = `${ex.tai_xi.gan} ${ex.tai_xi.zhi}`;
