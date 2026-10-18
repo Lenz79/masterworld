@@ -39,7 +39,7 @@
         .btn-action { flex: 1; background: #f59e0b; color: #0f172a; border: none; padding: 12px; font-size: 0.92rem; font-weight: bold; border-radius: 8px; cursor: pointer; text-align: center; }
         .btn-secondary { background: #0284c7; color: #fff; padding: 6px 10px; font-size: 0.8rem; }
 
-        /* 🌟 核心画布区：支持触控拖拽与多点触控 */
+        /* 画布区 */
         .workspace { display: flex; flex-direction: column; align-items: center; margin-bottom: 10px; }
         .canvas-container { background: #ffffff; border: 2px solid #cbd5e1; border-radius: 12px; width: 100%; max-width: 750px; aspect-ratio: 1 / 1; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(0,0,0,0.35); touch-action: none; }
 
@@ -53,11 +53,33 @@
         .school-report-title { font-size: 0.92rem; font-weight: bold; color: #f59e0b; border-bottom: 1px dashed #334155; padding-bottom: 6px; margin-bottom: 10px; }
         .report-block { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 10px; margin-bottom: 10px; }
         .report-block-title { font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; border-bottom: 1px solid #1e293b; padding-bottom: 4px; }
-        
-        .analysis-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
-        @media (min-width: 640px) { .analysis-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); } }
-        
-        .palace-card { background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 10px; border-left: 3px solid #f59e0b; }
+
+        /* 🌟 核心优化：改为横向水平滚动轮播布局 */
+        .analysis-horizontal-scroll {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+        .analysis-horizontal-scroll::-webkit-scrollbar {
+            height: 6px;
+        }
+        .analysis-horizontal-scroll::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
+
+        .palace-card {
+            flex: 0 0 260px; /* 固定每张卡片宽度，确保完美左右滑动 */
+            scroll-snap-align: start;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            padding: 10px;
+            border-left: 3px solid #f59e0b;
+        }
         .palace-title { font-size: 0.82rem; font-weight: bold; color: #f59e0b; margin-bottom: 4px; display: flex; justify-content: space-between; }
         .palace-content { font-size: 0.78rem; color: #cbd5e1; line-height: 1.4; }
 
@@ -67,7 +89,11 @@
         @media print {
             body { background: #fff; color: #000; }
             .home-bar, details, .btn-group-row, #btn-analyze-all { display: none !important; }
-            .canvas-container { border: none; }
+            .canvas-container { border: 2px solid #000; break-inside: avoid; background: #fff !important; }
+            .analysis-section { background: #fff; color: #000; border: none; }
+            .report-block { background: #f8fafc; border: 1px solid #cbd5e1; }
+            .analysis-horizontal-scroll { flex-direction: column; overflow: visible; }
+            .palace-card { flex: 1 1 100%; margin-bottom: 6px; }
         }
     </style>
 </head>
@@ -142,8 +168,8 @@
             </div>
 
             <div class="control-group">
-                <label>6. 罗盘透明度 (<span id="opacity-val">20</span>%)</label>
-                <input type="range" id="luopan-opacity" min="0" max="100" value="20">
+                <label>6. 罗盘透明度 (<span id="opacity-val">10</span>%)</label>
+                <input type="range" id="luopan-opacity" min="0" max="100" value="10">
             </div>
 
             <div class="control-group">
@@ -188,16 +214,16 @@
 
 <script>
     let currentDegree = 0;
-    let currentOpacity = 0.20; // 🌟 默认透明度设为 20%
+    let currentOpacity = 0.10;
     let isMeasuring = false;
     let isMouseDown = false;
     let measureStart = null;
     let measureEnd = null;
 
     const mountains = [
-        "子", "癸", "丑", "艮", "寅", "甲", 
-        "卯", "乙", "辰", "巽", "巳", "丙", 
-        "午", "丁", "未", "坤", "申", "庚", 
+        "子", "癸", "丑", "艮", "寅", "甲",
+        "卯", "乙", "辰", "巽", "巳", "丙",
+        "午", "丁", "未", "坤", "申", "庚",
         "酉", "辛", "戌", "乾", "亥", "壬"
     ];
 
@@ -220,10 +246,9 @@
                 document.getElementById('user-info-tag').innerText = `${p.name}`;
             } catch(e) {}
         }
-        
-        // 初始化滑块默认值
-        document.getElementById('luopan-opacity').value = 20;
-        document.getElementById('opacity-val').innerText = 20;
+
+        document.getElementById('luopan-opacity').value = 10;
+        document.getElementById('opacity-val').innerText = 10;
 
         initEventListeners();
         initCanvasInteraction();
@@ -281,7 +306,7 @@
                 btn.style.background = '#0284c7';
                 btn.innerText = '📏 开启拉线测量工具';
                 infoBox.style.display = 'none';
-                measureStart = null; 
+                measureStart = null;
                 measureEnd = null;
                 renderCanvasAndReport();
             }
@@ -364,7 +389,7 @@
 
     function getYearZiBai(year) {
         let y = parseInt(year);
-        let base2026 = 4; 
+        let base2026 = 4;
         let diff = y - 2026;
         let star = ((base2026 - 1 - (diff % 9) + 900) % 9) + 1;
         let flyingMap = calculateLoShuFlying(star);
@@ -407,7 +432,7 @@
         const ctx = canvas.getContext('2d');
         const cx = canvas.width / 2;
         const cy = canvas.height / 2;
-        const radius = 310; 
+        const radius = 310;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -429,9 +454,8 @@
         ctx.rotate((-deg * Math.PI) / 180);
 
         const innerRadius = radius * 0.78;
-        const innerRingRadius = innerRadius * 0.65; 
+        const innerRingRadius = innerRadius * 0.65;
 
-        // 🌟 底圈半透明填充 (20% 默认透明度)
         ctx.beginPath();
         ctx.arc(0, 0, radius, 0, 2 * Math.PI);
         ctx.fillStyle = `rgba(255, 255, 255, ${currentOpacity})`;
@@ -447,7 +471,7 @@
         let lmCfg = longmenData[selectedGuaJu];
 
         mountains.forEach((m, index) => {
-            const startAngle = index * 15 - 7.5; 
+            const startAngle = index * 15 - 7.5;
             const lineAngle = (startAngle - 90) * (Math.PI / 180);
             const midAngle = (index * 15 - 90) * (Math.PI / 180);
 
@@ -561,12 +585,12 @@
         ctx.strokeStyle = '#000000';
         ctx.stroke();
 
-        ctx.restore(); 
+        ctx.restore();
 
         ctx.save();
         ctx.strokeStyle = '#000000';
         ctx.lineWidth = 1;
-        ctx.setLineDash([3, 3]); 
+        ctx.setLineDash([3, 3]);
         [45, 135, 225, 315].forEach(ang => {
             const rad = (ang - 90) * (Math.PI / 180);
             ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(innerRadius * Math.cos(rad), innerRadius * Math.sin(rad)); ctx.stroke();
@@ -585,10 +609,10 @@
         ctx.fillStyle = '#ef4444'; ctx.fill();
         ctx.strokeStyle = '#000000'; ctx.lineWidth = 1; ctx.stroke();
 
-        ctx.restore(); 
+        ctx.restore();
 
         ctx.save();
-        ctx.translate(cx, cy - radius - 18); 
+        ctx.translate(cx, cy - radius - 18);
         ctx.fillStyle = '#dc2626';
         ctx.font = 'bold 12px sans-serif';
         ctx.textAlign = 'center';
@@ -629,7 +653,6 @@
         }
     }
 
-    // 🌟 核心：完美支持手机触控拖动与多点缩放的交互逻辑
     let imgPosX = 0, imgPosY = 0, imgScale = 1;
     let isImgDragging = false, startX = 0, startY = 0;
     let initialTouchDist = 0, initialScale = 1;
@@ -639,7 +662,6 @@
         const img = document.getElementById('floorplan-img');
         const container = document.getElementById('canvas-container');
 
-        // 鼠标事件 (PC端)
         container.addEventListener('mousedown', (e) => {
             if (isMeasuring) {
                 isMouseDown = true;
@@ -671,7 +693,6 @@
             isImgDragging = false;
         });
 
-        // 🌟 触控事件 (手机端单指拖动、双指捏合缩放)
         container.addEventListener('touchstart', (e) => {
             if (isMeasuring) {
                 isMouseDown = true;
@@ -732,7 +753,7 @@
         const selectedGuaJu = document.getElementById('longmen-ju').value || '坎';
         const yunVal = document.getElementById('xuankong-yun').value || '7';
         const ziweiYearVal = document.getElementById('ziwei-year').value || '2026';
-        
+
         const lmCfg = longmenData[selectedGuaJu];
         const zhaiInfo = getZhaiByDegree(deg);
         const bzMap = bazhaiMap[zhaiInfo.zhaixing];
@@ -747,12 +768,13 @@
 
         let html = '';
 
+        // 1. 八宅派全8宫 (横向滑动)
         html += `
             <div class="report-block">
                 <div class="report-block-title" style="color:#38bdf8;">
-                    <span>🏡 八宅派（${zhaiInfo.zhaiName}）全 8 宫吉凶与物品布局</span>
+                    <span>🏡 八宅派（${zhaiInfo.zhaiName}）全 8 宫吉凶与物品布局 (可左右滑动 ➔)</span>
                 </div>
-                <div class="analysis-grid">
+                <div class="analysis-horizontal-scroll">
         `;
 
         const allGuas = ['坎', '坤', '震', '巽', '乾', '兑', '艮', '离'];
@@ -761,7 +783,7 @@
             let detail = bazhaiStarDetails[starName];
             let isJi = detail.nature.includes('吉');
             let itemTagClass = isJi ? 'item-tag' : 'item-tag item-tag-danger';
-            
+
             html += `
                 <div class="palace-card" style="border-left-color:${detail.color};">
                     <div class="palace-title">
@@ -770,7 +792,7 @@
                     </div>
                     <div class="palace-content">
                         <div>${detail.desc}</div>
-                        <div style="margin-top:3px;"><b>💡 推荐布局与物品：</b></div>
+                        <div style="margin-top:3px;"><b>💡 推荐布局：</b></div>
                         <div>${detail.items.map(it => `<span class="${itemTagClass}">${it}</span>`).join(' ')}</div>
                     </div>
                 </div>
@@ -779,12 +801,13 @@
 
         html += `</div></div>`;
 
+        // 2. 紫白诀九星 (横向滑动)
         html += `
             <div class="report-block">
                 <div class="report-block-title" style="color:#f59e0b;">
-                    <span>📅 ${ziweiYearVal}年 紫白诀全九星飞临宫位与化煞物品</span>
+                    <span>📅 ${ziweiYearVal}年 紫白诀全九星飞临宫位 (可左右滑动 ➔)</span>
                 </div>
-                <div class="analysis-grid">
+                <div class="analysis-horizontal-scroll">
         `;
 
         for (let starNum = 1; starNum <= 9; starNum++) {
@@ -801,7 +824,7 @@
                     </div>
                     <div class="palace-content">
                         <div>${starInfo.desc}</div>
-                        <div style="margin-top:3px;"><b>💡 布局物品建议：</b></div>
+                        <div style="margin-top:3px;"><b>💡 布局建议：</b></div>
                         <div>${starInfo.items.map(it => `<span class="${itemTagClass}">${it}</span>`).join(' ')}</div>
                     </div>
                 </div>
@@ -810,6 +833,7 @@
 
         html += `</div></div>`;
 
+        // 3. 玄空元运与龙门水法
         let yaoshatTxt = Object.keys(lmCfg.yaoshats).map(m => `${m}山(${lmCfg.yaoshats[m]})`).join('、');
 
         html += `
@@ -817,26 +841,26 @@
                 <div class="report-block-title" style="color:#10b981;">
                     <span>🌀 玄空三元${yunVal}运飞星 & 龙门八局（${selectedGuaJu}局）水法布局</span>
                 </div>
-                <div class="analysis-grid">
+                <div class="analysis-horizontal-scroll">
                     <div class="palace-card" style="border-left-color:#10b981;">
                         <div class="palace-title"><span>玄空元运格局 (${xkData.gejuName})</span><span style="color:#10b981;">旺财旺丁</span></div>
                         <div class="palace-content">
                             <b>元运布局：</b>下元${yunVal}运当旺。向山宜见大门/大窗吸气。
-                            <div style="margin-top:3px;"><span class="item-tag">推荐：白水晶簇 / 聚宝盆 / 动水轮</span></div>
+                            <div style="margin-top:3px;"><span class="item-tag">推荐：白水晶簇 / 聚宝盆</span></div>
                         </div>
                     </div>
                     <div class="palace-card" style="border-left-color:#0ea5e9;">
                         <div class="palace-title"><span>龙门水法 (先天:${lmCfg.xiantian} | 后天:${lmCfg.houtian})</span><span style="color:#0ea5e9;">纳水引气</span></div>
                         <div class="palace-content">
                             <b>水法布局：</b>正窍水口在 <b>${lmCfg.zhengqiao}宫</b>。
-                            <div style="margin-top:3px;"><span class="item-tag">推荐：鱼缸 / 水养植物 / 阳台开窗</span></div>
+                            <div style="margin-top:3px;"><span class="item-tag">推荐：鱼缸 / 水养植物</span></div>
                         </div>
                     </div>
                     <div class="palace-card" style="border-left-color:#dc2626;">
                         <div class="palace-title"><span>三曜煞凶位避忌</span><span style="color:#dc2626;">大凶严禁犯煞</span></div>
                         <div class="palace-content">
                             <b>避忌山位：</b><b style="color:#ef4444;">${yaoshatTxt}</b>。严禁开大门、安灶放水。
-                            <div style="margin-top:3px;"><span class="item-tag item-tag-danger">化解：真品六帝钱 / 黑曜石八卦阵</span></div>
+                            <div style="margin-top:3px;"><span class="item-tag item-tag-danger">化解：六帝钱 / 八卦阵</span></div>
                         </div>
                     </div>
                 </div>
