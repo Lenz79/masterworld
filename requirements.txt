@@ -1,2 +1,3 @@
 flask
 lunar-python
+supabase
