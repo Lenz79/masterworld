@@ -738,15 +738,40 @@
             `;
         }).join('');
 
-        // 🌟 强力扩充：深度重构流年、流月与大限的批语，确保详尽、长篇、干货拉满
+        // 🌟 核心修复：为不同维度定制差异化的玄学专业深批扩充文本，绝不千篇一律
+        const categoryExtenders = {
+            career: {
+                text: " 职场星曜磁场感应明显，在工作推进中容易面临新任务的交接或权责重组。此时应注重团队协作与向上管理，妥善处理好与上司及核心同事的关系，遇事多沟通以避免误解。",
+                tips: "稳字当头，注意文件合规，避免因沟通不畅导致项目延误。"
+            },
+            wealth: {
+                text: " 财星气场波动，正财收益虽稳但偏财投资风险增加。资金周转需精打细算，面对诱惑性的高回报项目应保持清醒，切忌盲目跟风借贷或盲目扩张。",
+                tips: "严禁高风险投机，开源节流，妥善管理现金流。"
+            },
+            health: {
+                text: " 岁运五行交战，身体易感疲惫或因劳累引发旧疾。日常作息需规律有度，饮食宜清淡温和，注重脾胃消化及肩颈脊椎的日常放松。",
+                tips: "保证规律作息，劳逸结合，适度进行有氧舒缓运动。"
+            },
+            marriage: {
+                text: " 情感关系面临外界琐事或工作压力带来的摩擦考验。夫妻双多包容体谅，遇到分歧时切忌意气用事，多一些温和的倾听与深度交流。",
+                tips: "严格执行冷静10分钟沟通法，多制造温馨陪伴。"
+            },
+            social: {
+                text: " 人际交往圈子面临新旧交替，容易结识新朋友但也易遭小人暗中嫉妒。在社交场合言行宜谨言慎行，保持合理的边界感。",
+                tips: "保持边界感，交友不宜过深，防范口舌是非。"
+            },
+            accident: {
+                text: " 出行或户外活动时安全意识需加倍提升。尤其在驾车、远行或前往陌生环境时，当遵守交通规范，避开复杂的风险地带。",
+                tips: "遵守交通规则，恶劣天气尽量减少远行。"
+            }
+        };
+
         globalDayunList = record.dayun_list.map(dy => {
             if (dy.dayun_analysis) {
                 Object.keys(dy.dayun_analysis).forEach(k => {
                     let item = dy.dayun_analysis[k];
                     if (typeof item === 'string') {
-                        dy.dayun_analysis[k] = { text: item + " 在此大运期间，天干地支五行气场与命局形成深度交互，建议因势利导，注重长远规划，把握发展机遇，防范潜在风险。", tips: "稳中求进，加强专业能力学习，妥善维护人际关系。" };
-                    } else if (item && item.text && item.text.length < 35) {
-                        item.text += " 此运星曜磁场变化明显，在实际应对中当以稳妥为上，切忌激进冒进，多听取专业人士建议。";
+                        dy.dayun_analysis[k] = { text: item + " 在此大运期间，天干地支气场对命主命运轨迹产生深度赋能，宜因势利导，把握机遇。", tips: "稳中求进，加强专业沉淀。" };
                     }
                 });
             }
@@ -755,18 +780,20 @@
                     if (ln.analysis) {
                         ['career', 'wealth', 'health', 'marriage', 'social', 'accident'].forEach(lk => {
                             let sub = ln.analysis[lk];
+                            const extender = categoryExtenders[lk] || { text: " 流年气场交替，宜顺应天时，稳妥行事。", tips: "未雨绸缪，审时度势。" };
                             if (sub) {
                                 if (typeof sub === 'string') {
-                                    ln.analysis[lk] = { text: sub + ` 在 ${ln.year} 这一年中，流年干支气场对该领域产生深远影响。命主需顺应天时，注意细节把控，尤其在面对选择时保持理性与冷静。`, tips: `建议在 ${ln.year} 年内注重日常积累，未雨绸缪，规避不必要的消耗与摩擦。` };
-                                } else if (sub.text && sub.text.length < 35) {
-                                    sub.text += ` 该年度受流年运势牵引，变化较为丰富。应把握机遇，积极调整策略，确立阶段性目标。`;
+                                    ln.analysis[lk] = { text: sub + extender.text, tips: extender.tips };
+                                } else if (sub.text && !sub.text.includes("职场") && !sub.text.includes("财星") && !sub.text.includes("岁运") && !sub.text.includes("情感") && !sub.text.includes("人际") && !sub.text.includes("出行")) {
+                                    sub.text += extender.text;
+                                    if(!sub.tips) sub.tips = extender.tips;
                                 }
                             }
                         });
                         if (ln.analysis.liuyue) {
                             ln.analysis.liuyue = ln.analysis.liuyue.map(m => ({
                                 ...m,
-                                summary: m.summary + ` 本月气场转换，适合审时度势，处理好各项事务细节，避免急躁冲动。`
+                                summary: m.summary + ` 本月气场转换，处理事务宜循序渐进，防范细节疏漏。`
                             }));
                         }
                     }
