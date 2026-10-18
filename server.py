@@ -103,7 +103,6 @@ def calc_ming_ge(day_gan, month_star, month_zhi):
         return "羊刃格" if month_zhi == yangren_map.get(day_gan) else "建禄格"
     return f"{month_star}格"
 
-# 🛠️ 新增：动态精准计算“用、喜、闲、仇、忌”标准算法
 def calc_yong_xi(day_gan_elem, is_strong):
     sheng_map = {"木": "水", "火": "木", "土": "火", "金": "土", "水": "金"}
     ke_map = {"木": "金", "火": "水", "土": "木", "金": "火", "水": "土"}
@@ -124,9 +123,8 @@ def calc_yong_xi(day_gan_elem, is_strong):
         chou = elements[(idx + 3) % 5]
         ji = ke_map[day_gan_elem]
         
-    return f"用:{yong} | 喜:{xi} | 闲:{xian} | 仇:{chou} | 忌:{ji}"
+    return {"yong": yong, "xi": xi, "xian": xian, "chou": chou, "ji": ji, "str_repr": f"用:{yong} | 喜:{xi} | 闲:{xian} | 仇:{chou} | 忌:{ji}"}
 
-# 🛠️ 新增：动态计算月令“旺、相、死、囚、休”
 def calc_wang_xiang(month_zhi):
     zhi_elem = ZHI_ELEMENTS.get(month_zhi, "木")
     elements = ["木", "火", "土", "金", "水"]
@@ -181,15 +179,19 @@ def get_kongwang(gan, zhi):
     diff = (z_idx - g_idx) % 12
     return {0: "戌亥", 10: "申酉", 8: "午未", 6: "辰巳", 4: "寅卯", 2: "子丑"}.get(diff, "辰巳")
 
+# 🛠️ 核心修改：让全局分析严格区分【用神】与【喜神】独立论断
 def generate_dynamic_global_analysis(day_gan, gender, is_strong, day_zhi, birth_year_zhi, month_star, elem_scores):
     day_gan_elem = GAN_ELEMENTS.get(day_gan, "木")
-    sheng_map = {"木":["水","木"], "火":["木","火"], "土":["火","土"], "金":["土","金"], "水":["金","水"]}
-    ke_map = {"木":["火","土","金"], "火":["土","金","水"], "土":["金","水","木"], "金":["水","木","火"], "水":["木","火","土"]}
-    xi_elems = sheng_map.get(day_gan_elem, ["木"]) if not is_strong else ke_map.get(day_gan_elem, ["火"])
-    xi_primary = xi_elems[0]
-    xi_info = ELEMENT_DB.get(xi_primary, ELEMENT_DB["木"])
-    ji_elem = "金" if xi_primary == "木" else ("水" if xi_primary == "火" else ("木" if xi_primary == "土" else ("火" if xi_primary == "金" else "土")))
+    yx_obj = calc_yong_xi(day_gan_elem, is_strong)
+    yong_elem = yx_obj["yong"] # 用神
+    xi_elem = yx_obj["xi"]     # 喜神
+    
+    yong_info = ELEMENT_DB.get(yong_elem, ELEMENT_DB["木"])
+    xi_info = ELEMENT_DB.get(xi_elem, ELEMENT_DB["火"])
+    
+    ji_elem = yx_obj["ji"]
     ji_info = ELEMENT_DB.get(ji_elem, ELEMENT_DB["金"])
+    
     sorted_elems = sorted(elem_scores.items(), key=lambda x: x[1])
     weakest_elem = sorted_elems[0][0]
     weak_health_info = ELEMENT_DB.get(weakest_elem, ELEMENT_DB["土"])["health_tips"]
@@ -200,22 +202,22 @@ def generate_dynamic_global_analysis(day_gan, gender, is_strong, day_zhi, birth_
     return {
         "marriage": {
             "title": "💍 1. 婚姻感情",
-            "text": f"【夫妻婚姻宫 · 基于日支【{day_zhi}】与日元【{day_gan}{day_gan_elem}】专属解构】\n\n一、 伴侣外貌与体型特质：\n命主夫妻宫地支临【{day_zhi}】。{spouse_info['sp_type']}\n\n二、 婚姻情感气场与沟通机制：\n{spouse_info['relation']}夫妻相处如水相融，相互尊重对方的个人隐私与独立思考空间。偶有小争执时，宜实行“冷静沟通”，避免情绪化言语对情感产生内耗。\n\n三、 寻缘与桃花大吉方位：\n• 最佳桃花姻缘方位：未婚寻缘建议向常住地的{xi_info['directions']}拓展朋友圈，最易遇上价值观匹配的正缘伴侣。\n• 忌讳寻缘方位：严禁向{ji_info['directions']}盲目社交，容易遇到烂桃花或情感波折。",
-            "tips": "💡 【婚姻实操调理与避坑建议】：\n• 严格执行“冷静10分钟”沟通法则，切忌冷战与说伤人狠话。\n• 主卧床头宜朝向喜用方位（{xi_info['directions']}），卧室保持整洁明亮以催旺家运。"
+            "text": f"【夫妻婚姻宫 · 基于日支【{day_zhi}】与日元【{day_gan}{day_gan_elem}】专属解构】\n\n一、 伴侣外貌与体型特质：\n命主夫妻宫地支临【{day_zhi}】。{spouse_info['sp_type']}\n\n二、 婚姻情感气场与沟通机制：\n{spouse_info['relation']}夫妻相处如水相融，相互尊重对方的个人隐私与独立思考空间。偶有小争执时，宜实行“冷静沟通”，避免情绪化言语对情感产生内耗。\n\n三、 寻缘与桃花大吉方位（严格区分用神与喜神）：\n• 核心用神【{yong_elem}】方位：建议向常住地的{yong_info['directions']}拓展核心生活圈，最易遇上能互相扶持、价值观契合的正缘伴侣。\n• 喜神【{xi_elem}】催化方位：亦可向{xi_info['directions']}活动，能显著提升个人情感魅力与社交运势。\n• 忌讳寻缘方位：严禁向{ji_info['directions']}盲目社交，容易遇到烂桃花或情感波折。",
+            "tips": "💡 【婚姻实操调理与避坑建议】：\n• 严格执行“冷静10分钟”沟通法则，切忌冷战与说伤人狠话。\n• 主卧床头宜朝向用神喜用方位（{yong_info['directions']}），卧室保持整洁明亮以催旺家运。"
         },
         "career": {
             "title": "💼 2. 职业分析",
-            "text": f"【职业与事业发展 · 基于月令【{month_star}】与喜用【{xi_primary}】专属解构】\n\n一、 命格局与职场定位：\n命局表现为{strength_desc}。月令核心主星临【{month_star}】，赋予命主出色的职业敏锐度与执行力，既能深入业务细节，又能把握大局方向。\n\n二、 五行行业精准匹配：\n最利于从事五行属【{xi_primary}】性质的行业领域：\n👉 {xi_info['industries']}。\n在上述领域中，命主的潜能更容易被发掘并获得上司与贵人的青睐提携。\n\n三、 事业吉凶方位分布：\n• 事业大吉发展方位：拓展业务、寻找新跳槽机会或设立分公司首选{xi_info['directions']}。\n• 不利事业方位：{ji_info['directions']}气场受阻，在此方位求职或签协议需多加谨慎。",
-            "tips": "💡 【职场实操调理与避坑建议】：\n• 专注于核心竞争力的突破，切忌盲目频繁跨行。\n• 办公桌青龙方（左手边）保持高于白虎方（右手边），可摆放喜用五行风水植物以催旺贵人。"
+            "text": f"【职业与事业发展 · 基于月令【{month_star}】与用神【{yong_elem}】/喜神【{xi_elem}】独立解构】\n\n一、 命格局与职场定位：\n命局表现为{strength_desc}。月令核心主星临【{month_star}】，赋予命主出色的职业敏锐度与执行力。\n\n二、 用神与喜神行业精准匹配（分项论断）：\n👉 **核心用神【{yong_elem}】主赛道**（筑牢根基、稳健立足）：\n适宜深耕属【{yong_elem}】性质的行业：{yong_info['industries']}。此领域是命主立足社会的根本大后方。\n👉 **喜神【{xi_elem}】发光发热赛道**（突破创新、名气变现）：\n适宜结合属【{xi_elem}】性质的行业：{xi_info['industries']}。在此领域容易获得爆发性成就与名气。\n\n三、 事业吉凶方位分布：\n• 事业大吉发展方位：首选{yong_info['directions']}（用神方）与{xi_info['directions']}（喜神方）。\n• 不利事业方位：{ji_info['directions']}气场受阻，在此方位求职或签协议需多加谨慎。",
+            "tips": "💡 【职场实操调理与避坑建议】：\n• 根基用用神行业稳盘，通过喜神行业寻求突破。切忌盲目频繁跨行。\n• 办公桌青龙方（左手边）保持高于白虎方（右手边），可摆放喜用五行风水植物以催旺贵人。"
         },
         "wealth": {
             "title": "💰 3. 财运 / 投资分析",
-            "text": f"【财富与投资理财 · 基于日元【{day_gan}】与财库格局专属解构】\n\n一、 当老板运势与商业格局评估：\n月令临【{month_star}】，自身具备深厚的商业思考力与财商逻辑。{( '日元身强财旺，具备独立掌舵当老板、合伙开公司或进行大格局投资创业的强烈气场。' if is_strong else '日元身弱，求财宜稳扎稳打，适合合伙搭台、借力大平台或靠专业技术稳健增值。' )}\n\n二、 正财与偏财爆发力分析：\n正财运势极其稳固，薪资与正业收益呈阶段性递增；偏财方面需适度克制投机心理，长线价值投资比短期高风险炒作更有保障。\n\n三、 求财吉凶方位：\n• 求财大吉方位：{xi_info['directions']}是财源汇聚之地。\n• 破财防范方位：{ji_info['directions']}易引发资金链紧张或无谓耗损。",
+            "text": f"【财富与投资理财 · 基于日元【{day_gan}】与用喜神专属解构】\n\n一、 当老板运势与商业格局评估：\n月令临【{month_star}】，自身具备深厚的商业思考力与财商逻辑。{( '日元身强财旺，具备独立掌舵当老板、合伙开公司或进行大格局投资创业的强烈气场。' if is_strong else '日元身弱，求财宜稳扎稳打，适合合伙搭台、借力大平台或靠专业技术稳健增值。' )}\n\n二、 用神与喜神财富爆发力分析：\n• **用神【{yong_elem}】代表正财与稳健资产**：主实体经营、长期长线投资与储蓄积累，风险极低。\n• **喜神【{xi_elem}】代表偏财与商业机遇**：主投资眼光、商业灵感与多元化变现，需注意防范盲目激进。\n\n三、 求财吉凶方位：\n• 求财大吉方位：{yong_info['directions']}（用神方）与{xi_info['directions']}（喜神方）是财源汇聚之地。\n• 破财防范方位：{ji_info['directions']}易引发资金链紧张或无谓耗损。",
             "tips": "💡 【财运实操理财与避坑建议】：\n• 严禁参与民间高息借贷、高杠杆股票投机或不合规的盲目项目投资。\n• 建立家庭专项储备基金，时刻留足 6 个月以上的流动现金流。"
         },
         "health": {
             "title": "🏥 4. 健康分析",
-            "text": f"【健康养生与体质 · 基于最弱五行【{weakest_elem}】专属解构】\n\n一、 先天五行体质密码：\n八字五行中【{weakest_elem}】元素相对薄弱，先天体质需重点关照相关脏腑健康：\n👉 {weak_health_info}。\n\n二、 养生机制与作息建议：\n平时易因工作压力大或思虑过度导致睡眠质量下降或气血不畅。宜顺应四季作息，早睡早起，避免长期熬夜对免疫系统产生损伤。\n\n三、 饮食与调理要点：\n饮食宜清淡温润，少食辛辣生冷，注重脾胃养护与水分补充。",
+            "text": f"【健康养生与体质 · 基于最弱五行【{weakest_elem}】与用喜神调理专属解构】\n\n一、 先天五行体质密码：\n八字五行中【{weakest_elem}】元素相对薄弱，先天体质需重点关照相关脏腑健康：\n👉 {weak_health_info}。\n\n二、 用神与喜神养生机制：\n• 借助用神【{yong_elem}】气场（如生活在{yong_info['directions']}或调理相关作息）来固本培元，增强免疫力。\n• 借助喜神【{xi_elem}】气场（如保持积极乐观心态、接触{xi_info['directions']}阳光活力）来畅通气血。\n\n三、 饮食与调理要点：\n饮食宜清淡温润，少食辛辣生冷，注重脾胃养护与水分补充。",
             "tips": "💡 【健康实操调理与避坑建议】：\n• 坚持每晚热水泡脚 15~20 分钟，加入艾叶或生姜以促进血液循环。\n• 保持每周 3 次以上的有氧运动（如快走、慢跑或游泳），排解身体毒素与精神压力。"
         },
         "parents": {
@@ -245,12 +247,12 @@ def generate_dynamic_global_analysis(day_gan, gender, is_strong, day_zhi, birth_
         },
         "property": {
             "title": "🏡 10. 田宅不动产分析",
-            "text": f"【田宅不动产置业 · 基于喜用五行【{xi_primary}】专属解构】\n\n一、 置业运势与资产配置：\n命局田宅宫安定，置业安家运势顺遂。在财富有所积累之年份，适度配置优质不动产是资产保值增值的绝佳选择。\n\n二、 买房大吉朝向与采光方位：\n• 置业大吉方位朝向：首选房屋大门或主要阳台采光朝向{xi_info['directions']}的户型，最聚气运。\n• 忌讳房屋朝向：不宜购买大门或阳台朝向{ji_info['directions']}的房屋。\n\n三、 择房风水要点：\n房屋周边宜环境清幽、采光通风良好，避开高压电塔、路冲煞或杂乱煞气之地。",
+            "text": f"【田宅不动产置业 · 基于用神【{yong_elem}】与喜神【{xi_elem}】方位专属解构】\n\n一、 置业运势与资产配置：\n命局田宅宫安定，置业安家运势顺遂。在财富有所积累之年份，适度配置优质不动产是资产保值增值的绝佳选择。\n\n二、 买房大吉朝向与采光方位（分项论断）：\n• **用神【{yong_elem}】置业朝向**：首选房屋大门或主要阳台采光朝向{yong_info['directions']}的户型，主家运稳固、安居乐业。\n• **喜神【{xi_elem}】置业朝向**：亦可选择朝向{xi_info['directions']}的户型，主采光通透、人气兴旺、社交广阔。\n• 忌讳房屋朝向：不宜购买大门或阳台朝向{ji_info['directions']}的房屋。\n\n三、 择房风水要点：\n房屋周边宜环境清幽、采光通风良好，避开高压电塔、路冲煞或杂乱煞气之地。",
             "tips": "💡 【置业实操避坑建议】：\n• 购房前务必做好未来 3~5 年的现金流压力测试，切忌过度高杠杆负债。\n• 选房注重房企品质与地段升值潜力。"
         },
         "inner_world": {
             "title": "🧘 11. 内心世界分析",
-            "text": f"【内心世界与精神修炼 · 基于日元【{day_gan}{day_gan_elem}】与华盖灵性专属解构】\n\n一、 精神世界与哲学悟性深度剖析：\n命主内心世界极其丰富细腻，表面上或许随和务实，但内心里始终保有对生命本质、哲学玄学或艺术美学的深层思考。具天然的悟性与直觉灵感，常能在独处中洞察人性与世事规律。\n\n二、 情绪解压与精神修复机制：\n当面对外界高强度的工作竞争或复杂的家庭琐事时，命主的精神气场容易积累无形的内耗与焦虑感。此时，盲目的热闹聚会反而会加速精神疲惫，唯有“静心独处”才是最好的精神疗愈。\n\n三、 心灵修行与活在当下的境界：\n宜通过冥想禅修、经典阅读、书法茶道或走进大自然户外运动（如登山、森林徒步）来清空负面能量。学会“活在当下，知足常乐”，顺应自然规律，便能修得宠辱不惊的强大内心情感。",
+            "text": f"【内心世界与精神修炼 · 基于日元【{day_gan}{day_gan_elem}】与用喜神专属解构】\n\n一、 精神世界与哲学悟性深度剖析：\n命主内心世界极其丰富细腻，表面上或许随和务实，但内心里始终保有对生命本质、哲学玄学或艺术美学的深层思考。\n\n二、 情绪解压与精神修复机制：\n• 借助用神【{yong_elem}】的能量（如静心阅读、书画、大自然静坐）来沉淀心绪。\n• 借助喜神【{xi_elem}】的能量（如运动发汗、与挚友聚会、接触阳光）来释放压力。\n\n三、 心灵修行与活在当下的境界：\n宜通过冥想禅修、经典阅读或走进大自然户外运动来清空负面能量。学会“活在当下，知足常乐”，顺应自然规律，便能修得宠辱不惊的强大内心情感。",
             "tips": "💡 【心灵内修实操调理指引】：\n• 每天给自己预留 20 分钟绝对安静的“独处冥想时间”，关闭手机，清空杂念。\n• 定期清理居住与办公环境，定期丢弃无用之物（断舍离），环境清爽则心灵自然澄明。"
         }
     }
@@ -302,7 +304,6 @@ class BaziAPIHandler(SimpleHTTPRequestHandler):
                 virtual_age = current_year - year + 1
                 lunar_str = f"农历 {lunar.getYearInGanZhi()}年 {lunar.getMonthInChinese()}月{lunar.getDayInChinese()} {eight_char.getTimeZhi()}时"
 
-                # 🛡️ 优化：规范化公历显示时间（格式如 17:30）
                 time_formatted = f"{h_int:02d}:{m_int:02d}"
 
                 def build_cangan(zhi_char):
@@ -325,7 +326,6 @@ class BaziAPIHandler(SimpleHTTPRequestHandler):
                 month_star = month_p["shishen"]
                 calculated_ming_ge = calc_ming_ge(day_gan, month_star, month_zhi)
 
-                # ⚙️ 计算身强身弱，以便动态配合用喜神
                 elem_scores = {"金": 0, "木": 0, "水": 0, "火": 0, "土": 0}
                 for g in [birth_year_gan, month_gan, day_gan, time_gan]: elem_scores[GAN_ELEMENTS.get(g, "土")] += 100
                 for idx, z in enumerate([birth_year_zhi, month_zhi, day_zhi, time_zhi]): elem_scores[ZHI_ELEMENTS.get(z, "土")] += (300 if idx == 1 else 100)
@@ -344,8 +344,7 @@ class BaziAPIHandler(SimpleHTTPRequestHandler):
                 is_strong = plus_score >= (total_score * 0.42)
                 strength_text = "🔥 【身强】" if is_strong else "💧 【身弱】"
 
-                # 🛠️ 接入动态计算好的用喜闲仇忌与旺相死囚休
-                dynamic_yong_xi = calc_yong_xi(day_gan_elem, is_strong)
+                yx_obj = calc_yong_xi(day_gan_elem, is_strong)
                 dynamic_wang_xiang = calc_wang_xiang(month_zhi)
 
                 extra_p = {
@@ -355,8 +354,8 @@ class BaziAPIHandler(SimpleHTTPRequestHandler):
                     "ming_gong": {"gan": mg_gan, "zhi": mg_zhi},
                     "day_kong": get_kongwang(day_gan, day_zhi),
                     "year_kong": get_kongwang(birth_year_gan, birth_year_zhi),
-                    "yong_xi": dynamic_yong_xi,         # 👈 返回用喜闲仇忌
-                    "wang_xiang": dynamic_wang_xiang     # 👈 返回旺相死囚休
+                    "yong_xi": yx_obj["str_repr"],
+                    "wang_xiang": dynamic_wang_xiang
                 }
 
                 chart = {"year_pillar": year_p, "month_pillar": month_p, "day_pillar": day_p, "hour_pillar": hour_p, "extra": extra_p}
@@ -442,7 +441,6 @@ class BaziAPIHandler(SimpleHTTPRequestHandler):
                 detailed_report = {"personality": {"summary": pers_summary, "strengths": [f"主星【{month_star}】：{ms_info.get('pros','')}"], "weaknesses": [f"主星【{month_star}】：{ms_info.get('cons','')}"], "global_analysis": global_analysis_11}}
                 ai_report = f"【大师级真实八字分析报告 - {name}】"
 
-                # 🛡️ 在这里将时间精确展示为 年-月-日 时:分（两位数分钟）
                 solar_display_str = f"{year}-{month}-{day} {time_formatted}"
 
                 record = {"user_name": name, "gender": gender, "birth_year": year, "birth_month": month, "birth_day": day, "birth_hour": solar_display_str, "virtual_age": virtual_age, "lunar_date": lunar_str, "wang_du": wang_du, "ruo_du": ruo_du, "bazi_chart": chart, "five_elements": five_elements, "dayun_list": dayun_schedule, "detailed_report": detailed_report, "ai_report": ai_report}
