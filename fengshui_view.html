@@ -39,11 +39,11 @@
         .btn-action { flex: 1; background: #f59e0b; color: #0f172a; border: none; padding: 12px; font-size: 0.92rem; font-weight: bold; border-radius: 8px; cursor: pointer; text-align: center; }
         .btn-secondary { background: #0284c7; color: #fff; padding: 6px 10px; font-size: 0.8rem; }
 
-        /* 🌟 核心：尺寸精准控制在 750px 完美大视觉，画布本身透明度设为 1（让字百分百清晰，由 JS 控制底圈透明度） */
+        /* 🌟 核心画布区：支持触控拖拽与多点触控 */
         .workspace { display: flex; flex-direction: column; align-items: center; margin-bottom: 10px; }
-        .canvas-container { background: #ffffff; border: 2px solid #cbd5e1; border-radius: 12px; width: 100%; max-width: 750px; aspect-ratio: 1 / 1; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(0,0,0,0.35); }
+        .canvas-container { background: #ffffff; border: 2px solid #cbd5e1; border-radius: 12px; width: 100%; max-width: 750px; aspect-ratio: 1 / 1; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(0,0,0,0.35); touch-action: none; }
 
-        #floorplan-img { width: 100%; height: 100%; object-fit: contain; position: absolute; top: 0; left: 0; cursor: grab; user-select: none; z-index: 1; display: none; }
+        #floorplan-img { width: 100%; height: 100%; object-fit: contain; position: absolute; top: 0; left: 0; cursor: grab; user-select: none; z-index: 1; display: none; transform-origin: center center; }
         #luopan-canvas { width: 100% !important; height: 100% !important; position: absolute; top: 0; left: 0; z-index: 10; pointer-events: none; opacity: 1 !important; }
 
         .measure-info { position: absolute; top: 10px; right: 10px; background: rgba(15, 23, 42, 0.9); border: 1px solid #38bdf8; padding: 5px 10px; border-radius: 5px; font-size: 0.72rem; color: #38bdf8; z-index: 30; display: none; font-weight: bold; }
@@ -53,10 +53,10 @@
         .school-report-title { font-size: 0.92rem; font-weight: bold; color: #f59e0b; border-bottom: 1px dashed #334155; padding-bottom: 6px; margin-bottom: 10px; }
         .report-block { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 10px; margin-bottom: 10px; }
         .report-block-title { font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; border-bottom: 1px solid #1e293b; padding-bottom: 4px; }
-
+        
         .analysis-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
         @media (min-width: 640px) { .analysis-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); } }
-
+        
         .palace-card { background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 10px; border-left: 3px solid #f59e0b; }
         .palace-title { font-size: 0.82rem; font-weight: bold; color: #f59e0b; margin-bottom: 4px; display: flex; justify-content: space-between; }
         .palace-content { font-size: 0.78rem; color: #cbd5e1; line-height: 1.4; }
@@ -142,8 +142,8 @@
             </div>
 
             <div class="control-group">
-                <label>6. 罗盘透明度 (<span id="opacity-val">85</span>%)</label>
-                <input type="range" id="luopan-opacity" min="10" max="100" value="85">
+                <label>6. 罗盘透明度 (<span id="opacity-val">20</span>%)</label>
+                <input type="range" id="luopan-opacity" min="0" max="100" value="20">
             </div>
 
             <div class="control-group">
@@ -151,13 +151,13 @@
             </div>
 
             <div class="btn-group-row">
-                <button class="btn-action btn-secondary" id="btn-reset-view">🔄 复位度数</button>
+                <button class="btn-action btn-secondary" id="btn-reset-view">🔄 复位视图</button>
                 <button class="btn-action btn-secondary" id="btn-export-pdf">📄 导出报告</button>
             </div>
         </div>
     </details>
 
-    <!-- 4. 罗盘与户型图重叠画布区 (750px 完美大视觉) -->
+    <!-- 4. 罗盘与户型图重叠画布区 -->
     <div class="workspace">
         <div class="canvas-container" id="canvas-container">
             <div class="measure-info" id="measure-info">📏 测量中</div>
@@ -188,16 +188,16 @@
 
 <script>
     let currentDegree = 0;
-    let currentOpacity = 0.85; // 默认罗盘底圈透明度
+    let currentOpacity = 0.20; // 🌟 默认透明度设为 20%
     let isMeasuring = false;
     let isMouseDown = false;
     let measureStart = null;
     let measureEnd = null;
 
     const mountains = [
-        "子", "癸", "丑", "艮", "寅", "甲",
-        "卯", "乙", "辰", "巽", "巳", "丙",
-        "午", "丁", "未", "坤", "申", "庚",
+        "子", "癸", "丑", "艮", "寅", "甲", 
+        "卯", "乙", "辰", "巽", "巳", "丙", 
+        "午", "丁", "未", "坤", "申", "庚", 
         "酉", "辛", "戌", "乾", "亥", "壬"
     ];
 
@@ -220,6 +220,11 @@
                 document.getElementById('user-info-tag').innerText = `${p.name}`;
             } catch(e) {}
         }
+        
+        // 初始化滑块默认值
+        document.getElementById('luopan-opacity').value = 20;
+        document.getElementById('opacity-val').innerText = 20;
+
         initEventListeners();
         initCanvasInteraction();
         renderCanvasAndReport();
@@ -239,7 +244,6 @@
         document.getElementById('xuankong-yun').addEventListener('change', renderCanvasAndReport);
         document.getElementById('ziwei-year').addEventListener('input', renderCanvasAndReport);
 
-        // 🌟 核心：监听透明度滑块，只改变底盘填充颜色的 alpha 值，文字保持百分百清晰不透明
         document.getElementById('luopan-opacity').addEventListener('input', (e) => {
             currentOpacity = e.target.value / 100;
             document.getElementById('opacity-val').innerText = e.target.value;
@@ -252,7 +256,8 @@
         document.getElementById('btn-reset-view').addEventListener('click', () => {
             syncDegree(0);
             const img = document.getElementById('floorplan-img');
-            img.style.transform = 'translate(0px, 0px)';
+            img.style.transform = 'translate(0px, 0px) scale(1)';
+            imgPosX = 0; imgPosY = 0; imgScale = 1;
             measureStart = null;
             measureEnd = null;
             renderCanvasAndReport();
@@ -276,7 +281,7 @@
                 btn.style.background = '#0284c7';
                 btn.innerText = '📏 开启拉线测量工具';
                 infoBox.style.display = 'none';
-                measureStart = null;
+                measureStart = null; 
                 measureEnd = null;
                 renderCanvasAndReport();
             }
@@ -359,7 +364,7 @@
 
     function getYearZiBai(year) {
         let y = parseInt(year);
-        let base2026 = 4;
+        let base2026 = 4; 
         let diff = y - 2026;
         let star = ((base2026 - 1 - (diff % 9) + 900) % 9) + 1;
         let flyingMap = calculateLoShuFlying(star);
@@ -402,7 +407,7 @@
         const ctx = canvas.getContext('2d');
         const cx = canvas.width / 2;
         const cy = canvas.height / 2;
-        const radius = 310;
+        const radius = 310; 
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -424,9 +429,9 @@
         ctx.rotate((-deg * Math.PI) / 180);
 
         const innerRadius = radius * 0.78;
-        const innerRingRadius = innerRadius * 0.65;
+        const innerRingRadius = innerRadius * 0.65; 
 
-        // 🌟 核心：仅圆盘底圈填充使用动态半透明 rgba，让背景透出户型图，而后续绘制的文字和线条保持纯色100%清晰
+        // 🌟 底圈半透明填充 (20% 默认透明度)
         ctx.beginPath();
         ctx.arc(0, 0, radius, 0, 2 * Math.PI);
         ctx.fillStyle = `rgba(255, 255, 255, ${currentOpacity})`;
@@ -442,7 +447,7 @@
         let lmCfg = longmenData[selectedGuaJu];
 
         mountains.forEach((m, index) => {
-            const startAngle = index * 15 - 7.5;
+            const startAngle = index * 15 - 7.5; 
             const lineAngle = (startAngle - 90) * (Math.PI / 180);
             const midAngle = (index * 15 - 90) * (Math.PI / 180);
 
@@ -556,12 +561,12 @@
         ctx.strokeStyle = '#000000';
         ctx.stroke();
 
-        ctx.restore();
+        ctx.restore(); 
 
         ctx.save();
         ctx.strokeStyle = '#000000';
         ctx.lineWidth = 1;
-        ctx.setLineDash([3, 3]);
+        ctx.setLineDash([3, 3]); 
         [45, 135, 225, 315].forEach(ang => {
             const rad = (ang - 90) * (Math.PI / 180);
             ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(innerRadius * Math.cos(rad), innerRadius * Math.sin(rad)); ctx.stroke();
@@ -580,10 +585,10 @@
         ctx.fillStyle = '#ef4444'; ctx.fill();
         ctx.strokeStyle = '#000000'; ctx.lineWidth = 1; ctx.stroke();
 
-        ctx.restore();
+        ctx.restore(); 
 
         ctx.save();
-        ctx.translate(cx, cy - radius - 18);
+        ctx.translate(cx, cy - radius - 18); 
         ctx.fillStyle = '#dc2626';
         ctx.font = 'bold 12px sans-serif';
         ctx.textAlign = 'center';
@@ -616,19 +621,25 @@
                 img.src = e.target.result;
                 img.style.display = 'block';
                 document.getElementById('canvas-placeholder').style.display = 'none';
-                img.style.transform = 'translate(0px, 0px)';
+                img.style.transform = 'translate(0px, 0px) scale(1)';
+                imgPosX = 0; imgPosY = 0; imgScale = 1;
                 renderCanvasAndReport();
             }
             reader.readAsDataURL(file);
         }
     }
 
+    // 🌟 核心：完美支持手机触控拖动与多点缩放的交互逻辑
+    let imgPosX = 0, imgPosY = 0, imgScale = 1;
+    let isImgDragging = false, startX = 0, startY = 0;
+    let initialTouchDist = 0, initialScale = 1;
+
     function initCanvasInteraction() {
         const canvas = document.getElementById('luopan-canvas');
         const img = document.getElementById('floorplan-img');
         const container = document.getElementById('canvas-container');
-        let isImgDragging = false, startX, startY, posX = 0, posY = 0;
 
+        // 鼠标事件 (PC端)
         container.addEventListener('mousedown', (e) => {
             if (isMeasuring) {
                 isMouseDown = true;
@@ -636,10 +647,10 @@
                 measureStart = { x: e.clientX - rect.left, y: e.clientY - rect.top };
                 measureEnd = { x: e.clientX - rect.left, y: e.clientY - rect.top };
                 renderCanvasAndReport();
-            } else if (e.target === img) {
+            } else if (e.target === img || e.target === container || e.target === canvas) {
                 isImgDragging = true;
-                startX = e.clientX - posX;
-                startY = e.clientY - posY;
+                startX = e.clientX - imgPosX;
+                startY = e.clientY - imgPosY;
             }
         });
 
@@ -649,15 +660,70 @@
                 measureEnd = { x: e.clientX - rect.left, y: e.clientY - rect.top };
                 renderCanvasAndReport();
             } else if (isImgDragging) {
-                posX = e.clientX - startX;
-                posY = e.clientY - startY;
-                img.style.transform = `translate(${posX}px, ${posY}px)`;
+                imgPosX = e.clientX - startX;
+                imgPosY = e.clientY - startY;
+                img.style.transform = `translate(${imgPosX}px, ${imgPosY}px) scale(${imgScale})`;
             }
         });
 
         window.addEventListener('mouseup', () => {
             isMouseDown = false;
             isImgDragging = false;
+        });
+
+        // 🌟 触控事件 (手机端单指拖动、双指捏合缩放)
+        container.addEventListener('touchstart', (e) => {
+            if (isMeasuring) {
+                isMouseDown = true;
+                const rect = canvas.getBoundingClientRect();
+                const touch = e.touches[0];
+                measureStart = { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+                measureEnd = { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+                renderCanvasAndReport();
+            } else {
+                if (e.touches.length === 1) {
+                    isImgDragging = true;
+                    startX = e.touches[0].clientX - imgPosX;
+                    startY = e.touches[0].clientY - imgPosY;
+                } else if (e.touches.length === 2) {
+                    isImgDragging = false;
+                    initialTouchDist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    initialScale = imgScale;
+                }
+            }
+        }, { passive: true });
+
+        container.addEventListener('touchmove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            if (isMeasuring && isMouseDown) {
+                const touch = e.touches[0];
+                measureEnd = { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+                renderCanvasAndReport();
+            } else {
+                if (isImgDragging && e.touches.length === 1) {
+                    imgPosX = e.touches[0].clientX - startX;
+                    imgPosY = e.touches[0].clientY - startY;
+                    img.style.transform = `translate(${imgPosX}px, ${imgPosY}px) scale(${imgScale})`;
+                } else if (e.touches.length === 2) {
+                    let currentDist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    if (initialTouchDist > 0) {
+                        imgScale = Math.min(Math.max(initialScale * (currentDist / initialTouchDist), 0.5), 3.0);
+                        img.style.transform = `translate(${imgPosX}px, ${imgPosY}px) scale(${imgScale})`;
+                    }
+                }
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchend', () => {
+            isMouseDown = false;
+            isImgDragging = false;
+            initialTouchDist = 0;
         });
     }
 
@@ -666,7 +732,7 @@
         const selectedGuaJu = document.getElementById('longmen-ju').value || '坎';
         const yunVal = document.getElementById('xuankong-yun').value || '7';
         const ziweiYearVal = document.getElementById('ziwei-year').value || '2026';
-
+        
         const lmCfg = longmenData[selectedGuaJu];
         const zhaiInfo = getZhaiByDegree(deg);
         const bzMap = bazhaiMap[zhaiInfo.zhaixing];
@@ -695,7 +761,7 @@
             let detail = bazhaiStarDetails[starName];
             let isJi = detail.nature.includes('吉');
             let itemTagClass = isJi ? 'item-tag' : 'item-tag item-tag-danger';
-
+            
             html += `
                 <div class="palace-card" style="border-left-color:${detail.color};">
                     <div class="palace-title">
