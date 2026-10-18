@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>AI 智能玄学 SaaS 平台 - 综合预测导航中心</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #0f172a; color: #e2e8f0; margin: 0; padding: 40px 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .header { text-align: center; margin-bottom: 50px; }
+        .header h1 { color: #f59e0b; font-size: 2.5rem; margin-bottom: 10px; }
+        .header p { color: #94a3b8; font-size: 1.1rem; }
+
+        /* 功能卡片矩阵网格 */
+        .modules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+        
+        .module-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 14px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .module-card:hover {
+            transform: translateY(-5px);
+            border-color: #f59e0b;
+            box-shadow: 0 12px 30px rgba(245, 158, 11, 0.15);
+            background: #233248;
+        }
+
+        .module-icon { font-size: 3rem; margin-bottom: 15px; }
+        .module-title { font-size: 1.3rem; font-weight: bold; color: #f8fafc; margin-bottom: 10px; }
+        .module-desc { font-size: 0.9rem; color: #94a3b8; line-height: 1.5; margin-bottom: 20px; }
+        
+        .module-btn {
+            display: inline-block;
+            background: #334155;
+            color: #38bdf8;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .module-card:hover .module-btn {
+            background: #f59e0b;
+            color: #0f172a;
+        }
+
+        .badge-soon {
+            position: absolute;
+            top: 15px;
+            right: -30px;
+            background: #334155;
+            color: #94a3b8;
+            font-size: 0.75rem;
+            padding: 4px 30px;
+            transform: rotate(45deg);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>🔮 AI 智能玄学 SaaS 平台</h1>
+        <p>集成传统东方命理与西方神秘学的全维度 AI 预测与推演系统</p>
+    </div>
+
+    <div class="modules-grid">
+        <!-- 1. 八字 (已连通) -->
+        <div class="module-card" onclick="location.href='bazi_view.html'">
+            <div class="module-icon">📜</div>
+            <div class="module-title">八字推演 (四柱命理)</div>
+            <div class="module-desc">传统高阶 Master Grid 排盘、日主旺度分析、九步大运及十年流年精细化推演。</div>
+            <div class="module-btn">进入系统 ➔</div>
+        </div>
+
+        <!-- 2. 紫微斗数 -->
+        <div class="module-card" onclick="alert('🚀 紫微斗数排盘模块正在加紧研发中，敬请期待！')">
+            <div class="badge-soon">开发中</div>
+            <div class="module-icon">⭐</div>
+            <div class="module-title">紫微斗数</div>
+            <div class="module-desc">十二宫位全景星盘、三方四正格局剖析、星曜庙旺利陷深度解读。</div>
+            <div class="module-btn">敬请期待</div>
+        </div>
+
+        <!-- 3. 奇门遁甲 -->
+        <div class="module-card" onclick="alert('🚀 奇门遁甲排盘模块正在加紧研发中，敬请期待！')">
+            <div class="badge-soon">开发中</div>
+            <div class="module-icon">☯️</div>
+            <div class="module-title">奇门遁甲</div>
+            <div class="module-desc">时家奇门、排局布盘、九星八门八神与三奇六仪吉凶克应推演。</div>
+            <div class="module-btn">敬请期待</div>
+        </div>
+
+        <!-- 4. 六爻起卦 -->
+        <div class="module-card" onclick="alert('🚀 六爻起卦模块正在加紧研发中，敬请期待！')">
+            <div class="badge-soon">开发中</div>
+            <div class="module-icon">🪙</div>
+            <div class="module-title">六爻起卦</div>
+            <div class="module-desc">铜钱摇卦、纳甲装卦、世应六亲发动与应期精准占断。</div>
+            <div class="module-btn">敬请期待</div>
+        </div>
+
+        <!-- 5. 扑克牌起卦 -->
+        <div class="module-card" onclick="alert('🚀 扑克牌起卦模块正在加紧研发中，敬请期待！')">
+            <div class="badge-soon">开发中</div>
+            <div class="module-icon">🃏</div>
+            <div class="module-title">扑克牌起卦</div>
+            <div class="module-desc">融合数字灵动与西方牌阵密码的快速心灵直觉预测系统。</div>
+            <div class="module-btn">敬请期待</div>
+        </div>
+
+        <!-- 6. 塔罗牌 -->
+        <div class="module-card" onclick="alert('🚀 塔罗牌占卜模块正在加紧研发中，敬请期待！')">
+            <div class="badge-soon">开发中</div>
+            <div class="module-icon">🔮</div>
+            <div class="module-title">塔罗牌占卜</div>
+            <div class="module-desc">圣三角阵、凯尔特十字阵，大阿卡纳与小阿卡纳潜意识深度心理剖析。</div>
+            <div class="module-btn">敬请期待</div>
+        </div>
+
+        <!-- 7. 风水堪舆 -->
+        <div class="module-card" onclick="alert('🚀 风水堪舆模块正在加紧研发中，敬请期待！')">
+            <div class="badge-soon">开发中</div>
+            <div class="module-icon">🏠</div>
+            <div class="module-title">阳宅风水堪舆</div>
+            <div class="module-desc">龙门八局、九星飞泊、方位吉凶化解与住宅能量场布局优化。</div>
+            <div class="module-btn">敬请期待</div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
