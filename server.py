@@ -41,11 +41,11 @@ SHISHEN_DATABASE = {
 }
 
 ELEMENT_DB = {
-    "木": {"directions": "【东方】与【东南方】", "bad_directions": "【西方】与【西北方】", "industries": "文化教育、出版传媒、木材家居、农林园艺、医疗医药、设计策划、绿色环保", "health_tips": "肝胆气血、筋骨关节、神经系统及眼睛视力保养"},
-    "火": {"directions": "【正南方】", "bad_directions": "【正北方】", "industries": "高新科技、人工智能、能源光伏、餐饮娱乐、美妆美容、广告传媒、照明电子", "health_tips": "心脑血管、血液循环、小肠、视力及情绪焦虑防范"},
-    "土": {"directions": "【东北方】与【西南方】（中原之地）", "bad_directions": "【正东方】与【东南方】", "industries": "房地产, 建筑工程, 基础建设, 矿产资源, 仓储物流, 古玩农业, 不动产中介", "health_tips": "脾胃消化系统、皮肤屏障、肌肉劳损及腹部消化调理"},
-    "金": {"directions": "【西方】与【西北方】", "bad_directions": "【正南方】", "industries": "金融证券、机械制造、五金珠宝、汽车交运、军警法务、精密仪器、医疗器械", "health_tips": "呼吸系统、肺部气管、大肠咽喉及皮肤过敏防范"},
-    "水": {"directions": "【正北方】", "bad_directions": "【东北方】与【西南方】", "industries": "国际贸易、航运物流、水产旅游、文化传播、电商直播、饮料餐饮、清洁水利", "health_tips": "肾脏泌尿系统、生殖健康、内分泌及腰部气血调理"}
+    "木": {"directions": "【东方】与【东南方】", "bad_directions": "【西方】与【西北方】", "industries": "文化教育、出版传媒、木材家居、农林园艺、医疗医药、设计策划、绿色环保", "health_tips": "肝胆气血、筋骨关节、神经系统及眼睛视力保养", "colors": "【绿色、青色】", "numbers": "【3、8】", "floors": "【3楼、8楼、13楼、18楼】"},
+    "火": {"directions": "【正南方】", "bad_directions": "【正北方】", "industries": "高新科技、人工智能、能源光伏、餐饮娱乐、美妆美容、广告传媒、照明电子", "health_tips": "心脑血管、血液循环、小肠、视力及情绪焦虑防范", "colors": "【红色、紫色】", "numbers": "【2、7】", "floors": "【2楼、7楼、12楼、17楼】"},
+    "土": {"directions": "【东北方】与【西南方】", "bad_directions": "【正东方】与【东南方】", "industries": "房地产, 建筑工程, 基础建设, 矿产资源, 仓储物流, 古玩农业, 不动产中介", "health_tips": "脾胃消化系统、皮肤屏障、肌肉劳损及腹部消化调理", "colors": "【黄色、棕色】", "numbers": "【5、0】", "floors": "【5楼、10楼、15楼、20楼】"},
+    "金": {"directions": "【西方】与【西北方】", "bad_directions": "【正南方】", "industries": "金融证券、机械制造、五金珠宝、汽车交运、军警法务、精密仪器、医疗器械", "health_tips": "呼吸系统、肺部气管、大肠咽喉及皮肤过敏防范", "colors": "【白色、金色】", "numbers": "【4、9】", "floors": "【4楼、9楼、14楼、19楼】"},
+    "水": {"directions": "【正北方】", "bad_directions": "【东北方】与【西南方】", "industries": "国际贸易、航运物流、水产旅游、文化传播、电商直播、饮料餐饮、清洁水利", "health_tips": "肾脏泌尿系统、生殖健康、内分泌及腰部气血调理", "colors": "【黑色、蓝色】", "numbers": "【1、6】", "floors": "【1楼、6楼、11楼、16楼】"}
 }
 
 SPOUSE_ZHI_DB = {
@@ -136,6 +136,30 @@ def calc_wang_xiang(month_zhi):
     xiu = elements[(idx + 4) % 5]
     return f"旺:{wang} | 相:{xiang} | 死:{si} | 囚:{qiu} | 休:{xiu}"
 
+def scan_four_pillars_interactions(pillars):
+    # 扫描原局四柱之间的合、冲、刑、害、破
+    results = []
+    zhis = [p['zhi'] for p in pillars]
+    gans = [p['gan'] for p in pillars]
+    
+    # 地支六冲
+    for i in range(len(zhis)):
+        for j in range(i+1, len(zhis)):
+            if LIU_CHONG.get(zhis[i]) == zhis[j]:
+                results.append(f"⚡ 地支相冲：[{zhis[i]}]与[{zhis[j]}]相冲，主多动荡或心神不定。")
+    # 地支六合
+    for i in range(len(zhis)):
+        for j in range(i+1, len(zhis)):
+            if ZHI_HE.get(zhis[i]) == zhis[j]:
+                results.append(f"🤝 地支相合：[{zhis[i]}]与[{zhis[j]}]相合，主贵人相助、人缘融洽。")
+    # 天干五合
+    for i in range(len(gans)):
+        for j in range(i+1, len(gans)):
+            if GAN_HE.get(gans[i]) == gans[j]:
+                results.append(f"✨ 天干五合：{gans[i]}与{gans[j]}相合，主多得契约情谊。 ")
+                
+    return results if results else ["✨ 原局气场清畅，无剧烈刑冲破害交战。"]
+
 def get_liunian_shensha(day_gan, birth_year_zhi, ly_zhi):
     shensha_list = []
     tianyi_map = {"甲":["丑","未"], "戊":["丑","未"], "庚":["丑","未"], "乙":["子","申"], "己":["子","申"], "丙":["亥","酉"], "丁":["亥","酉"], "辛":["午","寅"], "壬":["卯","巳"], "癸":["卯","巳"]}
@@ -179,16 +203,14 @@ def get_kongwang(gan, zhi):
     diff = (z_idx - g_idx) % 12
     return {0: "戌亥", 10: "申酉", 8: "午未", 6: "辰巳", 4: "寅卯", 2: "子丑"}.get(diff, "辰巳")
 
-# 🛠️ 核心修改：让全局分析严格区分【用神】与【喜神】独立论断
 def generate_dynamic_global_analysis(day_gan, gender, is_strong, day_zhi, birth_year_zhi, month_star, elem_scores):
     day_gan_elem = GAN_ELEMENTS.get(day_gan, "木")
     yx_obj = calc_yong_xi(day_gan_elem, is_strong)
-    yong_elem = yx_obj["yong"] # 用神
-    xi_elem = yx_obj["xi"]     # 喜神
+    yong_elem = yx_obj["yong"]
+    xi_elem = yx_obj["xi"]
     
     yong_info = ELEMENT_DB.get(yong_elem, ELEMENT_DB["木"])
     xi_info = ELEMENT_DB.get(xi_elem, ELEMENT_DB["火"])
-    
     ji_elem = yx_obj["ji"]
     ji_info = ELEMENT_DB.get(ji_elem, ELEMENT_DB["金"])
     
@@ -202,62 +224,85 @@ def generate_dynamic_global_analysis(day_gan, gender, is_strong, day_zhi, birth_
     return {
         "marriage": {
             "title": "💍 1. 婚姻感情",
-            "text": f"【夫妻婚姻宫 · 基于日支【{day_zhi}】与日元【{day_gan}{day_gan_elem}】专属解构】\n\n一、 伴侣外貌与体型特质：\n命主夫妻宫地支临【{day_zhi}】。{spouse_info['sp_type']}\n\n二、 婚姻情感气场与沟通机制：\n{spouse_info['relation']}夫妻相处如水相融，相互尊重对方的个人隐私与独立思考空间。偶有小争执时，宜实行“冷静沟通”，避免情绪化言语对情感产生内耗。\n\n三、 寻缘与桃花大吉方位（严格区分用神与喜神）：\n• 核心用神【{yong_elem}】方位：建议向常住地的{yong_info['directions']}拓展核心生活圈，最易遇上能互相扶持、价值观契合的正缘伴侣。\n• 喜神【{xi_elem}】催化方位：亦可向{xi_info['directions']}活动，能显著提升个人情感魅力与社交运势。\n• 忌讳寻缘方位：严禁向{ji_info['directions']}盲目社交，容易遇到烂桃花或情感波折。",
+            "text": f"【夫妻婚姻宫 · 基于日支【{day_zhi}】与日元【{day_gan}{day_gan_elem}】专属解构】\n\n一、 伴侣外貌与体型特质：\n命主夫妻宫地支临【{day_zhi}】。{spouse_info['sp_type']}\n\n二、 婚姻情感气场与沟通机制：\n{spouse_info['relation']}夫妻相处如水相融，相互尊重对方的个人隐私与独立思考空间。\n\n三、 寻缘与桃花大吉方位（严格区分用神与喜神）：\n• 核心用神【{yong_elem}】方位：建议向常住地的{yong_info['directions']}拓展核心生活圈，最易遇上能互相扶持、价值观契合的正缘伴侣。\n• 喜神【{xi_elem}】催化方位：亦可向{xi_info['directions']}活动，能显著提升个人情感魅力与社交运势。\n• 忌讳寻缘方位：严禁向{ji_info['directions']}盲目社交，容易遇到烂桃花或情感波折。",
             "tips": "💡 【婚姻实操调理与避坑建议】：\n• 严格执行“冷静10分钟”沟通法则，切忌冷战与说伤人狠话。\n• 主卧床头宜朝向用神喜用方位（{yong_info['directions']}），卧室保持整洁明亮以催旺家运。"
         },
         "career": {
             "title": "💼 2. 职业分析",
-            "text": f"【职业与事业发展 · 基于月令【{month_star}】与用神【{yong_elem}】/喜神【{xi_elem}】独立解构】\n\n一、 命格局与职场定位：\n命局表现为{strength_desc}。月令核心主星临【{month_star}】，赋予命主出色的职业敏锐度与执行力。\n\n二、 用神与喜神行业精准匹配（分项论断）：\n👉 **核心用神【{yong_elem}】主赛道**（筑牢根基、稳健立足）：\n适宜深耕属【{yong_elem}】性质的行业：{yong_info['industries']}。此领域是命主立足社会的根本大后方。\n👉 **喜神【{xi_elem}】发光发热赛道**（突破创新、名气变现）：\n适宜结合属【{xi_elem}】性质的行业：{xi_info['industries']}。在此领域容易获得爆发性成就与名气。\n\n三、 事业吉凶方位分布：\n• 事业大吉发展方位：首选{yong_info['directions']}（用神方）与{xi_info['directions']}（喜神方）。\n• 不利事业方位：{ji_info['directions']}气场受阻，在此方位求职或签协议需多加谨慎。",
-            "tips": "💡 【职场实操调理与避坑建议】：\n• 根基用用神行业稳盘，通过喜神行业寻求突破。切忌盲目频繁跨行。\n• 办公桌青龙方（左手边）保持高于白虎方（右手边），可摆放喜用五行风水植物以催旺贵人。"
+            "text": f"【职业与事业发展 · 基于月令【{month_star}】与用神【{yong_elem}】/喜神【{xi_elem}】独立解构】\n\n一、 命格局与职场定位：\n命局表现为{strength_desc}。月令核心主星临【{month_star}】，赋予命主出色的职业敏锐度与执行力。\n\n二、 用神与喜神行业精准匹配（分项论断）：\n👉 **核心用神【{yong_elem}】主赛道**（筑牢根基、稳健立足）：\n适宜深耕属【{yong_elem}】性质的行业：{yong_info['industries']}。\n👉 **喜神【{xi_elem}】发光发热赛道**（突破创新、名气变现）：\n适宜结合属【{xi_elem}】性质的行业：{xi_info['industries']}。\n\n三、 事业吉凶方位分布：\n• 事业大吉发展方位：首选{yong_info['directions']}（用神方）与{xi_info['directions']}（喜神方）。\n• 不利事业方位：{ji_info['directions']}气场受阻，在此方位求职或签协议需多加谨慎。",
+            "tips": "💡 【职场实操调理与避坑建议】：\n• 专注于核心竞争力的突破，切忌盲目频繁跨行。\n• 办公桌青龙方（左手边）保持高于白虎方（右手边），可摆放喜用五行风水植物以催旺贵人。"
         },
         "wealth": {
             "title": "💰 3. 财运 / 投资分析",
-            "text": f"【财富与投资理财 · 基于日元【{day_gan}】与用喜神专属解构】\n\n一、 当老板运势与商业格局评估：\n月令临【{month_star}】，自身具备深厚的商业思考力与财商逻辑。{( '日元身强财旺，具备独立掌舵当老板、合伙开公司或进行大格局投资创业的强烈气场。' if is_strong else '日元身弱，求财宜稳扎稳打，适合合伙搭台、借力大平台或靠专业技术稳健增值。' )}\n\n二、 用神与喜神财富爆发力分析：\n• **用神【{yong_elem}】代表正财与稳健资产**：主实体经营、长期长线投资与储蓄积累，风险极低。\n• **喜神【{xi_elem}】代表偏财与商业机遇**：主投资眼光、商业灵感与多元化变现，需注意防范盲目激进。\n\n三、 求财吉凶方位：\n• 求财大吉方位：{yong_info['directions']}（用神方）与{xi_info['directions']}（喜神方）是财源汇聚之地。\n• 破财防范方位：{ji_info['directions']}易引发资金链紧张或无谓耗损。",
+            "text": f"【财富与投资理财 · 基于日元【{day_gan}】与用喜神专属解构】\n\n一、 当老板运势与商业格局评估：\n月令临【{month_star}】，自身具备深厚的商业思考力与财商逻辑。\n\n二、 用神与喜神财富爆发力分析：\n• **用神【{yong_elem}】代表正财与稳健资产**：主实体经营、长期长线投资与储蓄积累，风险极低。\n• **喜神【{xi_elem}】代表偏财与商业机遇**：主投资眼光、商业灵感与多元化变现。\n\n三、 求财吉凶方位：\n• 求财大吉方位：{yong_info['directions']}（用神方）与{xi_info['directions']}（喜神方）是财源汇聚之地。\n• 破财防范方位：{ji_info['directions']}易引发资金链紧张或无谓耗损。",
             "tips": "💡 【财运实操理财与避坑建议】：\n• 严禁参与民间高息借贷、高杠杆股票投机或不合规的盲目项目投资。\n• 建立家庭专项储备基金，时刻留足 6 个月以上的流动现金流。"
         },
         "health": {
             "title": "🏥 4. 健康分析",
-            "text": f"【健康养生与体质 · 基于最弱五行【{weakest_elem}】与用喜神调理专属解构】\n\n一、 先天五行体质密码：\n八字五行中【{weakest_elem}】元素相对薄弱，先天体质需重点关照相关脏腑健康：\n👉 {weak_health_info}。\n\n二、 用神与喜神养生机制：\n• 借助用神【{yong_elem}】气场（如生活在{yong_info['directions']}或调理相关作息）来固本培元，增强免疫力。\n• 借助喜神【{xi_elem}】气场（如保持积极乐观心态、接触{xi_info['directions']}阳光活力）来畅通气血。\n\n三、 饮食与调理要点：\n饮食宜清淡温润，少食辛辣生冷，注重脾胃养护与水分补充。",
+            "text": f"【健康养生与体质 · 基于最弱五行【{weakest_elem}】与用喜神调理专属解构】\n\n一、 先天五行体质密码：\n八字五行中【{weakest_elem}】元素相对薄弱，先天体质需重点关照相关脏腑健康：\n👉 {weak_health_info}。\n\n二、 用神与喜神养生机制：\n• 借助用神【{yong_elem}】气场（如生活在{yong_info['directions']}或调理相关作息）来固本培元。\n• 借助喜神【{xi_elem}】气场（如保持积极乐观心态、接触{xi_info['directions']}阳光活力）。",
             "tips": "💡 【健康实操调理与避坑建议】：\n• 坚持每晚热水泡脚 15~20 分钟，加入艾叶或生姜以促进血液循环。\n• 保持每周 3 次以上的有氧运动（如快走、慢跑或游泳），排解身体毒素与精神压力。"
         },
         "parents": {
             "title": "👨‍👩‍👦 5. 父母缘份",
-            "text": f"【父母长辈缘份 · 全局总论】\n\n一、 长辈庇荫与缘份厚薄：\n命局中印星气场中和，与父母长辈缘份深厚。早年多得长辈在生活与价值观上的悉心教导与庇荫。\n\n二、 长辈健康关照：\n需重点关照双方父母的心脑血管、骨质关节及慢性消化的日常调理。定期陪同父母进行全面身体检查，早作预防。\n\n三、 孝道沟通法则：\n与长辈沟通宜多倾听、少争辩，顺从长辈心意，在精神与物质上给予双重关怀。",
+            "text": f"【父母长辈缘份 · 全局总论】\n\n一、 长辈庇荫与缘份厚薄：\n命局中印星气场中和，与父母长辈缘份深厚。早年多得长辈在生活与价值观上的悉心教导与庇荫。\n\n二、 长辈健康关照：\n需重点关照双方父母的心脑血管、骨质关节及慢性消化的日常调理。\n\n三、 孝道沟通法则：\n与长辈沟通宜多倾听、少争辩，顺从长辈心意，在精神与物质上给予双重关怀。",
             "tips": "💡 【孝道实操调理建议】：\n• 每年安排父母进行一次深度体检。\n• 经常主动沟通倾听长辈心声，顺从长辈心意即是最上等之孝顺。"
         },
         "siblings": {
             "title": "👫 6. 兄弟姐妹缘份",
-            "text": f"【手足与合伙人助力 · 基于年支【{birth_year_zhi}】专属解构】\n\n一、 同辈与合伙气场：\n同辈兄弟姐妹及朋友手足交往顺畅，但在涉及重大商业合作或资金往来时，必须做到“亲兄弟明算账”，避免因人情模糊导致利益纠纷。\n\n二、 贵人生肖与忌讳生肖指南：\n• 贵人生肖：{vips['vip']}（能带来实质资源与关键时刻的提携助力）。\n• 忌讳生肖：{vips['taboo']}（理念易生分歧，合作时需保持理性与原则）。\n\n三、 商业合作规则：\n若选择与他人合伙，必须通过法律途径签署明确的股权与财务协议，分工明确。",
+            "text": f"【手足与合伙人助力 · 基于年支【{birth_year_zhi}】专属解构】\n\n一、 同辈与合伙气场：\n同辈兄弟姐妹及朋友手足交往顺畅，但在涉及重大商业合作或资金往来时，必须做到“亲兄弟明算账”。\n\n二、 贵人生肖与忌讳生肖指南：\n• 贵人生肖：{vips['vip']}。\n• 忌讳生肖：{vips['taboo']}。",
             "tips": "💡 【合伙实操避坑建议】：\n• 避免盲目为亲朋好友提供经济担保或借贷。\n• 君子之交淡如水，保持适度界限反而能使友情与合作更加长久。"
         },
         "children": {
             "title": "👶 7. 子女缘份",
-            "text": f"【子女成长与教育 · 全局总论】\n\n一、 子女性格与天赋特质：\n命局中食伤/官杀气场清透，预示子女聪明伶俐，富有探索精神与独立主见，在学术或艺术领域具有较强的领悟力。\n\n二、 亲子互动与教育法则：\n教育上切忌采用专制施压或强加意愿的方式。宜采取启发式与鼓励式的教育方法，成为孩子的良师益友。\n\n三、 潜能开发方向：\n多观察孩子的兴趣所在，培养其独立解决问题的能力与健全的人格性格。",
+            "text": f"【子女成长与教育 · 全局总论】\n\n一、 子女性格与天赋特质：\n命局中食伤/官杀气场清透，预示子女聪明伶俐，富有探索精神与独立主见。\n\n二、 亲子互动与教育法则：\n教育上切忌采用专制施压或强加意愿的方式，宜采取启发式与鼓励式教育。",
             "tips": "💡 【教育实操调理建议】：\n• 多倾听孩子的真实心声，给予其充分的信任与成长空间。\n• 营造温馨和谐的家庭学习氛围，榜样示范胜过千言万语。"
         },
         "accident": {
             "title": "⚠️ 8. 交通意外防范",
-            "text": f"【交通意外防范 · 全局总论】\n\n一、 出行安全与气场评估：\n日常行车与出差远行频率较高时，需时刻保持高度专注，防范因情绪急躁或疲劳驾驶引发的突发车辆擦碰。\n\n二、 凶煞出行防范方位：\n自驾或长途远行时，需严加防范前往{ji_info['bad_directions']}方向，遇恶劣天气宜调整行程，安全第一。\n\n三、 车辆安全管理：\n定期对车辆的轮胎、煞车系统及灯光进行检修维保，不可心存侥幸。",
+            "text": f"【交通意外防范 · 全局总论】\n\n一、 出行安全与气场评估：\n日常行车与出差远行频率较高时，需时刻保持高度专注，防范因情绪急躁或疲劳驾驶引发的突发车辆擦碰。\n\n二、 凶煞出行防范方位：\n自驾或长途远行时，需严加防范前往{ji_info['bad_directions']}方向。",
             "tips": "💡 【交通安全防范建议】：\n• 驾车时严格遵守交通法规，拒绝酒驾、超速与疲劳驾驶。\n• 车内保持整洁，可摆放平安符或平稳气场之饰物。"
         },
         "social": {
             "title": "🤝 9. 交友人缘 - 人事是非",
-            "text": f"【交友人缘与是非 · 全局总论】\n\n一、 社交圈层与人脉品质：\n命主待人热情真诚，社交圈层广阔，容易结识各行各业的朋友。但在人脉拓展中宜“择善而从”，注重朋友的思想品质而非盲目社交。\n\n二、 小人是非防范：\n处事高调时易引来小人无端的嫉妒或背后口舌是非。对不熟悉的人或商业伙伴保持适度的隐私边界感。\n\n三、 人际沟通法则：\n谨言慎行，倾听多于表达，遇人际摩擦时谦逊退让一步，往往能化干戈为玉帛。",
+            "text": f"【交友人缘与是非 · 全局总论】\n\n一、 社交圈层与人脉品质：\n命主待人热情真诚，社交圈层广阔，容易结识各行各业的朋友。\n\n二、 小人是非防范：\n处事高调时易引来小人无端的嫉妒或背后口舌是非。",
             "tips": "💡 【社交实操避坑建议】：\n• 远离满身负能量与爱议论他人是非的圈子。\n• 重大决策不盲从他人劝说，保持独立的理智判断。"
         },
         "property": {
             "title": "🏡 10. 田宅不动产分析",
-            "text": f"【田宅不动产置业 · 基于用神【{yong_elem}】与喜神【{xi_elem}】方位专属解构】\n\n一、 置业运势与资产配置：\n命局田宅宫安定，置业安家运势顺遂。在财富有所积累之年份，适度配置优质不动产是资产保值增值的绝佳选择。\n\n二、 买房大吉朝向与采光方位（分项论断）：\n• **用神【{yong_elem}】置业朝向**：首选房屋大门或主要阳台采光朝向{yong_info['directions']}的户型，主家运稳固、安居乐业。\n• **喜神【{xi_elem}】置业朝向**：亦可选择朝向{xi_info['directions']}的户型，主采光通透、人气兴旺、社交广阔。\n• 忌讳房屋朝向：不宜购买大门或阳台朝向{ji_info['directions']}的房屋。\n\n三、 择房风水要点：\n房屋周边宜环境清幽、采光通风良好，避开高压电塔、路冲煞或杂乱煞气之地。",
+            "text": f"【田宅不动产置业 · 基于用神【{yong_elem}】与喜神【{xi_elem}】方位专属解构】\n\n一、 置业运势与资产配置：\n命局田宅宫安定，置业安家运势顺遂。\n\n二、 买房大吉朝向与采光方位（分项论断）：\n• **用神【{yong_elem}】置业朝向**：首选房屋大门或主要阳台采光朝向{yong_info['directions']}的户型。\n• **喜神【{xi_elem}】置业朝向**：亦可选择朝向{xi_info['directions']}的户型。\n• 忌讳房屋朝向：不宜购买大门或阳台朝向{ji_info['directions']}的房屋。",
             "tips": "💡 【置业实操避坑建议】：\n• 购房前务必做好未来 3~5 年的现金流压力测试，切忌过度高杠杆负债。\n• 选房注重房企品质与地段升值潜力。"
         },
         "inner_world": {
             "title": "🧘 11. 内心世界分析",
-            "text": f"【内心世界与精神修炼 · 基于日元【{day_gan}{day_gan_elem}】与用喜神专属解构】\n\n一、 精神世界与哲学悟性深度剖析：\n命主内心世界极其丰富细腻，表面上或许随和务实，但内心里始终保有对生命本质、哲学玄学或艺术美学的深层思考。\n\n二、 情绪解压与精神修复机制：\n• 借助用神【{yong_elem}】的能量（如静心阅读、书画、大自然静坐）来沉淀心绪。\n• 借助喜神【{xi_elem}】的能量（如运动发汗、与挚友聚会、接触阳光）来释放压力。\n\n三、 心灵修行与活在当下的境界：\n宜通过冥想禅修、经典阅读或走进大自然户外运动来清空负面能量。学会“活在当下，知足常乐”，顺应自然规律，便能修得宠辱不惊的强大内心情感。",
+            "text": f"【内心世界与精神修炼 · 基于日元【{day_gan}{day_gan_elem}】与用喜神专属解构】\n\n一、 精神世界与哲学悟性深度剖析：\n命主内心世界极其丰富细腻，表面上或许随和务实，但内心里始终保有对生命本质、哲学玄学或艺术美学的深层思考。\n\n二、 情绪解压与精神修复机制：\n• 借助用神【{yong_elem}】的能量（如静心阅读、书画、大自然静坐）来沉淀心绪。\n• 借助喜神【{xi_elem}】的能量（如运动发汗、与挚友聚会、接触阳光）来释放压力。",
             "tips": "💡 【心灵内修实操调理指引】：\n• 每天给自己预留 20 分钟绝对安静的“独处冥想时间”，关闭手机，清空杂念。\n• 定期清理居住与办公环境，定期丢弃无用之物（断舍离），环境清爽则心灵自然澄明。"
         }
     }
 
 class BaziAPIHandler(SimpleHTTPRequestHandler):
+    def do_GET(self):
+        # 🛠️ 新增：获取历史档案列表 API
+        if self.path == '/api/records':
+            try:
+                if supabase:
+                    res = supabase.table("bazi_records").select("id, user_name, gender, birth_hour, created_at").order("created_at", desc=True).limit(20).execute()
+                    records = res.data if hasattr(res, 'data') else []
+                else:
+                    records = []
+                response_json = json.dumps({"status": "success", "data": records}, ensure_ascii=False)
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(response_json.encode('utf-8'))
+            except Exception as err:
+                err_resp = json.dumps({"status": "error", "message": str(err)}, ensure_ascii=False)
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(err_resp.encode('utf-8'))
+        else:
+            super().do_GET()
+
     def do_POST(self):
         if self.path == '/api/calculate':
             try:
@@ -346,6 +391,9 @@ class BaziAPIHandler(SimpleHTTPRequestHandler):
 
                 yx_obj = calc_yong_xi(day_gan_elem, is_strong)
                 dynamic_wang_xiang = calc_wang_xiang(month_zhi)
+                
+                # 🛠️ 新增：原局刑冲合害扫描
+                pillar_scan = scan_four_pillars_interactions([year_p, month_p, day_p, hour_p])
 
                 extra_p = {
                     "tai_xi": {"gan": tx_gan, "zhi": tx_zhi, "star": get_shishen(day_gan, tx_gan)},
@@ -355,7 +403,9 @@ class BaziAPIHandler(SimpleHTTPRequestHandler):
                     "day_kong": get_kongwang(day_gan, day_zhi),
                     "year_kong": get_kongwang(birth_year_gan, birth_year_zhi),
                     "yong_xi": yx_obj["str_repr"],
-                    "wang_xiang": dynamic_wang_xiang
+                    "wang_xiang": dynamic_wang_xiang,
+                    "pillar_scan": pillar_scan,
+                    "strength_details": f"同党得分: {plus_score} | 异党得分: {minus_score} | 月令({month_zhi})权重最高"
                 }
 
                 chart = {"year_pillar": year_p, "month_pillar": month_p, "day_pillar": day_p, "hour_pillar": hour_p, "extra": extra_p}
@@ -391,17 +441,17 @@ class BaziAPIHandler(SimpleHTTPRequestHandler):
                         vips = ZODIAC_VIP_DB.get(birth_year_zhi, ZODIAC_VIP_DB["子"])
 
                         dayun_analysis_11 = {
-                            "marriage": {"title": "💍 大限夫妻婚姻宫深度解构", "text": f"【大限 {gz} 期间 · 婚姻感情全景剖析】\n当前大运逢【{main_star}】临值主事。\n\n一、 情感磁场与伴侣关系：\n受大运【{main_star}】星引动，此十年情感世界趋于成熟务实。未婚者异性缘显著提升，极易遇到理想的正缘伴侣；已婚者与伴侣在家庭责任与日常生活中更具默契。", "tips": "💡 【婚姻实操调理】：严格执行冷静10分钟沟通，主卧床头宜朝向喜用吉方。"},
-                            "career": {"title": "💼 大限职业与事业方位详批", "text": f"【大限 {gz} 期间 · 事业发展与职场定位】\n大运十神【{main_star}】主事。\n最利于发展五行属【{dy_xi_elem}】性质的细分领域（如：{dy_info['industries']}）。前往{dy_info['directions']}事业贵人多。", "tips": "💡 【职场实操调理】：办公桌青龙方置放绿植催旺贵人。"},
-                            "wealth": {"title": "💰 大限财运格局与求财方位解析", "text": f"【大限 {gz} 期间 · 财富爆发与投资解析】\n大运十神【{main_star}】主事。财气充沛，求财大吉方位为{dy_info['directions']}。", "tips": "💡 【财运实操调理】：保持财位明亮洁净，严禁高杠杆高风险投机。"},
-                            "health": {"title": "🏥 大限健康养生与调理指南", "text": f"【大限 {gz} 期间 · 健康管理与体质防范】\n大运十神【{main_star}】主事。需特别防范{dy_info['health_tips']}。", "tips": "💡 【健康实操调理】：每晚坚持热水泡脚，保持每周3次有氧运动。"},
-                            "parents": {"title": "👨‍👩‍👦 大限父母长辈缘份与健康", "text": f"【大限 {gz} 期间 · 长辈缘份全景剖析】长辈缘分深厚，多关照双方父母健康。", "tips": "💡 【孝道建议】：定期安排全面体检。"},
-                            "siblings": {"title": "👫 大限手足与合伙人助力分析", "text": f"【大限 {gz} 期间 · 同辈助力与合伙】同辈及合伙助力平平，合约必须分明。", "tips": "💡 【合伙建议】：亲兄弟明算账。"},
-                            "children": {"title": "👶 大限子女成长与教育指引", "text": f"【大限 {gz} 期间 · 子女教育全景剖析】子女聪慧独立，教育宜启发式引导。", "tips": "💡 【教育建议】：多做良师益友。"},
-                            "accident": {"title": "⚠️ 大限交通出行与凶险方位防范", "text": f"【大限 {gz} 期间 · 出行安全与防范】远行频率增加，防范前往{dy_info['bad_directions']}方向。", "tips": "💡 【安全建议】：严禁酒驾与疲劳驾驶。"},
-                            "social": {"title": "🤝 大限交友合伙与生肖喜忌全解", "text": f"【大限 {gz} 期间 · 人脉交友与生肖指南】贵人生肖：{vips['vip']}。忌讳生肖：{vips['taboo']}。", "tips": "💡 【交友建议】：择善而从。"},
-                            "property": {"title": "🏡 大限田宅不动产与买房方位指南", "text": f"【大限 {gz} 期间 · 不动产置业指南】置业运势亨通，买房首选朝向{dy_info['directions']}的户型。", "tips": "💡 【置业建议】：做好现金流压力测试。"},
-                            "inner_world": {"title": "🧘 大限内心世界与精神修炼", "text": f"【大限 {gz} 期间 · 心灵内修与精神世界】注重哲学思考与精神放松，冥想禅修释放压力。", "tips": "💡 【内修建议】：活在当下，知足常乐。"}
+                            "marriage": {"title": "💍 大限夫妻婚姻宫深度解构", "text": f"【大限 {gz} 期间 · 婚姻感情全景剖析】\n当前大运逢【{main_star}】临值主事。", "tips": "💡 【婚姻实操调理】：严格执行冷静10分钟沟通。"},
+                            "career": {"title": "💼 大限职业与事业方位详批", "text": f"【大限 {gz} 期间 · 事业发展与职场定位】\n大运十神【{main_star}】主事。前往{dy_info['directions']}事业贵人多。", "tips": "💡 【职场实操调理】：办公桌青龙方置放绿植。"},
+                            "wealth": {"title": "💰 大限财运格局与求财方位解析", "text": f"【大限 {gz} 期间 · 财富爆发与投资解析】\n大运十神【{main_star}】主事。求财大吉方位为{dy_info['directions']}。", "tips": "💡 【财运实操调理】：保持财位明亮洁净。"},
+                            "health": {"title": "🏥 大限健康养生与调理指南", "text": f"【大限 {gz} 期间 · 健康管理与体质防范】\n大运十神【{main_star}】主事。", "tips": "💡 【健康实操调理】：每晚坚持热水泡脚。"},
+                            "parents": {"title": "👨‍👩‍👦 大限父母长辈缘份与健康", "text": f"【大限 {gz} 期间 · 长辈缘份全景剖析】", "tips": "💡 【孝道建议】：定期安排全面体检。"},
+                            "siblings": {"title": "👫 大限手足与合伙人助力分析", "text": f"【大限 {gz} 期间 · 同辈助力与合伙】", "tips": "💡 【合伙建议】：亲兄弟明算账。"},
+                            "children": {"title": "👶 大限子女成长与教育指引", "text": f"【大限 {gz} 期间 · 子女教育全景剖析】", "tips": "💡 【教育建议】：多做良师益友。"},
+                            "accident": {"title": "⚠️ 大限交通出行与凶险方位防范", "text": f"【大限 {gz} 期间 · 出行安全与防范】", "tips": "💡 【安全建议】：严禁酒驾与疲劳驾驶。"},
+                            "social": {"title": "🤝 大限交友合伙与生肖喜忌全解", "text": f"【大限 {gz} 期间 · 人脉交友与生肖指南】贵人生肖：{vips['vip']}。", "tips": "💡 【交友建议】：择善而从。"},
+                            "property": {"title": "🏡 大限田宅不动产与买房方位指南", "text": f"【大限 {gz} 期间 · 不动产置业指南】首选朝向{dy_info['directions']}的户型。", "tips": "💡 【置业建议】：做好现金流压力测试。"},
+                            "inner_world": {"title": "🧘 大限内心世界与精神修炼", "text": f"【大限 {gz} 期间 · 心灵内修与精神世界】", "tips": "💡 【内修建议】：活在当下，知足常乐。"}
                         }
 
                         liu_nian_list = []
