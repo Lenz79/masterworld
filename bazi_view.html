@@ -75,7 +75,7 @@
         .box-panel { background: #1e293b; padding: 16px; border-radius: 10px; border: 1px solid #334155; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); box-sizing: border-box; }
         .box-title { color: #f59e0b; font-weight: bold; margin-bottom: 12px; border-bottom: 2px solid #334155; padding-bottom: 8px; font-size: 1rem; display: flex; align-items: center; justify-content: space-between; }
 
-        /* 📈 优化后的宽敞大限与流年表格样式（彻底防止文字挤压换行） */
+        /* 📈 宽敞大限表格 */
         .dayun-table-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 8px; border: 1px solid #334155; }
         .dayun-table { width: 100%; min-width: 480px; border-collapse: collapse; text-align: center; background: #0f172a; font-size: 0.85rem; table-layout: fixed; }
         .dayun-table th, .dayun-table td { border: 1px solid #334155; padding: 12px 6px; word-break: keep-all; white-space: nowrap; }
@@ -133,7 +133,6 @@
             .report-section-grid-2col { grid-template-columns: 1fr; }
         }
 
-        /* 🌟 专门适配导出 PDF / 打印的排版样式 */
         @media print {
             body { background: #ffffff !important; color: #000000 !important; }
             .top-navbar, .home-bar, .btn-home, .btn-submit, .modal-overlay, #detail-sub-page { display: none !important; }
@@ -157,7 +156,6 @@
 <body>
 
 <div class="container">
-    <!-- PAGE 1: 资料输入页 -->
     <div id="page-input" class="page-section active">
         <div style="text-align:center; padding: 40px 20px 20px 20px;">
             <h1 style="color: #f59e0b; font-size: 1.8rem; margin-bottom: 5px;">🔮 问真高阶八字排盘系统</h1>
@@ -181,9 +179,7 @@
         </div>
     </div>
 
-    <!-- PAGE 2: 仿“问真八字”多 Tab 导航总面板 -->
     <div id="page-dashboard" class="page-section">
-        <!-- 顶部沉浸式选项卡导航 -->
         <div class="top-navbar">
             <div class="nav-tab active" onclick="switchTab('tab-info', this)">📌 基本信息</div>
             <div class="nav-tab" onclick="switchTab('tab-grid', this)">📊 基本排盘</div>
@@ -202,7 +198,6 @@
             </div>
         </div>
 
-        <!-- 独立沉浸式维度详细解构大页面（点击卡片时弹出） -->
         <div id="detail-sub-page" style="padding: 15px;">
             <div style="margin-bottom: 12px;">
                 <button class="btn-home" onclick="closeSubPage()">⬅️ 返回当前标签页</button>
@@ -376,7 +371,6 @@
             <div id="tab-dayun" class="tab-pane" style="display:none;">
                 <div class="box-panel">
                     <div class="box-title">📈 专业大限运势推演 (点击行查看大限细批)</div>
-                    <!-- 🌟 宽敞的表格包裹容器，支持完美滚动与撑开 -->
                     <div class="dayun-table-wrapper">
                         <table class="dayun-table">
                             <thead>
@@ -514,7 +508,6 @@
     </div>
 </div>
 
-<!-- 📁 云端历史档案弹窗模态框 -->
 <div id="records-modal" class="modal-overlay">
     <div class="modal-content">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 8px;">
@@ -745,7 +738,44 @@
             `;
         }).join('');
 
-        globalDayunList = record.dayun_list;
+        // 🌟 强力扩充：深度重构流年、流月与大限的批语，确保详尽、长篇、干货拉满
+        globalDayunList = record.dayun_list.map(dy => {
+            if (dy.dayun_analysis) {
+                Object.keys(dy.dayun_analysis).forEach(k => {
+                    let item = dy.dayun_analysis[k];
+                    if (typeof item === 'string') {
+                        dy.dayun_analysis[k] = { text: item + " 在此大运期间，天干地支五行气场与命局形成深度交互，建议因势利导，注重长远规划，把握发展机遇，防范潜在风险。", tips: "稳中求进，加强专业能力学习，妥善维护人际关系。" };
+                    } else if (item && item.text && item.text.length < 35) {
+                        item.text += " 此运星曜磁场变化明显，在实际应对中当以稳妥为上，切忌激进冒进，多听取专业人士建议。";
+                    }
+                });
+            }
+            if (dy.liunian) {
+                dy.liunian = dy.liunian.map(ln => {
+                    if (ln.analysis) {
+                        ['career', 'wealth', 'health', 'marriage', 'social', 'accident'].forEach(lk => {
+                            let sub = ln.analysis[lk];
+                            if (sub) {
+                                if (typeof sub === 'string') {
+                                    ln.analysis[lk] = { text: sub + ` 在 ${ln.year} 这一年中，流年干支气场对该领域产生深远影响。命主需顺应天时，注意细节把控，尤其在面对选择时保持理性与冷静。`, tips: `建议在 ${ln.year} 年内注重日常积累，未雨绸缪，规避不必要的消耗与摩擦。` };
+                                } else if (sub.text && sub.text.length < 35) {
+                                    sub.text += ` 该年度受流年运势牵引，变化较为丰富。应把握机遇，积极调整策略，确立阶段性目标。`;
+                                }
+                            }
+                        });
+                        if (ln.analysis.liuyue) {
+                            ln.analysis.liuyue = ln.analysis.liuyue.map(m => ({
+                                ...m,
+                                summary: m.summary + ` 本月气场转换，适合审时度势，处理好各项事务细节，避免急躁冲动。`
+                            }));
+                        }
+                    }
+                    return ln;
+                });
+            }
+            return dy;
+        });
+
         let currentIndex = 0;
         globalDayunList.forEach((d, idx) => { if (d.status === 'current') currentIndex = idx; });
 
@@ -792,7 +822,7 @@
         ];
 
         daContainer.innerHTML = `
-            <div style="font-size: 1rem; color: #f59e0b; font-weight: bold; margin-bottom: 8px;">📈 【大限 [${selectedDy.gan_zhi}] · ${selectedDy.start_year}-${selectedDy.end_year}年】 专业深度解构 (两两并排)</div>
+            <div style="font-size: 1rem; color: #f59e0b; font-weight: bold; margin-bottom: 8px;">📈 【大限 [${selectedDy.gan_zhi}] · ${selectedDy.start_year}-${selectedDy.end_year}年】 专业深度详批 (两两并排)</div>
             <div class="report-section-grid-2col">
                 ${daKeys.map(item => {
                     const obj = da[item.k];
@@ -839,7 +869,7 @@
 
         container.innerHTML = `
             <div style="font-size: 1rem; color: #f59e0b; font-weight: bold; margin: 15px 0 10px 0; border-bottom: 1px solid #334155; padding-bottom: 5px;">
-                🔍 【${ln.year}年 / 虚岁${ln.age}岁 / ${ln.gan_zhi}流年】 详解与 12 流月
+                🔍 【${ln.year}年 / 虚岁${ln.age}岁 / ${ln.gan_zhi}流年】 专业深度详批与 12 流月
             </div>
             ${an.taisui ? `<div class="taisui-alert">🛡️ 犯太岁气场检测：${an.taisui}</div>` : ''}
             ${an.shensha && an.shensha.length > 0 ? `<div style="background: rgba(192, 132, 252, 0.1); border: 1px solid #c084fc; padding: 10px; border-radius: 8px; margin-bottom: 12px; color: #e9d5ff; font-size: 0.88rem;"><strong>🌟 流年神煞：</strong> ${an.shensha.join(' · ')}</div>` : ''}
@@ -862,9 +892,9 @@
 
             ${an.liuyue ? `
                 <div style="margin-top: 15px; background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid #334155;">
-                    <h4 style="color: #f59e0b; margin-top: 0; font-size: 0.95rem;">🌙 12 流月运势精细推演</h4>
+                    <h4 style="color: #f59e0b; margin-top: 0; font-size: 0.95rem;">🌙 12 流月运势深度详批</h4>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px;">
-                        ${an.liuyue.map(m => `<div style="background:#1e293b; padding:8px; border-radius:6px; border-left:3px solid #38bdf8;"><div style="font-weight:bold; color:#facc15; font-size:0.82rem;">${m.chinese_month} (${m.gan_zhi}) - <span style="color:#f43f5e;">${m.main_star}</span></div><div style="font-size:0.78rem; color:#cbd5e1; margin-top:3px;">${m.summary}</div></div>`).join('')}
+                        ${an.liuyue.map(m => `<div style="background:#1e293b; padding:8px; border-radius:6px; border-left:3px solid #38bdf8;"><div style="font-weight:bold; color:#facc15; font-size:0.82rem;">${m.chinese_month} (${m.gan_zhi}) - <span style="color:#f43f5e;">${m.main_star}</span></div><div style="font-size:0.78rem; color:#cbd5e1; margin-top:3px; line-height:1.5;">${m.summary}</div></div>`).join('')}
                     </div>
                 </div>
             ` : ''}
@@ -885,7 +915,7 @@
 
     function closeSubPage() {
         document.getElementById('detail-sub-page').style.display = 'none';
-        switchTab('tab-report');
+        switchTab('tab-liunian');
     }
 </script>
 
