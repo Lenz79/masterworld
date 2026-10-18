@@ -73,7 +73,7 @@
         .label-col .cell-lbl { border-bottom: 1px solid #334155; display: flex; align-items: center; justify-content: center; color: #94a3b8; }
 
         .box-panel { background: #1e293b; padding: 16px; border-radius: 10px; border: 1px solid #334155; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); box-sizing: border-box; }
-        .box-title { color: #f59e0b; font-weight: bold; margin-bottom: 12px; border-bottom: 2px solid #334155; padding-bottom: 8px; font-size: 1rem; display: flex; align-items: center; gap: 8px; }
+        .box-title { color: #f59e0b; font-weight: bold; margin-bottom: 12px; border-bottom: 2px solid #334155; padding-bottom: 8px; font-size: 1rem; display: flex; align-items: center; justify-content: space-between; }
 
         /* 📈 大限与流年表格一页适配 */
         .dayun-table { width: 100%; border-collapse: collapse; text-align: center; background: #0f172a; font-size: 0.82rem; margin-top: 10px; table-layout: fixed; }
@@ -90,12 +90,43 @@
         .current-limit-tag { background: #f43f5e; color: #fff; padding: 1px 3px; border-radius: 3px; font-size: 0.6rem; font-weight: normal; white-space: nowrap; }
         .locked-tag { background: #475569; color: #94a3b8; padding: 1px 3px; border-radius: 3px; font-size: 0.6rem; }
 
-        .report-section-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-top: 12px; }
-        .report-card { background: #131d31; border: 1px solid #334155; border-radius: 8px; padding: 14px; cursor: pointer; transition: all 0.2s ease; position: relative; }
+        /* 🌟 横向水平滚动轮播布局 */
+        .report-section-horizontal-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            margin-top: 12px;
+        }
+        .report-section-horizontal-scroll::-webkit-scrollbar {
+            height: 6px;
+        }
+        .report-section-horizontal-scroll::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
+
+        .report-card { 
+            flex: 0 0 280px;
+            scroll-snap-align: start;
+            background: #131d31; 
+            border: 1px solid #334155; 
+            border-radius: 8px; 
+            padding: 14px; 
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+            position: relative; 
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
         .report-card:hover { border-color: #38bdf8; background: #1a2744; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(56,189,248,0.15); }
-        .report-card::after { content: "🔍 点击进入专业深度详批 ➡️"; position: absolute; right: 14px; bottom: 10px; font-size: 0.72rem; color: #38bdf8; opacity: 0.9; font-weight: bold; }
+        .report-card::after { content: "🔍 点击进入专业深度详批 ➡️"; display: block; margin-top: 10px; font-size: 0.72rem; color: #38bdf8; opacity: 0.9; font-weight: bold; text-align: right; }
         .report-card h4 { color: #38bdf8; margin-top: 0; margin-bottom: 6px; font-size: 0.95rem; border-bottom: 1px dashed #334155; padding-bottom: 5px; }
-        .report-card p { color: #cbd5e1; font-size: 0.85rem; line-height: 1.55; margin: 0 0 24px 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .report-card p { color: #cbd5e1; font-size: 0.85rem; line-height: 1.55; margin: 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        
         .tips-box { margin-top: 8px; background: rgba(245, 158, 11, 0.1); border-left: 3px solid #f59e0b; padding: 7px 9px; font-size: 0.8rem; color: #fde68a; border-radius: 4px; }
         .taisui-alert { background: rgba(244, 63, 94, 0.15); border: 1px solid #f43f5e; padding: 10px 12px; border-radius: 8px; margin-bottom: 12px; color: #fca5a5; font-weight: bold; font-size: 0.88rem; }
 
@@ -104,17 +135,29 @@
         .sub-page-content { font-size: 0.95rem; line-height: 1.75; color: #e2e8f0; margin-bottom: 15px; white-space: pre-wrap; background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #334155; }
         .sub-page-tips { background: rgba(245, 158, 11, 0.15); border-left: 4px solid #f59e0b; padding: 12px; border-radius: 6px; color: #fde68a; font-size: 0.9rem; line-height: 1.65; margin-top: 12px; white-space: pre-wrap; }
 
-        /* 📁 历史档案模态框样式 */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content { background: #1e293b; border: 1px solid #334155; border-radius: 12px; width: 90%; max-width: 500px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-height: 80vh; overflow-y: auto; }
         .record-item { background: #0f172a; border: 1px solid #334155; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.2s; }
         .record-item:hover { border-color: #38bdf8; background: #1a2744; }
 
-        @media (max-width: 768px) {
-            body { padding: 0; }
-            .form-grid { grid-template-columns: 1fr; gap: 10px; }
-            .card-input { padding: 16px 12px; margin: 10px; }
-            .report-section-grid { grid-template-columns: 1fr; }
+        /* 🌟 专门适配导出 PDF / 打印的精美排版样式 */
+        @media print {
+            body { background: #ffffff !important; color: #000000 !important; }
+            .top-navbar, .home-bar, .btn-home, .btn-submit, .modal-overlay, #detail-sub-page { display: none !important; }
+            .page-section { display: block !important; }
+            .tab-pane { display: block !important; page-break-after: always; }
+            .box-panel, .info-card { background: #ffffff !important; color: #000000 !important; border: 1px solid #cbd5e1 !important; box-shadow: none !important; margin-bottom: 20px; }
+            .box-title { color: #b45309 !important; border-bottom: 2px solid #b45309 !important; }
+            .info-row { border-bottom: 1px solid #e2e8f0 !important; }
+            .info-label { color: #64748b !important; }
+            .info-val { color: #0f172a !important; }
+            .report-section-horizontal-scroll { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; overflow: visible !important; }
+            .report-card { flex: unset !important; width: 100% !important; background: #f8fafc !important; border: 1px solid #cbd5e1 !important; color: #000 !important; break-inside: avoid; }
+            .report-card h4 { color: #0284c7 !important; }
+            .report-card p { color: #334155 !important; }
+            .report-card::after { display: none !important; }
+            .dayun-table th { background: #f1f5f9 !important; color: #000 !important; border: 1px solid #cbd5e1 !important; }
+            .dayun-table td { border: 1px solid #cbd5e1 !important; color: #000 !important; }
         }
     </style>
 </head>
@@ -160,7 +203,10 @@
 
         <div class="home-bar">
             <button class="btn-home" onclick="goToInputPage()">⬅️ 重新输入资料</button>
-            <div id="strength-display" style="font-size:0.88rem; font-weight:bold; color:#f59e0b;">-</div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <div id="strength-display" style="font-size:0.88rem; font-weight:bold; color:#f59e0b;">-</div>
+                <button class="btn-home" onclick="window.print()" style="background: #0284c7; color: #fff; border: none;">📄 导出报告 PDF</button>
+            </div>
         </div>
 
         <!-- 独立沉浸式维度详细解构大页面（点击卡片时弹出） -->
@@ -309,7 +355,10 @@
             <!-- TAB 3: 专业报告 -->
             <div id="tab-report" class="tab-pane" style="display:none;">
                 <div class="box-panel">
-                    <div class="box-title">🌐 八字全局总论与专业深度详批</div>
+                    <div class="box-title">
+                        <span>🌐 八字全局总论与专业深度详批</span>
+                        <span style="font-size:0.75rem; color:#38bdf8; font-weight:normal;">(可左右滑动 ➔)</span>
+                    </div>
                     <div style="background: #131d31; padding: 14px; border-radius: 8px; margin-bottom: 18px;">
                         <h4 style="color: #f59e0b; margin-top: 0; font-size: 0.98rem;">🧠 个性分析与优缺点评估</h4>
                         <p id="pers-summary" style="font-size: 0.88rem; color: #f8fafc; line-height: 1.6; white-space: pre-wrap;"></p>
@@ -325,8 +374,8 @@
                         </div>
                     </div>
 
-                    <h4 style="color: #38bdf8; margin-bottom: 10px; font-size: 0.95rem;">📋 核心 11 大专业维度命运总论（点击进入独立详细页）</h4>
-                    <div class="report-section-grid" id="global-grid-container"></div>
+                    <h4 style="color: #38bdf8; margin-bottom: 6px; font-size: 0.95rem;">📋 核心 11 大专业维度命运总论</h4>
+                    <div class="report-section-horizontal-scroll" id="global-grid-container"></div>
                 </div>
             </div>
 
@@ -383,61 +432,60 @@
             <!-- TAB 6: 今年犯太岁生肖 -->
             <div id="tab-taisui" class="tab-pane" style="display:none;">
                 <div class="box-panel" style="border: 1px solid #f59e0b;">
-                    <div class="box-title" style="color:#f59e0b;">🛡️ 2026 丙午马年犯太岁生肖全解与化解指南</div>
+                    <div class="box-title" style="color:#f59e0b;">
+                        <span>🛡️ 2026 丙午马年犯太岁生肖全解与化解指南</span>
+                        <span style="font-size:0.75rem; color:#38bdf8; font-weight:normal;">(可左右滑动 ➔)</span>
+                    </div>
                     <div style="font-size: 0.9rem; line-height: 1.6; color: #e2e8f0; margin-bottom: 15px; background: rgba(245, 158, 11, 0.08); padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b;">
                         公元 2026 年为农历**丙午马年**。值年太岁为**文哲大将军**。在流年气场中，部分生肖由于与太岁产生刑、冲、破、害、值等关系，运势易生波折。以下为您全面列出 2026 年犯太岁生肖及标准专业化解方法：
                     </div>
 
-                    <div class="report-section-grid">
-                        <div style="background:#131d31; border:1px solid #f43f5e; border-radius:8px; padding:14px;">
+                    <div class="report-section-horizontal-scroll">
+                        <div class="report-card" style="border:1px solid #f43f5e; flex: 0 0 280px;">
                             <h4 style="color:#f43f5e; margin-top:0; border-bottom:1px dashed #334155; padding-bottom:6px;">🐎 1. 生肖马（值太岁 / 本命年）</h4>
                             <p style="font-size:0.85rem; color:#cbd5e1; line-height:1.6;">
                                 <strong>犯太岁形式：</strong>值太岁（坐太岁），即本命年。谓之“太岁当头坐，无喜恐有祸”。<br>
                                 <strong>运势影响：</strong>情绪起伏较大，易感疲惫，事业、职场或生活环境面临变动或压力，人际交往需防口舌是非。<br>
-                                <strong>化解与佩戴建议：</strong>
                             </p>
-                            <div class="tips-box">
-                                🏮 <strong>化解方案：</strong>奉请流年太岁符或拜太岁祈福。<br>
-                                📿 <strong>随身佩戴：</strong>宜佩戴**未（羊）六合贵人手链**或**黑曜石本命佛/生肖三合生肖吊坠（虎、狗）**以增强福报磁场，化解太岁压迫。
+                            <div class="tips-box" style="margin-top:auto;">
+                                🏮 <strong>化解：</strong>奉请流年太岁符。<br>
+                                📿 <strong>佩戴：</strong>未（羊）六合贵人手链。
                             </div>
                         </div>
 
-                        <div style="background:#131d31; border:1px solid #f59e0b; border-radius:8px; padding:14px;">
+                        <div class="report-card" style="border:1px solid #f59e0b; flex: 0 0 280px;">
                             <h4 style="color:#f59e0b; margin-top:0; border-bottom:1px dashed #334155; padding-bottom:6px;">🐭 2. 生肖鼠（冲太岁）</h4>
                             <p style="font-size:0.85rem; color:#cbd5e1; line-height:1.6;">
                                 <strong>犯太岁形式：</strong>子午相冲（冲太岁）。水火相激，变动最剧烈。<br>
                                 <strong>运势影响：</strong>代表奔波、动荡、搬迁、跳槽或投资理财易有破耗，感情婚姻易生摩擦。<br>
-                                <strong>化解与佩戴建议：</strong>
                             </p>
-                            <div class="tips-box">
-                                🏮 <strong>化解方案：</strong>动中求稳，宜主动谋求变化（如出差、旅游、装修），切忌盲目大额投资。<br>
-                                📿 <strong>随身佩戴：</strong>宜佩戴**丑（牛）六合贵人吉祥物**，合力化解子午冲克之力。
+                            <div class="tips-box" style="margin-top:auto;">
+                                🏮 <strong>化解：</strong>动中求稳，切忌盲目大额投资。<br>
+                                📿 <strong>佩戴：</strong>丑（牛）六合贵人吉祥物。
                             </div>
                         </div>
 
-                        <div style="background:#131d31; border:1px solid #f43f5e; border-radius:8px; padding:14px;">
+                        <div class="report-card" style="border:1px solid #f43f5e; flex: 0 0 280px;">
                             <h4 style="color:#f43f5e; margin-top:0; border-bottom:1px dashed #334155; padding-bottom:6px;">🐰 3. 生肖兔（破太岁）</h4>
                             <p style="font-size:0.85rem; color:#cbd5e1; line-height:1.6;">
                                 <strong>犯太岁形式：</strong>卯午相破（破太岁）。破者，破坏、损耗。<br>
                                 <strong>运势影响：</strong>人际关系易遭暗中破坏，合同协议易出细微漏洞，身体健康需注意脾胃与神经系统。<br>
-                                <strong>化解与佩戴建议：</strong>
                             </p>
-                            <div class="tips-box">
-                                🏮 <strong>化解方案：</strong>签署重要文件须细致反复审核，谨防小人背后谗言。<br>
-                                📿 <strong>随身佩戴：</strong>宜佩戴**亥（猪）或未（羊）三合翡翠/红玛瑙吊坠**以生旺木气，增强正缘贵人运。
+                            <div class="tips-box" style="margin-top:auto;">
+                                🏮 <strong>化解：</strong>审核合同，谨防小人背后谗言。<br>
+                                📿 <strong>佩戴：</strong>亥猪/未羊三合翡翠吊坠。
                             </div>
                         </div>
 
-                        <div style="background:#131d31; border:1px solid #f59e0b; border-radius:8px; padding:14px;">
+                        <div class="report-card" style="border:1px solid #f59e0b; flex: 0 0 280px;">
                             <h4 style="color:#f59e0b; margin-top:0; border-bottom:1px dashed #334155; padding-bottom:6px;">🐮 4. 生肖牛（害太岁）</h4>
                             <p style="font-size:0.85rem; color:#cbd5e1; line-height:1.6;">
                                 <strong>犯太岁形式：</strong>丑午相害（害太岁）。害代表陷害、不和、灾害相侵。<br>
                                 <strong>运势影响：</strong>易遭他人妒忌、陷害或合作中途生变，背后阻力较大，心情易烦闷。<br>
-                                <strong>化解与佩戴建议：</strong>
                             </p>
-                            <div class="tips-box">
-                                🏮 <strong>化解方案：</strong>低调行事，凡事多留心眼，切勿轻信他人空头承诺。<br>
-                                📿 <strong>随身佩戴：</strong>宜佩戴**巳（蛇）或酉（鸡）三合金局吊坠**，以金泄土生水，化解丑午害气。
+                            <div class="tips-box" style="margin-top:auto;">
+                                🏮 <strong>化解：</strong>低调行事，凡事多留心眼。<br>
+                                📿 <strong>佩戴：</strong>巳蛇/酉鸡三合金局吊坠。
                             </div>
                         </div>
                     </div>
@@ -489,7 +537,6 @@
     let globalDayunList = [];
     let globalReportData = null;
 
-    // 🚀 页面加载时：自动同步 index.html 传递过来的通用生辰档案
     window.addEventListener('DOMContentLoaded', () => {
         const savedProfile = localStorage.getItem('metaphysics_common_profile');
         if (savedProfile) {
@@ -695,8 +742,10 @@
             const tipsVal = (obj && typeof obj === 'object') ? obj.tips : '';
             return `
                 <div class="report-card" onclick='openSubDetailPage(${JSON.stringify(item.title)}, ${JSON.stringify(textVal)}, ${JSON.stringify(tipsVal)})'>
-                    <h4>${item.title}</h4>
-                    <p>${textVal}</p>
+                    <div>
+                        <h4>${item.title}</h4>
+                        <p>${textVal}</p>
+                    </div>
                     ${tipsVal ? `<div class="tips-box">${tipsVal}</div>` : ''}
                 </div>
             `;
@@ -749,16 +798,19 @@
         ];
 
         daContainer.innerHTML = `
-            <div style="font-size: 1rem; color: #f59e0b; font-weight: bold; margin-bottom: 12px;">📈 【大限 [${selectedDy.gan_zhi}] · ${selectedDy.start_year}-${selectedDy.end_year}年】 专业深度解构</div>
-            <div class="report-section-grid">
+            <div style="font-size: 1rem; color: #f59e0b; font-weight: bold; margin-bottom: 8px;">📈 【大限 [${selectedDy.gan_zhi}] · ${selectedDy.start_year}-${selectedDy.end_year}年】 专业深度解构 (可左右滑动 ➔)</div>
+            <div class="report-section-horizontal-scroll">
                 ${daKeys.map(item => {
                     const obj = da[item.k];
                     const textVal = (obj && typeof obj === 'object') ? obj.text : (obj || '');
                     const tipsVal = (obj && typeof obj === 'object') ? obj.tips : '';
                     return `
                         <div class="report-card" onclick='openSubDetailPage(${JSON.stringify(`[大限 ${selectedDy.gan_zhi}] ${item.title}`)}, ${JSON.stringify(textVal)},${JSON.stringify(tipsVal)})'>
-                            <h4>${item.title}</h4>
-                            <p>${textVal}</p>${tipsVal ? `<div class="tips-box">${tipsVal}</div>` : ''}
+                            <div>
+                                <h4>${item.title}</h4>
+                                <p>${textVal}</p>
+                            </div>
+                            ${tipsVal ? `<div class="tips-box">${tipsVal}</div>` : ''}
                         </div>
                     `;
                 }).join('')}
@@ -797,18 +849,23 @@
             </div>
             ${an.taisui ? `<div class="taisui-alert">🛡️ 犯太岁气场检测：${an.taisui}</div>` : ''}
             ${an.shensha && an.shensha.length > 0 ? `<div style="background: rgba(192, 132, 252, 0.1); border: 1px solid #c084fc; padding: 10px; border-radius: 8px; margin-bottom: 12px; color: #e9d5ff; font-size: 0.88rem;"><strong>🌟 流年神煞：</strong> ${an.shensha.join(' · ')}</div>` : ''}
-            <div class="report-section-grid">
+            
+            <div class="report-section-horizontal-scroll">
                 ${['career', 'wealth', 'health', 'marriage', 'social', 'accident'].map(k => {
                     const obj = an[k];
                     const t = {career: '💼 事业', wealth: '💰 财运', health: '🏥 健康', marriage: '💍 婚姻', social: '🤝 人缘', accident: '⚠️ 安全'}[k];
                     return `
                         <div class="report-card" onclick='openSubDetailPage(${JSON.stringify(`[${ln.year}年] ${t}`)}, ${JSON.stringify(obj.text)},${JSON.stringify(obj.tips)})'>
-                            <h4>${t}</h4>
-                            <p>${obj.text}</p>${obj.tips ? `<div class="tips-box">${obj.tips}</div>` : ''}
+                            <div>
+                                <h4>${t}</h4>
+                                <p>${obj.text}</p>
+                            </div>
+                            ${obj.tips ? `<div class="tips-box">${obj.tips}</div>` : ''}
                         </div>
                     `;
                 }).join('')}
             </div>
+
             ${an.liuyue ? `
                 <div style="margin-top: 15px; background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid #334155;">
                     <h4 style="color: #f59e0b; margin-top: 0; font-size: 0.95rem;">🌙 12 流月运势精细推演</h4>
