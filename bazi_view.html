@@ -75,10 +75,11 @@
         .box-panel { background: #1e293b; padding: 16px; border-radius: 10px; border: 1px solid #334155; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); box-sizing: border-box; }
         .box-title { color: #f59e0b; font-weight: bold; margin-bottom: 12px; border-bottom: 2px solid #334155; padding-bottom: 8px; font-size: 1rem; display: flex; align-items: center; justify-content: space-between; }
 
-        /* 📈 大限与流年表格一页适配 */
-        .dayun-table { width: 100%; border-collapse: collapse; text-align: center; background: #0f172a; font-size: 0.82rem; margin-top: 10px; table-layout: fixed; }
-        .dayun-table th, .dayun-table td { border: 1px solid #334155; padding: 9px 2px; word-break: break-all; }
-        .dayun-table th { background: #334155; color: #38bdf8; font-size: 0.8rem; }
+        /* 📈 优化后的宽敞大限与流年表格样式（彻底防止文字挤压换行） */
+        .dayun-table-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 8px; border: 1px solid #334155; }
+        .dayun-table { width: 100%; min-width: 480px; border-collapse: collapse; text-align: center; background: #0f172a; font-size: 0.85rem; table-layout: fixed; }
+        .dayun-table th, .dayun-table td { border: 1px solid #334155; padding: 12px 6px; word-break: keep-all; white-space: nowrap; }
+        .dayun-table th { background: #1e293b; color: #38bdf8; font-size: 0.85rem; }
 
         .dayun-row { transition: background 0.2s; }
         .dayun-row.clickable { cursor: pointer; }
@@ -86,11 +87,11 @@
         .dayun-row.locked { opacity: 0.45; cursor: not-allowed; background: #0b1120; }
         .dayun-row.active-dayun { background: rgba(244, 63, 94, 0.2); border-left: 4px solid #f43f5e; }
 
-        .star-cell-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
-        .current-limit-tag { background: #f43f5e; color: #fff; padding: 1px 3px; border-radius: 3px; font-size: 0.6rem; font-weight: normal; white-space: nowrap; }
-        .locked-tag { background: #475569; color: #94a3b8; padding: 1px 3px; border-radius: 3px; font-size: 0.6rem; }
+        .star-cell-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; }
+        .current-limit-tag { background: #f43f5e; color: #fff; padding: 1px 4px; border-radius: 3px; font-size: 0.65rem; font-weight: normal; white-space: nowrap; }
+        .locked-tag { background: #475569; color: #94a3b8; padding: 1px 4px; border-radius: 3px; font-size: 0.65rem; }
 
-        /* 🌟 核心修改：两列固定并排，上下顺畅滑动 */
+        /* 🌟 两列并排、上下流式滚动的网格布局 */
         .report-section-grid-2col {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -129,7 +130,7 @@
         .record-item:hover { border-color: #38bdf8; background: #1a2744; }
 
         @media (max-width: 480px) {
-            .report-section-grid-2col { grid-template-columns: 1fr; } /* 超小屏自动单列 */
+            .report-section-grid-2col { grid-template-columns: 1fr; }
         }
 
         /* 🌟 专门适配导出 PDF / 打印的排版样式 */
@@ -375,15 +376,16 @@
             <div id="tab-dayun" class="tab-pane" style="display:none;">
                 <div class="box-panel">
                     <div class="box-title">📈 专业大限运势推演 (点击行查看大限细批)</div>
-                    <div>
+                    <!-- 🌟 宽敞的表格包裹容器，支持完美滚动与撑开 -->
+                    <div class="dayun-table-wrapper">
                         <table class="dayun-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 25%;">主星</th>
-                                    <th>大限干支</th>
-                                    <th>副星</th>
-                                    <th style="width: 24%;">岁数区间</th>
-                                    <th style="width: 25%;">年份区间</th>
+                                    <th style="width: 22%;">主星</th>
+                                    <th style="width: 16%;">大限干支</th>
+                                    <th style="width: 20%;">副星</th>
+                                    <th style="width: 18%;">岁数区间</th>
+                                    <th style="width: 24%;">年份区间</th>
                                 </tr>
                             </thead>
                             <tbody id="dayun-table-body">
@@ -402,14 +404,14 @@
                     <div style="margin-bottom: 12px; color: #94a3b8; font-size: 0.85rem;">
                         💡 请在上方大限选中后，在此查看对应大运内的流年：
                     </div>
-                    <div style="margin-bottom: 15px;">
+                    <div class="dayun-table-wrapper" style="margin-bottom: 15px;">
                         <table class="dayun-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 28%;">流年主星</th>
-                                    <th>流年干支</th>
-                                    <th>虚岁</th>
-                                    <th>公历年份</th>
+                                    <th style="width: 30%;">流年主星</th>
+                                    <th style="width: 22%;">流年干支</th>
+                                    <th style="width: 22%;">虚岁</th>
+                                    <th style="width: 26%;">公历年份</th>
                                 </tr>
                             </thead>
                             <tbody id="liunian-table-body">
@@ -449,7 +451,7 @@
                             <h4 style="color:#f59e0b; margin-top:0; border-bottom:1px dashed #334155; padding-bottom:6px;">🐭 2. 生肖鼠（冲太岁）</h4>
                             <p style="font-size:0.85rem; color:#cbd5e1; line-height:1.6;">
                                 <strong>犯太岁形式：</strong>子午相冲（冲太岁）。水火相激，变动最剧烈。<br>
-                                <strong>运势影响：</strong>代表奔波、动荡、搬迁、跳槽或投资理财易有破耗，感情婚姻易生摩擦。<br>
+                                <strong>运势影响：</strong>代表奔波、动荡、搬迁、跳槽 or 投资理财易有破耗，感情婚姻易生摩擦。<br>
                             </p>
                             <div class="tips-box" style="margin-top:auto;">
                                 🏮 <strong>化解：</strong>动中求稳，切忌盲目大额投资。<br>
@@ -759,8 +761,8 @@
                     <td>${mainStarHtml}</td>
                     <td style="color:${isFuture ? '#94a3b8':'#facc15'}; font-weight:bold;">${d.gan_zhi}</td>
                     <td style="color:#cbd5e1;">${d.sub_star}</td>
-                    <td style="color:#38bdf8; font-weight:bold;">${d.age}-${d.age+9}岁</td>
-                    <td style="color:#a7f3d0; font-weight:bold;">${d.start_year}-${d.end_year}</td>
+                    <td style="color:#38bdf8; font-weight:bold; white-space:nowrap;">${d.age}-${d.age+9}岁</td>
+                    <td style="color:#a7f3d0; font-weight:bold; white-space:nowrap;">${d.start_year}-${d.end_year}</td>
                 </tr>
             `;
         }).join('');
@@ -818,8 +820,8 @@
                 <tr style="${isThisYear ? "background: rgba(244, 63, 94, 0.15); font-weight: bold;" : ""}" onclick="showLiunianDetail(${index}, ${lnIdx})" class="dayun-row clickable">
                     <td style="color:#f43f5e; font-weight:bold;">${ln.main_star}</td>
                     <td style="color:#facc15; font-weight:bold;">${ln.gan_zhi}</td>
-                    <td style="color:#38bdf8;">${ln.age}岁</td>
-                    <td>${isThisYear ? `<span style="color:#a7f3d0; font-weight:bold;">${ln.year}年(今)</span>` : `<span style="color:#a7f3d0;">${ln.year}年</span>`}</td>
+                    <td style="color:#38bdf8; white-space:nowrap;">${ln.age}岁</td>
+                    <td style="white-space:nowrap;">${isThisYear ? `<span style="color:#a7f3d0; font-weight:bold;">${ln.year}年(今)</span>` : `<span style="color:#a7f3d0;">${ln.year}年</span>`}</td>
                 </tr>
             `;
         }).join('');
