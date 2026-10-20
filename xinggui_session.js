@@ -43,9 +43,9 @@ async function loginWithGoogle(){
  if(error)throw Error(error.message);
  return data;
 }
-async function sendPhoneOtp(phone){
+async function sendPhoneOtp(phone,channel="sms",shouldCreateUser=true){
  if(!client)throw Error('登录服务尚未就绪');
- const {error}=await client.auth.signInWithOtp({phone,options:{shouldCreateUser:true}});
+ const {error}=await client.auth.signInWithOtp({phone,options:{shouldCreateUser,channel}});
  if(error)throw Error(error.message);
 }
 async function verifyPhoneOtp(phone,token){

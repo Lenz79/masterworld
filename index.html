@@ -110,9 +110,9 @@
         </section>
         <div id="form-phone" class="auth-form">
             <h3 id="phone-auth-title">📱 手机号码注册</h3>
-            <p style="color:#94a3b8;font-size:.85rem">请填写国际格式号码，例如 +60123456789。须先在 Supabase 配置 Phone 和短信供应商。</p>
+            <p style="color:#94a3b8;font-size:.85rem">请填写国际格式号码，例如 +60123456789。WhatsApp 验证需先配置 Supabase Phone、Twilio Verify 和 WhatsApp Sender。</p>
             <div class="form-group"><label>手机号码</label><input type="tel" id="phone-number" autocomplete="tel" placeholder="+60123456789"></div>
-            <button class="btn-submit" type="button" onclick="handleSendPhoneOtp()">发送短信验证码</button>
+            <div class="form-group"><label>验证码发送方式</label><select id="phone-channel"><option value="whatsapp">WhatsApp（需开通）</option><option value="sms">SMS 短信</option></select></div><button class="btn-submit" type="button" onclick="handleSendPhoneOtp()">发送验证码</button>
             <div class="form-group" style="margin-top:12px"><label>6 位验证码</label><input type="text" id="phone-otp" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000"></div>
             <button class="btn-submit" type="button" onclick="handleVerifyPhoneOtp()">验证并登录</button>
             <button class="btn-submit" type="button" style="background:#334155;color:white" onclick="returnFromPhoneAuth()">返回邮箱方式</button>
@@ -149,7 +149,7 @@
             <h3>找回密码</h3>
             <p style="color:#94a3b8">输入注册邮箱，我们将发送密码重设链接。</p>
             <div class="form-group"><label>注册邮箱</label><input type="email" id="reset-email" autocomplete="email" placeholder="your@email.com"></div>
-            <button class="btn-submit" onclick="handlePasswordResetRequest()">发送重设邮件</button>
+            <button class="btn-submit" onclick="handlePasswordResetRequest()">发送重设邮件</button><p style="color:#94a3b8;margin-top:16px">如果账号是使用手机号码注册的，也可以通过 WhatsApp 验证身份，再为该手机账号设置密码。此流程不能重置未绑定手机号的邮箱或 Google 账号。</p><div class="form-group"><label>已注册的手机号码</label><input type="tel" id="recovery-phone" placeholder="+60123456789"></div><button class="btn-submit" type="button" onclick="handlePhoneRecoverySend()">发送 WhatsApp 验证码</button><div class="form-group"><label>6 位验证码</label><input id="recovery-code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000"></div><button class="btn-submit" type="button" onclick="handlePhoneRecoveryVerify()">验证身份并设置密码</button>
             <button class="btn-submit" style="background:#334155;color:#fff" onclick="showLoginForm()">返回登录</button>
         </div>
         <div id="form-new-password" class="auth-form">
@@ -310,14 +310,29 @@
     async function handleSendPhoneOtp(){
       const phone=document.getElementById('phone-number').value.trim();
       if(!/^\+[1-9]\d{7,14}$/.test(phone)){showAuthMessage('请填写国际格式手机号码，例如 +60123456789');return}
-      try{await XingguiSession.ready;await XingguiSession.sendPhoneOtp(phone);showAuthMessage('如短信服务配置正确，验证码已发送。请检查手机。')}
-      catch(e){showAuthMessage('发送短信失败：'+e.message+'。请检查 Supabase Phone Auth / SMS Provider。')}
+      try{await XingguiSession.ready;await XingguiSession.sendPhoneOtp(phone,document.getElementById('phone-channel').value,currentAuthMode==='signup');showAuthMessage('验证码请求已提交。请检查所选渠道。')}
+      catch(e){showAuthMessage('发送验证码失败：'+e.message+'。请检查 Supabase Phone Auth / SMS Provider。')}
     }
     async function handleVerifyPhoneOtp(){
       const phone=document.getElementById('phone-number').value.trim(),token=document.getElementById('phone-otp').value.trim();
       if(!/^\d{6}$/.test(token)){showAuthMessage('请输入 6 位验证码');return}
       try{await XingguiSession.verifyPhoneOtp(phone,token);checkLoginState();showAuthMessage('手机验证成功')}
       catch(e){showAuthMessage('验证失败：'+e.message)}
+    }
+    async function handlePhoneRecoverySend(){
+      const phone=document.getElementById('recovery-phone').value.trim();
+      if(!/^\+[1-9]\d{7,14}$/.test(phone)){showAuthMessage('请填写国际格式手机号码');return}
+      try{await XingguiSession.ready;await XingguiSession.sendPhoneOtp(phone,'whatsapp',false);showAuthMessage('若该手机号已注册，验证码请求已提交。')}
+      catch(e){showAuthMessage('无法发送验证码，请确认 WhatsApp 服务已开通，或使用邮箱重置。')}
+    }
+    async function handlePhoneRecoveryVerify(){
+      const phone=document.getElementById('recovery-phone').value.trim(),token=document.getElementById('recovery-code').value.trim();
+      if(!/^\d{6}$/.test(token)){showAuthMessage('请输入6位验证码');return}
+      try{await XingguiSession.ready;await XingguiSession.verifyPhoneOtp(phone,token);const a=XingguiSession.account();
+        if(!a){throw Error('未建立验证会话')}
+        // 此时 Supabase 仅认证此手机号对应的账号，不会授予其他账号的密码重置权限。
+        document.getElementById('auth-box').style.display='block';document.getElementById('user-status-box').style.display='none';showAuthForm('new-password');showAuthMessage('手机身份已验证。仅可为此手机账号设置新密码。')
+      }catch(e){showAuthMessage('身份验证失败：'+e.message)}
     }
     function handleWeChatAuth(){showAuthMessage('微信登录尚未开通：需先申请微信开放平台网站应用及授权对接，不能直接使用 Supabase 内置微信 Provider。')}
     function showResetForm(){showAuthForm('reset');showAuthMessage('')}
