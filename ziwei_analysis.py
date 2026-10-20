@@ -597,40 +597,89 @@ def build_palace_narratives(edges, palaces, decade_zhi=None, annual_zhi=None, an
           'note':'大限及流年宫名为同一物理宫位叠宫映射，不代表独立宫干飞化。'})
     return cards
 
-# Independent school-specific reading summaries for the high-level analysis API.
-# This is an interpretive rule-based reading, not an assertion of real-world events.
-def build_school_readings(chart, school, analysis_result):
-    palaces = chart.get("palaces") or {}
-    records = []
-    if school == "sanhe":
-        for item in analysis_result.get("palaces", []):
-            parts = item.get("three_harmony_four_positions") or []
-            local = parts[0] if parts else {}
-            related = parts[1:]
-            supportive = sorted({s for p in related for s in p.get("stars", []) if s in SANHE_STAR_GROUPS["六吉"]})
-            stressful = sorted({s for p in related for s in p.get("stars", []) if s in SANHE_STAR_GROUPS["六煞"]})
-            records.append({
-                "palace": item.get("palace"), "zhi": item.get("zhi"), "school": "三合派",
-                "focus": "本宫星曜、三方四正与吉煞会照",
-                "observed": "本宫可见：" + ("、".join(local.get("stars") or []) or "暂无已排星曜") +
-                    "；三方四正可见：" + ("、".join(sorted({s for p in related for s in p.get("stars", [])})) or "暂无已排星曜"),
-                "favorable": "会照的辅助星曜：" + ("、".join(supportive) or "未观察到已核验吉曜"),
-                "unfavorable": "会照的压力星曜：" + ("、".join(stressful) or "未观察到已核验煞曜"),
-                "caveat": "星曜分布只支持条件式分析；格局和庙旺利陷尚未校准。"
-            })
+# Client-facing direct readings. Evidence and interpretation are kept separate.
+# These are conditional tendencies, not assertions of future facts or dates.
+PALACE_SCENES = {
+ "命宫": ("个人选择与处事", "个人决定、工作方向、责任分配", "自己、主管及重要合作对象", "重大选择前先确认条件，避免临时改变安排"),
+ "兄弟宫": ("手足及同辈往来", "借贷、利益分配、亲友之间的协助", "兄弟姐妹、同辈、熟悉的朋友", "金钱与人情往来应清楚分账"),
+ "夫妻宫": ("伴侣与亲密关系", "关系承诺、相处方式、共同财务安排", "伴侣、追求者及双方家人", "重要承诺与财务安排宜双方说清楚"),
+ "子女宫": ("子女及投入的项目", "子女教育、照顾责任、项目投入与成果", "子女、晚辈、团队成员", "安排时间及预算，避免同时承担过多责任"),
+ "财帛宫": ("收入与资金", "薪酬、回款、投资安排、开支及债务", "客户、付款方、合伙人", "重视现金流、合同及款项到账情况"),
+ "疾厄宫": ("身体状态与生活节奏", "工作负荷、休息安排、健康检查", "自己、家人及医疗专业人员", "不以命盘代替诊断，有不适应及时就医"),
+ "迁移宫": ("外出与环境变化", "出差、搬迁、异地合作、交通及行程", "外地客户、陌生合作方、同行者", "行程、文件及费用预留调整空间"),
+ "交友宫": ("朋友与合作网络", "合作邀约、资源介绍、利益分配、人际纠纷", "朋友、同事、合作伙伴", "先明确责任与分配，避免只凭交情答应"),
+ "事业宫": ("工作与职位", "岗位变化、项目推进、升迁、管理责任", "上司、同事、客户及下属", "先确认权限、交付目标与资源"),
+ "田宅宫": ("居住与不动产", "租售、搬家、装修、房贷及家产安排", "家人、业主、中介及承包商", "核对产权、合同、预算及施工安排"),
+ "福德宫": ("精神状态与生活满足", "休息、消费习惯、长期规划与压力管理", "自己、亲近的人及工作伙伴", "避免长期透支时间与精力"),
+ "父母宫": ("长辈与权威关系", "长辈照顾、上级支持、审批、文书及制度", "父母、长辈、主管及审批人员", "重要文件与责任边界宜事先确认"),
+}
+
+def _direct_reading(palace, school, signals):
+    topic, matters, people, advice = PALACE_SCENES.get(palace, ("相关生活事务", "工作与家庭安排", "有关当事人", "重要决定先核实事实"))
+    good = any(x in signals for x in ('化禄','化科','六吉'))
+    power = '化权' in signals
+    caution = any(x in signals for x in ('化忌','六煞'))
+    if good and caution:
+        judgment = f"{topic}方面可能出现机会与压力并存的情况；事情推进时，容易同时牵涉{matters}。"
+        favorable = f"若相关人员愿意配合、条件明确，{matters}较有机会顺利落实。"
+        unfavorable = f"若沟通反复或责任不清，{people}之间可能出现拖延、争执或额外支出。"
+    elif caution:
+        judgment = f"{topic}方面宜留意反复、延误或责任加重的情况，较可能牵涉{matters}。"
+        favorable = f"若及早协调{people}，并确认安排，可减少不必要的阻碍。"
+        unfavorable = f"若急于作决定，{matters}容易出现额外压力或后续调整。"
+    elif good:
+        judgment = f"{topic}方面较容易遇到可争取的机会，重点可能落在{matters}。"
+        favorable = f"获得{people}支持且条件落实时，事情较容易推进。"
+        unfavorable = f"若只看表面机会、忽略实际条件，仍可能出现预期落差。"
     else:
-        transfers={x["source"]:x for x in analysis_result.get("transfer_ji_paths", [])}
-        for item in analysis_result.get("palace_narratives", []):
-            incoming = item.get("incoming") or []
-            outgoing = item.get("outgoing") or []
-            records.append({
-                "palace": item.get("natal_palace"), "zhi": item.get("zhi"), "school": "飞星派",
-                "focus": "宫干四化、飞宫转忌与来源去向",
-                "transfer_ji": transfers.get(item.get("zhi"), {}),
-                "observed": "飞入：" + ("；".join(x.get("description", "") for x in incoming[:5]) or "无已记录路径") +
-                    "；飞出：" + ("；".join(x.get("description", "") for x in outgoing[:5]) or "无已记录路径"),
-                "favorable": "可追溯的禄科飞入：" + str(sum("禄" in x.get("hua", "") or "科" in x.get("hua", "") for x in incoming)),
-                "unfavorable": "可追溯的忌飞入：" + str(sum("忌" in x.get("hua", "") for x in incoming)),
-                "caveat": "限年独立宫干规则尚未校准，飞化路径不等于事件成立或应期。"
-            })
+        judgment = f"{topic}的重点在于处理{matters}，目前不足以单凭已有信号判断明确吉凶。"
+        favorable = f"若与{people}充分沟通、提前准备，通常较有利于安排。"
+        unfavorable = "资料不足时，不宜推断特定事件一定发生。"
+    if power:
+        judgment += " 其中可能涉及主导权、职位或责任分配的调整。"
+    return {
+        "direct_judgment": judgment,
+        "related_people": people,
+        "related_matters": matters,
+        "favorable": favorable,
+        "unfavorable": unfavorable,
+        "advice": advice + "。",
+        "reading": " ".join((judgment, favorable, unfavorable, advice + "。")),
+        "certainty": "条件式趋势；不是已验证事件或发生时间",
+        "school": "三合派" if school == 'sanhe' else "飞星派",
+    }
+
+
+def build_school_readings(chart, school, analysis_result):
+    """Return client-friendly readings plus independent technical evidence."""
+    records=[]
+    if school == 'sanhe':
+        for item in analysis_result.get('palaces', []):
+            parts=item.get('three_harmony_four_positions') or []
+            related=parts[1:]
+            supportive=sorted({s for p in parts for s in p.get('stars',[]) if s in SANHE_STAR_GROUPS['六吉']})
+            stressful=sorted({s for p in parts for s in p.get('stars',[]) if s in SANHE_STAR_GROUPS['六煞']})
+            signals=set()
+            if supportive: signals.add('六吉')
+            if stressful: signals.add('六煞')
+            palace=item.get('palace')
+            reading=_direct_reading(palace,'sanhe',signals)
+            records.append(dict(reading, palace=palace, zhi=item.get('zhi'),
+                focus='三方四正的星曜分布',
+                evidence={'supportive_stars':supportive,'stressful_stars':stressful},
+                caveat='仅按可见星曜生成条件式批语；未验证的格局和亮度不参与断事。'))
+    else:
+        transfers={x['source']:x for x in analysis_result.get('transfer_ji_paths', [])}
+        for item in analysis_result.get('palace_narratives', []):
+            incoming=item.get('incoming') or []
+            outgoing=item.get('outgoing') or []
+            # Incoming and outgoing are retained as distinct evidence; do not infer dates.
+            signals={e.get('hua') for e in incoming + outgoing if e.get('hua')}
+            palace=item.get('natal_palace')
+            reading=_direct_reading(palace,'flying',signals)
+            records.append(dict(reading, palace=palace, zhi=item.get('zhi'),
+                focus='宫干四化及转忌关系',
+                evidence={'incoming':incoming,'outgoing':outgoing,
+                          'transfer_ji':transfers.get(item.get('zhi'),{})},
+                caveat='宫干路径不等于事件成立；大限流年独立规则及应期尚未校准。'))
     return records

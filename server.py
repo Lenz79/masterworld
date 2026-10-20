@@ -246,6 +246,7 @@ class MainGatewayHandler(SimpleHTTPRequestHandler):
                 if request.get('school') != 'sanhe':
                     result.setdefault('transfer_ji_paths', build_transfer_ji_paths(request['chart']))
                 result['school_readings'] = build_school_readings(request['chart'], 'sanhe' if request.get('school') == 'sanhe' else 'flying', result)
+                result['client_readings'] = result['school_readings']
                 from ziwei_delivery_audit import audit_chart
                 result['delivery_audit'] = audit_chart(request['chart'])
                 from ziwei_quality_audit import audit_quality
