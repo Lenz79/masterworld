@@ -7,7 +7,7 @@
     <style>
         * { box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #0f172a; color: #e2e8f0; margin: 0; padding: 6px; }
-        .container { max-width: 1550px; margin: 0 auto; padding: 4px; }
+        .container { max-width: 880px; margin: 0 auto; padding: 4px; } /* 🌟 整体宽度向外拓宽约 3cm (880px) */
 
         /* 顶部导航 */
         .home-bar { padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; background: #1e293b; border-bottom: 1px solid #334155; margin-bottom: 8px; border-radius: 8px; gap: 8px; }
@@ -21,31 +21,45 @@
         summary::after { content: "▼"; font-size: 0.72rem; color: #94a3b8; }
         details[open] summary::after { content: "▲"; }
 
-        .layer-toolbar-content { padding: 10px 12px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; background: #0f172a; border-top: 1px solid #334155; }
-        @media (min-width: 640px) { .layer-toolbar-content { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); } }
-        .layer-item { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: bold; color: #cbd5e1; cursor: pointer; }
-        .layer-item input[type="checkbox"] { width: 15px; height: 15px; accent-color: #f59e0b; }
+        /* 🌟 图层勾选栏：在拓宽的宽度下完美单行平铺，间距宽敞 */
+        .layer-toolbar-content { padding: 10px 16px; display: flex; flex-wrap: nowrap; justify-content: space-between; align-items: center; background: #0f172a; border-top: 1px solid #334155; }
+        .layer-item { display: inline-flex; align-items: center; gap: 5px; font-size: 0.78rem; font-weight: bold; color: #cbd5e1; cursor: pointer; white-space: nowrap; }
+        .layer-item input[type="checkbox"] { width: 14px; height: 14px; accent-color: #f59e0b; }
 
         .control-panel { background: #0f172a; padding: 12px; border-top: 1px solid #334155; }
         .control-group { margin-bottom: 8px; }
         .control-group label { display: block; font-size: 0.78rem; color: #38bdf8; margin-bottom: 3px; font-weight: 600; }
         .control-group input[type="file"], .control-group select, .control-group input[type="number"] { width: 100%; padding: 7px; border-radius: 5px; border: 1px solid #475569; background: #1e293b; color: #fff; font-size: 0.82rem; }
 
-        .degree-input-row { display: flex; gap: 8px; align-items: center; margin-top: 3px; }
-        .degree-input-row input[type="range"] { flex: 1; }
-        .degree-input-row input[type="number"] { width: 65px; text-align: center; font-weight: bold; color: #facc15; }
+        /* 罗盘上方的外置控制栏：单行排列 */
+        .external-control-bar { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 10px 14px; margin-bottom: 10px; display: flex; flex-wrap: nowrap; gap: 16px; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
+        .ext-control-item { display: flex; align-items: center; gap: 8px; flex: 1; }
+        .ext-control-item label { font-size: 0.78rem; color: #38bdf8; font-weight: bold; white-space: nowrap; }
+        .ext-control-item input[type="range"] { flex: 1; min-width: 80px; }
+        .degree-input-container input[type="number"] { width: 60px; text-align: center; font-weight: bold; color: #facc15; padding: 3px; background: #0f172a; border: 1px solid #475569; border-radius: 4px; font-size: 0.8rem; }
 
         .btn-group-row { display: flex; gap: 8px; margin-top: 6px; }
         .btn-action { flex: 1; background: #f59e0b; color: #0f172a; border: none; padding: 12px; font-size: 0.92rem; font-weight: bold; border-radius: 8px; cursor: pointer; text-align: center; }
-        .btn-secondary { background: #0284c7; color: #fff; padding: 6px 10px; font-size: 0.8rem; }
+        .btn-secondary { background: #0284c7; color: #fff; padding: 6px 12px; font-size: 0.8rem; }
 
-        /* 画布区 */
+        /* 画布区：宽度同步拓宽到 880px */
         .workspace { display: flex; flex-direction: column; align-items: center; margin-bottom: 10px; }
-        .canvas-container { background: #ffffff; border: 2px solid #cbd5e1; border-radius: 12px; width: 100%; max-width: 750px; aspect-ratio: 1 / 1; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(0,0,0,0.35); touch-action: none; }
+        .canvas-container { background: #ffffff; border: 2px solid #cbd5e1; border-radius: 12px; width: 100%; max-width: 880px; aspect-ratio: 1 / 1; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(0,0,0,0.35); touch-action: none; }
 
         #floorplan-img { width: 100%; height: 100%; object-fit: contain; position: absolute; top: 0; left: 0; cursor: grab; user-select: none; z-index: 1; display: none; transform-origin: center center; }
         #luopan-canvas { width: 100% !important; height: 100% !important; position: absolute; top: 0; left: 0; z-index: 10; pointer-events: none; opacity: 1 !important; }
 
+        .floorplan-toolbar { background:#1e293b; border:1px solid #334155; border-radius:10px; padding:12px; margin:8px 0 10px; display:flex; flex-wrap:wrap; align-items:end; gap:10px 16px; }
+        .floorplan-control { display:flex; align-items:center; gap:7px; min-width:190px; flex:1; }
+        .floorplan-control label { color:#38bdf8; font-weight:600; font-size:.8rem; white-space:nowrap; }
+        .floorplan-control input[type=range] { min-width:80px; flex:1; }
+        .floorplan-control output { min-width:48px; color:#facc15; font-size:.8rem; text-align:right; }
+        .floorplan-file { flex:1 1 250px; min-width:200px; }
+        .floorplan-file label { display:block; color:#38bdf8; font-size:.8rem; margin-bottom:5px; font-weight:600; }
+        .floorplan-file input { width:100%; max-width:100%; color:#e2e8f0; font-size:.8rem; }
+        .floorplan-actions { display:flex; gap:8px; flex-wrap:wrap; }
+        .floorplan-actions button { flex:0 0 auto; }
+        @media(max-width:600px) { .external-control-bar {flex-wrap:wrap;} .floorplan-control {flex-basis:100%;} }
         .measure-info { position: absolute; top: 10px; right: 10px; background: rgba(15, 23, 42, 0.9); border: 1px solid #38bdf8; padding: 5px 10px; border-radius: 5px; font-size: 0.72rem; color: #38bdf8; z-index: 30; display: none; font-weight: bold; }
 
         /* 报表样式 */
@@ -54,7 +68,6 @@
         .report-block { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 10px; margin-bottom: 10px; }
         .report-block-title { font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; border-bottom: 1px solid #1e293b; padding-bottom: 4px; }
 
-        /* 🌟 核心优化：改为横向水平滚动轮播布局 */
         .analysis-horizontal-scroll {
             display: flex;
             gap: 10px;
@@ -63,16 +76,11 @@
             scroll-snap-type: x mandatory;
             -webkit-overflow-scrolling: touch;
         }
-        .analysis-horizontal-scroll::-webkit-scrollbar {
-            height: 6px;
-        }
-        .analysis-horizontal-scroll::-webkit-scrollbar-thumb {
-            background: #475569;
-            border-radius: 3px;
-        }
+        .analysis-horizontal-scroll::-webkit-scrollbar { height: 6px; }
+        .analysis-horizontal-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
 
         .palace-card {
-            flex: 0 0 260px; /* 固定每张卡片宽度，确保完美左右滑动 */
+            flex: 0 0 260px;
             scroll-snap-align: start;
             background: #1e293b;
             border: 1px solid #334155;
@@ -88,7 +96,7 @@
 
         @media print {
             body { background: #fff; color: #000; }
-            .home-bar, details, .btn-group-row, #btn-analyze-all { display: none !important; }
+            .home-bar, details, .external-control-bar, .floorplan-toolbar, .btn-group-row, #btn-analyze-all { display: none !important; }
             .canvas-container { border: 2px solid #000; break-inside: avoid; background: #fff !important; }
             .analysis-section { background: #fff; color: #000; border: none; }
             .report-block { background: #f8fafc; border: 1px solid #cbd5e1; }
@@ -100,38 +108,32 @@
 <body>
 
 <div class="container" id="export-area">
-    <!-- 1. 顶部精简导航 -->
     <div class="home-bar">
         <a href="index.html" class="btn-home">🏠 首页</a>
         <div class="title-text">🏠 阳宅风水多盘系统</div>
         <div class="user-tag" id="user-info-tag">加载中</div>
     </div>
 
-    <!-- 2. 图层勾选面板 -->
-    <details>
+    <!-- 图层勾选面板：拓宽后完美单行显示所有 7 个图层 -->
+    <details open>
         <summary>👁️ 点击展开/收起 盘面叠加图层</summary>
         <div class="layer-toolbar-content">
-            <label class="layer-item"><input type="checkbox" id="chk-base" checked> 24山地盘</label>
-            <label class="layer-item"><input type="checkbox" id="chk-longmen" checked> 龙门八局(含三曜)</label>
+            <label class="layer-item"><input type="checkbox" id="chk-base" checked> 24山透视图</label>
+            <label class="layer-item"><input type="checkbox" id="chk-longmen" checked> 龙门八局</label>
             <label class="layer-item"><input type="checkbox" id="chk-bazhai" checked> 八宅盘</label>
-            <label class="layer-item"><input type="checkbox" id="chk-ziwei" checked> 紫白诀(流年星)</label>
-            <label class="layer-item"><input type="checkbox" id="chk-chengmen"> 玄空城门诀</label>
-            <label class="layer-item"><input type="checkbox" id="chk-pailong"> 玄空排龙诀</label>
-            <label class="layer-item"><input type="checkbox" id="chk-xuankong" checked> 玄空飞星</label>
+            <label class="layer-item"><input type="checkbox" id="chk-ziwei" checked> 紫白诀</label>
+            <label class="layer-item"><input type="checkbox" id="chk-chengmen" checked> 城门诀</label>
+            <label class="layer-item"><input type="checkbox" id="chk-pailong" checked> 排龙诀</label>
+            <label class="layer-item"><input type="checkbox" id="chk-xuankong" checked> 飞星</label>
         </div>
     </details>
 
-    <!-- 3. 参数与度数微调面板 -->
+    <!-- 堪舆其他设置折叠面板 -->
     <details>
-        <summary>📐 点击展开/收起 堪舆设置与度数微调</summary>
+        <summary>📐 点击展开/收起 其他堪舆参数设置 (户型图 / 卦局 / 元运 / 年份)</summary>
         <div class="control-panel">
             <div class="control-group">
-                <label>1. 上传户型图 (Floorplan)</label>
-                <input type="file" id="upload-floorplan" accept="image/*">
-            </div>
-
-            <div class="control-group">
-                <label>2. 龙门八局（坐山卦局）</label>
+                <label>1. 龙门八局（坐山卦局）</label>
                 <select id="longmen-ju">
                     <option value="乾">乾局 (坐西北)</option>
                     <option value="坤">坤局 (坐西南)</option>
@@ -145,7 +147,7 @@
             </div>
 
             <div class="control-group">
-                <label>3. 选择玄空元运</label>
+                <label>2. 选择玄空元运</label>
                 <select id="xuankong-yun">
                     <option value="9">下元九运 (2024 - 2043年)</option>
                     <option value="8">下元八运 (2004 - 2023年)</option>
@@ -155,52 +157,78 @@
             </div>
 
             <div class="control-group">
-                <label>4. 紫白诀流年份</label>
+                <label>3. 紫白诀流年份</label>
                 <input type="number" id="ziwei-year" value="2026" min="1900" max="2100">
             </div>
 
-            <div class="control-group">
-                <label>5. 朝向度数 (<span id="degree-val">0</span>°)</label>
-                <div class="degree-input-row">
-                    <input type="range" id="luopan-range" min="0" max="359" value="0" step="0.5">
-                    <input type="number" id="luopan-number" min="0" max="359" value="0" step="0.5">
-                </div>
-            </div>
-
-            <div class="control-group">
-                <label>6. 罗盘透明度 (<span id="opacity-val">10</span>%)</label>
-                <input type="range" id="luopan-opacity" min="0" max="100" value="10">
-            </div>
-
-            <div class="control-group">
-                <button class="btn-action btn-secondary" id="btn-toggle-measure" style="width:100%;">📏 开启拉线测量工具</button>
-            </div>
-
-            <div class="btn-group-row">
+            <div class="btn-group-row" style="margin-top: 10px;">
                 <button class="btn-action btn-secondary" id="btn-reset-view">🔄 复位视图</button>
                 <button class="btn-action btn-secondary" id="btn-export-pdf">📄 导出报告</button>
             </div>
         </div>
     </details>
 
-    <!-- 4. 罗盘与户型图重叠画布区 -->
+    <!-- 户型图独立操作区：放在折叠参数面板之外，随时可操作 -->
+    <section class="floorplan-toolbar" aria-label="户型图调整与导出">
+        <div class="floorplan-file">
+            <label for="upload-floorplan">📂 上传户型图 (Floorplan)</label>
+            <input type="file" id="upload-floorplan" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp">
+        </div>
+        <div class="floorplan-control">
+            <label for="floorplan-scale">🔍 缩放</label>
+            <input id="floorplan-scale" type="range" min="20" max="500" step="1" value="100">
+            <output id="floorplan-scale-value" for="floorplan-scale">100%</output>
+        </div>
+        <div class="floorplan-control">
+            <label for="floorplan-rotation">🔄 旋转</label>
+            <input id="floorplan-rotation" type="range" min="0" max="360" step="1" value="0">
+            <output id="floorplan-rotation-value" for="floorplan-rotation">0°</output>
+        </div>
+        <div class="floorplan-actions">
+            <button class="btn-action btn-secondary" type="button" id="btn-floorplan-reset">↩️ 复位户型图</button>
+            <button class="btn-action btn-secondary" type="button" id="btn-export-overlay">🖼️ 单独导出罗盘＋户型图</button>
+        </div>
+    </section>
+
+    <!-- 🧭 罗盘上方的外置控制栏：单行排列 -->
+    <div class="external-control-bar">
+        <!-- 朝向度数 -->
+        <div class="ext-control-item" style="flex: 1.4;">
+            <label>🧭 朝向(<span id="degree-val">0</span>°)</label>
+            <input type="range" id="luopan-range" min="0" max="359" value="0" step="0.5">
+            <div class="degree-input-container">
+                <input type="number" id="luopan-number" min="0" max="359" value="0" step="0.5">
+            </div>
+        </div>
+
+        <!-- 罗盘透明度 -->
+        <div class="ext-control-item" style="flex: 1;">
+            <label>🎨 透明度(<span id="opacity-val">10</span>%)</label>
+            <input type="range" id="luopan-opacity" min="0" max="100" value="10">
+        </div>
+
+        <!-- 拉线测量按钮 -->
+        <div>
+            <button class="btn-action btn-secondary" id="btn-toggle-measure" style="padding: 7px 12px; font-size: 0.78rem; white-space: nowrap;">📏 测量</button>
+        </div>
+    </div>
+
+    <!-- 罗盘与户型图重叠画布区 -->
     <div class="workspace">
         <div class="canvas-container" id="canvas-container">
             <div class="measure-info" id="measure-info">📏 测量中</div>
             <div style="color: #64748b; text-align: center; position: absolute; z-index: 2; font-size: 0.8rem;" id="canvas-placeholder">
-                📂 提示：在上方“堪舆设置”上传户型图
+                📂 提示：使用上方独立工具栏上传户型图
             </div>
             <img id="floorplan-img" src="" alt="">
-            <canvas id="luopan-canvas" width="760" height="760"></canvas>
+            <canvas id="luopan-canvas" width="880" height="880"></canvas>
         </div>
     </div>
 
-    <!-- 5. 黄色按钮在下方 -->
     <div style="margin-bottom: 10px;">
         <button class="btn-action" id="btn-analyze-all" style="width: 100%;">✨ 点击生成全盘 AI 堪舆建议</button>
     </div>
 
-    <!-- 6. 堪舆建议展示区 -->
     <div class="analysis-section" id="report-section">
         <div class="school-report-title" id="report-title">
             <span>📜 综合堪舆全盘吉凶与布局建议报告</span>
@@ -237,6 +265,24 @@
         '艮': { xiantian: '乾', houtian: '震', tianjie: '离', zhengqiao: '兑', fuqiao: '巽', yaoshats: { '寅': '曜煞', '巳': '劫煞', '丁': '黄泉' } },
         '兑': { xiantian: '巽', houtian: '坎', tianjie: '艮', zhengqiao: '巽', fuqiao: '离', yaoshats: { '巳': '曜煞', '丙': '黄泉' } }
     };
+
+    function getDynamicChengmen(zuoShan, m) {
+        const baseOffset = mountains.indexOf(zuoShan);
+        const mIndex = mountains.indexOf(m);
+        const relIndex = (mIndex - baseOffset + 24) % 24;
+
+        const chengmenList = ['巽', '震', '艮', '坎', '乾', '兑', '离', '坤', '巽', '震', '艮', '坎', '乾', '兑', '离', '坤', '巽', '震', '艮', '坎', '乾', '兑', '离', '坤'];
+        return chengmenList[relIndex] || '吉';
+    }
+
+    function getDynamicPailong(zuoShan, m) {
+        const baseOffset = mountains.indexOf(zuoShan);
+        const mIndex = mountains.indexOf(m);
+        const relIndex = (mIndex - baseOffset + 24) % 24;
+
+        const pailongList = ['贪狼', '巨门', '禄存', '文曲', '武曲', '破军', '左辅', '右弼', '贪狼', '巨门', '禄存', '文曲', '武曲', '破军', '左辅', '右弼', '贪狼', '巨门', '禄存', '文曲', '武曲', '破军', '左辅', '右弼'];
+        return pailongList[relIndex % pailongList.length] || '吉龙';
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
         const profileStr = localStorage.getItem('metaphysics_common_profile');
@@ -276,13 +322,21 @@
         });
 
         document.getElementById('upload-floorplan').addEventListener('change', loadFloorplan);
+        document.getElementById('floorplan-scale').addEventListener('input', (e) => {
+            imgScale = Number(e.target.value) / 100;
+            updateFloorplanTransform();
+        });
+        document.getElementById('floorplan-rotation').addEventListener('input', (e) => {
+            imgRotation = Number(e.target.value);
+            updateFloorplanTransform();
+        });
+        document.getElementById('btn-floorplan-reset').addEventListener('click', resetFloorplanTransform);
+        document.getElementById('btn-export-overlay').addEventListener('click', exportCompassFloorplan);
         document.getElementById('btn-analyze-all').addEventListener('click', generateFullAnalysisReport);
 
         document.getElementById('btn-reset-view').addEventListener('click', () => {
             syncDegree(0);
-            const img = document.getElementById('floorplan-img');
-            img.style.transform = 'translate(0px, 0px) scale(1)';
-            imgPosX = 0; imgPosY = 0; imgScale = 1;
+            resetFloorplanTransform();
             measureStart = null;
             measureEnd = null;
             renderCanvasAndReport();
@@ -299,24 +353,18 @@
             if (isMeasuring) {
                 canvas.style.pointerEvents = 'auto';
                 btn.style.background = '#dc2626';
-                btn.innerText = '🛑 测量开启 (点击关闭)';
+                btn.innerText = '🛑 关闭测量';
                 infoBox.style.display = 'block';
             } else {
                 canvas.style.pointerEvents = 'none';
                 btn.style.background = '#0284c7';
-                btn.innerText = '📏 开启拉线测量工具';
+                btn.innerText = '📏 测量';
                 infoBox.style.display = 'none';
                 measureStart = null;
                 measureEnd = null;
                 renderCanvasAndReport();
             }
         });
-    }
-
-    function getMountainByDegree(deg) {
-        let normalized = (deg % 360 + 360) % 360;
-        let index = Math.floor(((normalized + 7.5) % 360) / 15);
-        return mountains[index];
     }
 
     function getZhaiByDegree(deg) {
@@ -432,7 +480,7 @@
         const ctx = canvas.getContext('2d');
         const cx = canvas.width / 2;
         const cy = canvas.height / 2;
-        const radius = 310;
+        const radius = 350; // 适配 880 画布大小
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -466,9 +514,12 @@
 
         const chkBase = document.getElementById('chk-base').checked;
         const chkLongmen = document.getElementById('chk-longmen').checked;
+        const chkChengmen = document.getElementById('chk-chengmen').checked;
+        const chkPailong = document.getElementById('chk-pailong').checked;
 
         let selectedGuaJu = document.getElementById('longmen-ju').value || '坎';
         let lmCfg = longmenData[selectedGuaJu];
+        const zhaiInfo = getZhaiByDegree(deg);
 
         mountains.forEach((m, index) => {
             const startAngle = index * 15 - 7.5;
@@ -482,6 +533,7 @@
             ctx.strokeStyle = '#000000';
             ctx.stroke();
 
+            // 24山透视图
             if (chkBase) {
                 ctx.save();
                 ctx.rotate(midAngle + Math.PI / 2);
@@ -493,15 +545,42 @@
                 ctx.restore();
             }
 
+            // 龙门曜煞
             if (chkLongmen && lmCfg && lmCfg.yaoshats && lmCfg.yaoshats[m]) {
                 let shaName = lmCfg.yaoshats[m];
                 ctx.save();
                 ctx.rotate(midAngle + Math.PI / 2);
                 ctx.fillStyle = '#dc2626';
-                ctx.font = 'bold 10px sans-serif';
+                ctx.font = 'bold 12px sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(`[${shaName}]`, 0, -(radius * 0.96));
+                ctx.fillText(`[${shaName}]`, 0, -(radius * 0.94));
+                ctx.restore();
+            }
+
+            // 玄空城门诀
+            if (chkChengmen) {
+                let chengmenText = "城:" + getDynamicChengmen(zhaiInfo.zuoShan, m);
+                ctx.save();
+                ctx.rotate(midAngle + Math.PI / 2);
+                ctx.fillStyle = '#ff4500';
+                ctx.font = 'bold 12px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(chengmenText, 0, -(radius * 0.82));
+                ctx.restore();
+            }
+
+            // 玄空排龙诀
+            if (chkPailong) {
+                let pailongText = "龙:" + getDynamicPailong(zhaiInfo.zuoShan, m);
+                ctx.save();
+                ctx.rotate(midAngle + Math.PI / 2);
+                ctx.fillStyle = '#008000';
+                ctx.font = 'bold 12px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(pailongText, 0, -(innerRadius * 0.88));
                 ctx.restore();
             }
         });
@@ -526,7 +605,7 @@
                     ctx.save();
                     ctx.rotate((angleDeg) * (Math.PI / 180));
                     ctx.fillStyle = lmColor;
-                    ctx.font = 'bold 12px sans-serif';
+                    ctx.font = 'bold 13px sans-serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(`[${lmTag}]`, 0, -(innerRadius + innerRingRadius) / 2 - 14);
@@ -535,14 +614,13 @@
             }
 
             if (chkBazhai) {
-                const zhaiInfo = getZhaiByDegree(deg);
                 const currentBazhaiMapping = bazhaiMap[zhaiInfo.zhaixing];
                 let starName = currentBazhaiMapping[gua] || '';
                 ctx.save();
                 ctx.rotate((angleDeg) * (Math.PI / 180));
                 const isJi = ['生气', '天医', '延年', '伏位'].includes(starName);
                 ctx.fillStyle = isJi ? '#0ea5e9' : '#dc2626';
-                ctx.font = 'bold 13px sans-serif';
+                ctx.font = 'bold 14px sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(starName, 0, -(innerRadius + innerRingRadius) / 2);
@@ -557,7 +635,7 @@
                 ctx.save();
                 ctx.rotate((angleDeg) * (Math.PI / 180));
                 ctx.fillStyle = info.nature.includes('吉') ? '#0ea5e9' : '#dc2626';
-                ctx.font = 'bold 12px sans-serif';
+                ctx.font = 'bold 13px sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(info.name.substring(0, 4), 0, -(innerRadius + innerRingRadius) / 2 + 16);
@@ -571,7 +649,7 @@
                 ctx.save();
                 ctx.rotate((angleDeg) * (Math.PI / 180));
                 ctx.fillStyle = '#0284c7';
-                ctx.font = 'bold 13px sans-serif';
+                ctx.font = 'bold 14px sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(`【${yunVal}运 ${starNum}飞】`, 0, -(innerRingRadius * 0.7));
@@ -645,15 +723,72 @@
                 img.src = e.target.result;
                 img.style.display = 'block';
                 document.getElementById('canvas-placeholder').style.display = 'none';
-                img.style.transform = 'translate(0px, 0px) scale(1)';
-                imgPosX = 0; imgPosY = 0; imgScale = 1;
+                resetFloorplanTransform();
                 renderCanvasAndReport();
             }
             reader.readAsDataURL(file);
         }
     }
 
-    let imgPosX = 0, imgPosY = 0, imgScale = 1;
+    let imgPosX = 0, imgPosY = 0, imgScale = 1, imgRotation = 0;
+
+    function updateFloorplanTransform() {
+        const img = document.getElementById('floorplan-img');
+        img.style.transform = `translate(${imgPosX}px, ${imgPosY}px) rotate(${imgRotation}deg) scale(${imgScale})`;
+        document.getElementById('floorplan-scale').value = Math.round(imgScale * 100);
+        document.getElementById('floorplan-scale-value').textContent = `${Math.round(imgScale * 100)}%`;
+        document.getElementById('floorplan-rotation').value = imgRotation;
+        document.getElementById('floorplan-rotation-value').textContent = `${imgRotation}°`;
+    }
+
+    function resetFloorplanTransform() {
+        imgPosX = 0; imgPosY = 0; imgScale = 1; imgRotation = 0;
+        updateFloorplanTransform();
+    }
+
+    // 按屏幕可见的图层顺序合成 PNG：底色 -> 平移/旋转/缩放的户型图 -> 罗盘。
+    // 不包含工具栏、报告或按钮；输出正方形高分辨率图片。
+    function exportCompassFloorplan() {
+        const img = document.getElementById('floorplan-img');
+        if (!img.complete || !img.naturalWidth || img.style.display === 'none') {
+            alert('请先上传户型图，再导出罗盘叠加图片。');
+            return;
+        }
+        const compass = document.getElementById('luopan-canvas');
+        const area = document.getElementById('canvas-container');
+        const size = 1760;
+        const out = document.createElement('canvas');
+        out.width = size; out.height = size;
+        const ctx = out.getContext('2d');
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, size, size);
+        const screenWidth = area.clientWidth;
+        const screenHeight = area.clientHeight;
+        const factorX = size / screenWidth, factorY = size / screenHeight;
+        // object-fit: contain 与 CSS 100%×100% 对齐；变换围绕图片容器中心。
+        const baseScale = Math.min(screenWidth / img.naturalWidth, screenHeight / img.naturalHeight);
+        const w = img.naturalWidth * baseScale;
+        const h = img.naturalHeight * baseScale;
+        ctx.save();
+        ctx.translate(size / 2 + imgPosX * factorX, size / 2 + imgPosY * factorY);
+        ctx.rotate(imgRotation * Math.PI / 180);
+        ctx.scale(imgScale * factorX, imgScale * factorY);
+        ctx.drawImage(img, -w / 2, -h / 2, w, h);
+        ctx.restore();
+        ctx.drawImage(compass, 0, 0, size, size);
+        try {
+            out.toBlob((blob) => {
+                if (!blob) { alert('图片导出失败，请重试。'); return; }
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `风水罗盘_户型叠加_${new Date().toISOString().slice(0,10)}.png`;
+                document.body.appendChild(link); link.click(); link.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+            }, 'image/png');
+        } catch (error) {
+            alert('图片导出失败，请检查上传的图片格式。');
+        }
+    }
     let isImgDragging = false, startX = 0, startY = 0;
     let initialTouchDist = 0, initialScale = 1;
 
@@ -684,7 +819,7 @@
             } else if (isImgDragging) {
                 imgPosX = e.clientX - startX;
                 imgPosY = e.clientY - startY;
-                img.style.transform = `translate(${imgPosX}px, ${imgPosY}px) scale(${imgScale})`;
+                updateFloorplanTransform();
             }
         });
 
@@ -727,15 +862,15 @@
                 if (isImgDragging && e.touches.length === 1) {
                     imgPosX = e.touches[0].clientX - startX;
                     imgPosY = e.touches[0].clientY - startY;
-                    img.style.transform = `translate(${imgPosX}px, ${imgPosY}px) scale(${imgScale})`;
+                    updateFloorplanTransform();
                 } else if (e.touches.length === 2) {
                     let currentDist = Math.hypot(
                         e.touches[0].clientX - e.touches[1].clientX,
                         e.touches[0].clientY - e.touches[1].clientY
                     );
                     if (initialTouchDist > 0) {
-                        imgScale = Math.min(Math.max(initialScale * (currentDist / initialTouchDist), 0.5), 3.0);
-                        img.style.transform = `translate(${imgPosX}px, ${imgPosY}px) scale(${imgScale})`;
+                        imgScale = Math.min(Math.max(initialScale * (currentDist / initialTouchDist), 0.2), 5.0);
+                        updateFloorplanTransform();
                     }
                 }
             }
@@ -768,7 +903,6 @@
 
         let html = '';
 
-        // 1. 八宅派全8宫 (横向滑动)
         html += `
             <div class="report-block">
                 <div class="report-block-title" style="color:#38bdf8;">
@@ -801,7 +935,6 @@
 
         html += `</div></div>`;
 
-        // 2. 紫白诀九星 (横向滑动)
         html += `
             <div class="report-block">
                 <div class="report-block-title" style="color:#f59e0b;">
@@ -833,7 +966,6 @@
 
         html += `</div></div>`;
 
-        // 3. 玄空元运与龙门水法
         let yaoshatTxt = Object.keys(lmCfg.yaoshats).map(m => `${m}山(${lmCfg.yaoshats[m]})`).join('、');
 
         html += `

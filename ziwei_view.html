@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI 智能玄学 SaaS 平台 - 紫微斗数全盘联动排盘系统</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 5px; overflow-x: hidden; }
+        .container { max-width: 1060px; margin: 0 auto; padding: 3px; }
+
+        /* 顶部导航 */
+        .home-bar { padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; background: #ffffff; border-bottom: 1px solid #e2e8f0; margin-bottom: 5px; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .btn-home { background: #f1f5f9; color: #0284c7; border: 1px solid #cbd5e1; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; text-decoration: none; font-size: 0.75rem; white-space: nowrap; }
+        .title-text { font-weight: bold; color: #d97706; font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .user-tag { font-size: 0.75rem; color: #0284c7; font-weight: bold; white-space: nowrap; background: #e0f2fe; padding: 2px 8px; border-radius: 4px; border: 1px solid #bae6fd; }
+
+        /* V8.4 顶部双派切换：唯一模式控制入口 */
+        .home-bar { gap: 12px; flex-wrap: wrap; }
+        .header-mode-switch { display: inline-flex; gap: 3px; padding: 3px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 7px; }
+        .header-mode-switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+        .header-mode-switch label { cursor: pointer; padding: 6px 14px; border-radius: 5px; font-size: .8rem; font-weight: 700; color: #475569; white-space: nowrap; }
+        .header-mode-switch label:has(input:checked) { background: #d97706; color: white; box-shadow: 0 1px 3px #0002; }
+        .header-mode-switch label:focus-within { outline: 2px solid #0284c7; outline-offset: 2px; }
+        .home-bar .title-text { flex: 1; text-align: center; min-width: 180px; }
+        @media (max-width: 640px) { .home-bar .title-text { order: 4; flex-basis: 100%; } .header-mode-switch label { padding: 6px 9px; } }
+
+        /* 手风琴折叠面板 */
+        details { background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 5px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+        summary { padding: 6px 12px; font-size: 0.82rem; font-weight: bold; color: #b45309; cursor: pointer; user-select: none; background: #fffbeb; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #fef3c7; }
+        summary::after { content: "▼"; font-size: 0.68rem; color: #94a3b8; }
+        details[open] summary::after { content: "▲"; }
+
+        /* 模式切换与图层控制栏 */
+        .layer-toolbar-content { padding: 8px 14px; display: flex; flex-wrap: wrap; gap: 10px 20px; background: #ffffff; align-items: center; }
+        .layer-item { display: inline-flex; align-items: center; gap: 5px; font-size: 0.78rem; font-weight: bold; color: #334155; cursor: pointer; }
+        .layer-item input[type="checkbox"], .layer-item input[type="radio"] { width: 14px; height: 14px; accent-color: #d97706; }
+
+        /* 命盘十二宫格画布区 */
+        .workspace { display: flex; flex-direction: column; align-items: center; margin-bottom: 5px; }
+        .pan-container { background: #ffffff; border: 2px solid #cbd5e1; border-radius: 10px; width: 100%; max-width: 1040px; padding: 10px; box-shadow: 0 3px 8px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center; }
+
+        /* 精准固定尺寸网格：单宫 245px × 198px */
+        .ziwei-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 245px));
+            grid-template-rows: repeat(4, 198px);
+            gap: 4px;
+            justify-content: center;
+        }
+
+        /* 专业宫位格子排版（245px * 198px） */
+        .palace-box {
+            width: 100%;
+            height: 198px;
+            background: #ffffff;
+            border: 1.5px solid #475569;
+            border-radius: 3px;
+            padding: 5px 6px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            grid-template-rows: auto 1fr auto;
+            position: relative;
+            font-size: 0.84rem;
+        }
+
+        .sanhe-toolbar{display:none;max-width:1004px;width:100%;padding:7px 10px;margin-bottom:6px;border:1px solid #bfdbfe;border-radius:6px;background:#f8fafc;font-size:12px;gap:12px;align-items:center;flex-wrap:wrap}
+        .sanhe-toolbar label{white-space:nowrap;cursor:pointer}
+        .sanhe-toolbar .audit-info{color:#92400e;flex-basis:100%}
+        .star-sha{color:#dc2626;font-weight:650;flex:0 0 auto}
+        .star-other{color:#b45309}
+        .star-provisional{border-bottom:1px dotted #c2410c;text-decoration:none}
+        .p-top-left{max-height:142px;overflow-y:auto;align-content:flex-start;scrollbar-width:thin}
+        .sanhe-palace-audit{font-size:12px;line-height:1.65;margin-top:8px;padding:8px;border:1px solid #e2e8f0;border-radius:6px;background:#f8fafc}
+        .star-lucky{color:#0369a1;flex:0 0 auto}
+        .sanhe-brightness-note{color:#64748b;font-size:11px}
+        .decade-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;width:100%;max-width:1004px;padding:8px 10px;margin:0 0 7px;border:1px solid #93c5fd;background:#eff6ff;border-radius:6px;font-size:14px}
+        .decade-toolbar label{cursor:pointer;white-space:nowrap}
+        #decade-age{font-size:14px;padding:4px;border:1px solid #94a3b8;border-radius:4px;max-width:130px}
+        #decade-summary{color:#1d4ed8;font-weight:650}
+        .palace-box.decade-active{outline:3px solid #2563eb;outline-offset:-4px;background:#eff6ff!important}
+        .decade-tag{position:absolute;top:5px;left:5px;color:#1d4ed8;font-size:13px;font-weight:800;background:#dbeafe;padding:2px 4px;border-radius:3px;z-index:2}
+        .decade-four{font-size:14px;font-weight:700;color:#1d4ed8;white-space:normal}
+        .layer-names{position:absolute;bottom:43px;left:6px;right:31px;display:flex;flex-direction:column;gap:1px;font-size:13px;line-height:1.15;font-weight:700;z-index:3;pointer-events:none}
+        .layer-names .layer-decade{color:#2563eb}.layer-names .layer-annual{color:#c2410c}
+        .layer-names .layer-label{font-size:11px;margin-right:3px;opacity:.8}
+        .palace-box.annual-active{box-shadow:inset 0 0 0 2px #f97316}
+        #annual-year{font-size:14px;padding:4px;border:1px solid #94a3b8;border-radius:4px}
+        .wm-timeline{width:100%;max-width:1004px;margin-top:6px;border:1px solid #94a3b8;background:#fff;font-size:13px}
+        .wm-row{display:flex;border-bottom:1px solid #cbd5e1;min-height:43px}
+        .wm-row:last-child{border-bottom:0}
+        .wm-row-title{flex:0 0 55px;display:flex;align-items:center;justify-content:center;font-weight:800;background:#f1f5f9;border-right:1px solid #cbd5e1}
+        .wm-row-scroll{display:flex;overflow-x:auto;flex:1;scrollbar-width:thin}
+        .wm-cell{flex:0 0 83px;min-width:83px;min-height:42px;padding:3px 2px;border:0;border-right:1px solid #e2e8f0;background:#fff;cursor:pointer;color:#334155;font-size:12px;line-height:1.3;text-align:center}
+        .wm-cell small{display:block;font-size:11px;color:#64748b}
+        .wm-cell.active{background:#bfdbfe;color:#1d4ed8;font-weight:800}
+        .wm-cell:focus-visible{outline:2px solid #2563eb;outline-offset:-2px}
+        .layer-names{bottom:47px;left:5px;right:35px;gap:2px;font-size:13px}
+        .layer-names .layer-decade{color:#2563eb}.layer-names .layer-annual{color:#c2410c}
+        .layer-names .layer-month{color:#059669}
+        .layer-legend{font-size:12px;color:#475569}
+        /* 左上角小星/煞曜区 */
+        .p-top-left {
+            grid-column: 1;
+            grid-row: 1 / 3;
+            font-size: 0.75rem;
+            color: #f43f5e;
+            line-height: 1.2;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px 5px;
+        }
+
+        /* 右侧主星区：多主星及吉星独立竖列、由右向左平排 */
+        .p-right-main {
+            grid-column: 2;
+            grid-row: 1 / 3;
+            display: flex;
+            flex-direction: row-reverse;
+            align-items: flex-start;
+            gap: 6px;
+            padding-right: 4px;
+            border-left: 1px dashed #cbd5e1;
+            justify-content: flex-start;
+        }
+
+        /* 单颗星曜的独立竖列容器 */
+        .star-col {
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            font-weight: bold;
+            font-size: 1.08rem;
+            color: #0284c7;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            letter-spacing: 2px;
+        }
+
+        /* 生年四化方框样式 */
+        .sihua-lu  { border: 1.5px solid #16a34a; color: #16a34a; padding: 1px; font-size: 0.72rem; border-radius: 2px; }
+        .sihua-quan{ border: 1.5px solid #1d4ed8; color: #1d4ed8; padding: 1px; font-size: 0.72rem; border-radius: 2px; }
+        .sihua-ke  { border: 1.5px solid #ca8a04; color: #ca8a04; padding: 1px; font-size: 0.72rem; border-radius: 2px; }
+        .sihua-ji  { border: 1.5px solid #dc2626; color: #dc2626; padding: 1px; font-size: 0.72rem; border-radius: 2px; }
+
+        /* 自化标记：以较大的回环箭头替换原菱形，不另起一组 */
+        .zihua-lu  { color: #16a34a; font-size: 1rem; font-weight: bold; }
+        .zihua-quan{ color: #1d4ed8; font-size: 1rem; font-weight: bold; }
+        .zihua-ke  { color: #ca8a04; font-size: 1rem; font-weight: bold; }
+        .zihua-ji  { color: #dc2626; font-size: 1rem; font-weight: bold; }
+
+        /* 左下角对齐区 */
+        .p-bottom-left-column {
+            grid-column: 1;
+            grid-row: 3;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-end;
+            gap: 1px;
+            z-index: 2;
+        }
+        .tag-month-box { border: 1.5px solid #16a34a; color: #16a34a; padding: 0px 3px; font-size: 0.72rem; font-weight: bold; background: #f0fdf4; border-radius: 2px; line-height: 1.2; }
+        .tag-liunian-box { border: 1.5px solid #dc2626; color: #dc2626; padding: 0px 3px; font-size: 0.72rem; font-weight: bold; background: #fef2f2; border-radius: 2px; line-height: 1.2; }
+        .p-age-text { font-size: 0.8rem; color: #dc2626; font-weight: bold; line-height: 1.2; }
+        .p-year-text { font-size: 0.8rem; color: #dc2626; font-weight: bold; line-height: 1.2; }
+
+        /* 正下方对齐区 */
+        .p-bottom-center-column {
+            grid-column: 1 / 3;
+            grid-row: 3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            width: 100%;
+        }
+        .p-daxian-name { color: #dc2626; font-size: 1.15rem; font-weight: bold; letter-spacing: 1px; margin-bottom: 2px; }
+        .p-daxian-range-slot { height: 1.25rem; display: flex; align-items: center; justify-content: center; color: #2563eb; font-size: 0.88rem; font-weight: bold; margin-bottom: 2px; }
+        .p-benming-name { font-size: 1.05rem; font-weight: bold; color: #1e293b; text-align: center; }
+
+        /* 右下角竖排干支 */
+        .p-bottom-right {
+            position: absolute;
+            bottom: 3px;
+            right: 3px;
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #334155;
+            letter-spacing: 2px;
+        }
+
+        /* 中间 2x2 合并区域 */
+        .palace-box.center-box {
+            grid-column: 2 / 4;
+            grid-row: 2 / 4;
+            width: 490px;
+            height: 396px;
+            background: #fffbeb;
+            border: 1.5px dashed #d97706;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+            padding: 12px 16px;
+            font-size: 0.88rem;
+            line-height: 1.6;
+            color: #1e293b;
+            grid-template-columns: unset;
+            grid-template-rows: unset;
+        }
+
+        /* 三合与飞星共用同一套中央资料排版，切换模式不改变位置 */
+        .center-box .center-mode-title { flex: 0 0 auto; width: 100%; text-align: center; }
+        .center-box .center-birth-details { width: max-content; max-width: 100%; align-self: center; flex: 0 0 auto; }
+        .center-box .time-btn-group { flex: 0 0 auto; align-self: center; }
+
+        /* 时间调整四按钮样式组 */
+        .time-btn-group {
+            display: inline-flex;
+            border: 1px solid #94a3b8;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-top: 6px;
+        }
+        .time-btn {
+            background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+            border: none;
+            border-right: 1px solid #cbd5e1;
+            padding: 4px 12px;
+            font-size: 0.82rem;
+            font-weight: bold;
+            color: #334155;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            transition: all 0.15s ease;
+        }
+        .time-btn:last-child { border-right: none; }
+        .time-btn:hover { background: #e2e8f0; color: #b45309; }
+        .time-btn:active { background: #cbd5e1; transform: translateY(1px); }
+
+        /* 飞星连线图层：覆盖在十二宫格上，鼠标事件透传给宫格 */
+        .ziwei-grid { position:relative; }
+        .fly-active-palace { outline: 2px solid #d97706; outline-offset: -3px; }
+        .fly-overlay { position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:8;overflow:visible; }
+        .fly-overlay text { paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round;font-size:12px;font-weight:bold; }
+        .fly-toolbar { display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:6px 12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:6px;margin:4px 0 7px;font-size:.78rem; }
+        .fly-toolbar select { border:1px solid #cbd5e1;border-radius:4px;padding:4px;background:white; }
+        .star-brightness{font-size:11px;line-height:1;color:#64748b;font-weight:600;writing-mode:horizontal-tb;display:inline-block;border:1px solid #cbd5e1;border-radius:3px;padding:1px 2px;margin-top:2px}
+        .fly-legend { font-size:.74rem;color:#475569; }
+        .fly-legend b { margin-left:8px; }
+        .fly-legend .lu {color:#16a34a}.fly-legend .quan {color:#2563eb}.fly-legend .ke {color:#ca8a04}.fly-legend .ji {color:#dc2626}
+        /* 底部报告区 */
+        .analysis-section { margin-top: 5px; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 6px 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+        .report-block { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 5px 10px; margin-top: 3px; }
+        .report-block-title { font-size: 0.78rem; font-weight: bold; margin-bottom: 2px; color: #0284c7; }
+    
+        /* V8.19：仅放大十二宫内字体，每种字号约增加 2px；保持工具栏原样 */
+        .palace-box:not(.center-box){font-size:calc(0.84rem + 2px)}
+        .palace-box:not(.center-box) .p-top-left{font-size:calc(0.75rem + 2px);line-height:1.32;gap:3px 6px}
+        .palace-box:not(.center-box) .star-col{font-size:calc(1.08rem + 2px)}
+        .palace-box:not(.center-box) .sihua-lu,
+        .palace-box:not(.center-box) .sihua-quan,
+        .palace-box:not(.center-box) .sihua-ke,
+        .palace-box:not(.center-box) .sihua-ji,
+        .palace-box:not(.center-box) .tag-month-box,
+        .palace-box:not(.center-box) .tag-liunian-box{font-size:calc(0.72rem + 2px)}
+        .palace-box:not(.center-box) .zihua-lu,
+        .palace-box:not(.center-box) .zihua-quan,
+        .palace-box:not(.center-box) .zihua-ke,
+        .palace-box:not(.center-box) .zihua-ji{font-size:calc(1rem + 2px)}
+        .palace-box:not(.center-box) .p-age-text,
+        .palace-box:not(.center-box) .p-year-text{font-size:calc(0.8rem + 2px)}
+        .palace-box:not(.center-box) .p-daxian-name{font-size:calc(1.15rem + 2px)}
+        .palace-box:not(.center-box) .p-daxian-range-slot{font-size:calc(0.88rem + 2px);height:1.5rem}
+        .palace-box:not(.center-box) .p-benming-name{font-size:calc(1.05rem + 2px)}
+        .palace-box:not(.center-box) .p-bottom-right{font-size:calc(0.85rem + 2px)}
+        .palace-box:not(.center-box) .star-brightness{font-size:13px}
+        /* 保留宫位下方名称空间，星曜密集时独立滚动，避免压住宫名 */
+        .palace-box:not(.center-box) .p-top-left{height:142px;max-height:142px;min-height:40px;overflow-y:auto;align-self:start;position:relative;z-index:2;display:flex;align-content:flex-start;align-items:flex-start}
+        .palace-box:not(.center-box) .p-right-main{min-width:0}
+
+        /* V8.28: 为三层宫名与本命宫名预留固定底栏，禁止文字越过宫格边界。 */
+        *, *::before, *::after { box-sizing: border-box; }
+        .ziwei-grid { grid-template-rows: repeat(4, 224px); }
+        .palace-box { height: 224px; min-width: 0; min-height: 0; overflow: hidden; }
+        .palace-box:not(.center-box) { display: block; }
+        .palace-box:not(.center-box) .p-top-left {
+            position: absolute; top: 6px; left: 6px; right: 94px;
+            width: auto; height: auto; max-height: none; min-height: 0;
+            bottom: 91px; overflow-x: hidden; overflow-y: auto;
+            z-index: 1; align-content: flex-start;
+        }
+        .palace-box:not(.center-box) .p-right-main {
+            position: absolute; top: 6px; right: 6px; left: auto;
+            width: 85px; height: auto; bottom: 91px;
+            min-width: 0; overflow-x: auto; overflow-y: hidden;
+            z-index: 1; padding-right: 2px;
+        }
+        .palace-box:not(.center-box) .layer-names {
+            position: absolute; left: 6px; right: 34px; bottom: 47px;
+            height: 43px; display: flex; flex-direction: column;
+            justify-content: flex-end; gap: 0; line-height: 1.12;
+            font-size: 12px; z-index: 3; overflow: hidden;
+        }
+        .palace-box:not(.center-box) .layer-names > div {
+            display: block; white-space: nowrap; overflow: hidden;
+            text-overflow: ellipsis; min-height: 14px;
+        }
+        .palace-box:not(.center-box) .p-bottom-center-column {
+            position: absolute; left: 34px; right: 34px; bottom: 3px;
+            width: auto; height: 42px; z-index: 3;
+            display: flex; flex-direction: column; justify-content: flex-end;
+            align-items: center; overflow: hidden;
+        }
+        .palace-box:not(.center-box) .p-daxian-range-slot {
+            height: 19px; min-height: 19px; margin: 0; line-height: 19px;
+        }
+        .palace-box:not(.center-box) .p-benming-name {
+            font-size: 18px; line-height: 22px; white-space: nowrap;
+        }
+        .palace-box:not(.center-box) .p-bottom-left-column {
+            position: absolute; left: 4px; bottom: 4px; z-index: 4;
+        }
+        .palace-box:not(.center-box) .p-bottom-right {
+            z-index: 4; max-height: 42px; overflow: hidden;
+        }
+        @media (max-width: 700px) {
+            .ziwei-grid { grid-template-rows: repeat(4, 224px); }
+            .palace-box:not(.center-box) .p-top-left { right: 69px; }
+            .palace-box:not(.center-box) .p-right-main { width: 62px; }
+            .palace-box:not(.center-box) .layer-names { font-size: 11px; }
+        }
+
+
+
+/* V8.29: 文墨式叠宫位置，流年在大限上方；月份只作邻接标记。 */
+.palace-box:not(.center-box) .layer-names { height: 39px; bottom: 45px; left: 6px; right: 39px; display:flex; flex-direction:column; justify-content:flex-end; gap:2px; overflow:hidden; }
+.palace-box:not(.center-box) .layer-names > div { font-size:13px; line-height:17px; min-height:17px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.palace-box:not(.center-box) .layer-annual { order:0; color:#c2410c; }
+.palace-box:not(.center-box) .layer-decade { order:1; color:#2563eb; }
+.palace-box:not(.center-box) .p-month-indicator { position:absolute; bottom:6px; left:5px; z-index:5; font-size:12px; font-weight:700; color:#0d9488; }
+.palace-box.layer-feixing:not(.center-box) .layer-names { left:6px; right:auto; width:91px; bottom:9px; height:56px; align-items:flex-start; }
+.palace-box.layer-feixing:not(.center-box) .layer-names > div { max-width:90px; }
+.palace-box.layer-feixing:not(.center-box) .p-bottom-center-column { left:94px; right:29px; width:auto; }
+.palace-box.layer-feixing:not(.center-box) .p-month-indicator { left:auto; right:30px; bottom:47px; }
+.palace-box.layer-sanhe:not(.center-box) .p-month-indicator { left:4px; bottom:5px; }
+
+/* V8.30: compact palace labels; months are shown inside palaces, never as a separate timeline. */
+.palace-box:not(.center-box) .layer-names {
+ position:absolute; z-index:6; overflow:visible; pointer-events:none;
+ font-weight:700; display:flex; flex-direction:column; gap:1px;
+ height:auto; max-height:44px; bottom:51px; left:6px; right:auto; width:55px;
+ align-items:flex-start; justify-content:flex-end;
+}
+.palace-box:not(.center-box) .layer-names > div {
+ font-size:13px; line-height:17px; min-height:0; max-width:100%;
+ overflow:hidden; white-space:nowrap; text-overflow:clip;
+}
+.palace-box.layer-sanhe:not(.center-box) .layer-names {bottom:49px;left:6px;}
+.palace-box.layer-sanhe:not(.center-box) .p-month-indicator {
+ position:absolute;left:auto;right:72px;bottom:10px;
+ font-size:11px;line-height:1.15;max-width:85px;white-space:normal;
+ color:#64748b;z-index:6;pointer-events:none;
+}
+.palace-box.layer-feixing:not(.center-box) .layer-names {bottom:9px;left:6px;width:48px;}
+.palace-box.layer-feixing:not(.center-box) .p-bottom-center-column {left:94px;right:29px;width:auto;}
+.palace-box.layer-feixing:not(.center-box) .p-month-indicator {
+ position:absolute;left:6px;right:auto;bottom:54px;
+ font-size:11px;line-height:1.15;max-width:72px;white-space:normal;
+ color:#64748b;z-index:6;pointer-events:none;
+}
+
+/* V8.32: 宫内大限与流年简称放大 4px（13px → 17px），不影响其他文字 */
+.palace-box:not(.center-box) .layer-names > .layer-annual,
+.palace-box:not(.center-box) .layer-names > .layer-decade {
+  font-size:17px; line-height:22px; min-height:22px; font-weight:700;
+  overflow:visible; white-space:nowrap;
+}
+.palace-box.layer-sanhe:not(.center-box) .layer-names {
+  height:50px; max-height:50px; bottom:52px; width:64px;
+  justify-content:flex-end; gap:2px;
+}
+.palace-box.layer-feixing:not(.center-box) .layer-names {
+  height:50px; max-height:50px; bottom:9px; width:62px;
+  justify-content:flex-end; gap:2px;
+}
+
+/* V8.34: full-chart reading mode keeps all 12 palaces and both timelines visible together. */
+body.chart-fit-active{overflow:hidden}
+body.chart-fit-active #chart-workspace{
+ position:fixed;inset:0;z-index:10000;background:#f1f5f9;
+ display:flex;justify-content:center;align-items:flex-start;
+ overflow:auto;padding:4px;margin:0;
+}
+body.chart-fit-active #chart-panel{
+ flex:0 0 auto;max-width:none;box-sizing:border-box;
+ margin:0;box-shadow:0 2px 16px #94a3b866;
+}
+@media print{
+ body.chart-fit-active{overflow:visible}
+ body.chart-fit-active #chart-workspace{position:static;overflow:visible;padding:0}
+ body.chart-fit-active #chart-panel{zoom:1!important;width:1040px!important}
+ #fit-chart-button{display:none}
+}
+
+/* V8.35: center the annual/decade labels in each palace, for both schools. */
+.palace-box.layer-sanhe:not(.center-box) .layer-names,
+.palace-box.layer-feixing:not(.center-box) .layer-names {
+ left:50%;right:auto;transform:translateX(-50%);width:90px;
+ text-align:center;align-items:center;justify-content:flex-end;
+ bottom:52px;height:57px;max-height:none;gap:2px;z-index:5;
+}
+.palace-box.layer-sanhe:not(.center-box) .layer-names > div,
+.palace-box.layer-feixing:not(.center-box) .layer-names > div {
+ text-align:center;max-width:100%;overflow:visible;
+}
+/* Flying-star mode only: add 6px to all main palace typography, not the chart center. */
+.palace-box.layer-feixing:not(.center-box) .p-top-left {
+ font-size:20px;line-height:1.3;gap:4px 7px;
+ bottom:122px;right:110px;overflow-y:auto;
+}
+.palace-box.layer-feixing:not(.center-box) .p-right-main {
+ width:104px;bottom:116px;gap:8px;overflow-x:auto;
+}
+.palace-box.layer-feixing:not(.center-box) .star-col {font-size:25px;letter-spacing:2px;gap:5px}
+.palace-box.layer-feixing:not(.center-box) .star-brightness {font-size:19px}
+.palace-box.layer-feixing:not(.center-box) .sihua-lu,
+.palace-box.layer-feixing:not(.center-box) .sihua-quan,
+.palace-box.layer-feixing:not(.center-box) .sihua-ke,
+.palace-box.layer-feixing:not(.center-box) .sihua-ji,
+.palace-box.layer-feixing:not(.center-box) .tag-month-box,
+.palace-box.layer-feixing:not(.center-box) .tag-liunian-box {font-size:calc(.72rem + 8px)}
+.palace-box.layer-feixing:not(.center-box) .zihua-lu,
+.palace-box.layer-feixing:not(.center-box) .zihua-quan,
+.palace-box.layer-feixing:not(.center-box) .zihua-ke,
+.palace-box.layer-feixing:not(.center-box) .zihua-ji {font-size:calc(1rem + 8px)}
+.palace-box.layer-feixing:not(.center-box) .layer-names > .layer-annual,
+.palace-box.layer-feixing:not(.center-box) .layer-names > .layer-decade {
+ font-size:23px;line-height:26px;min-height:26px;
+}
+.palace-box.layer-feixing:not(.center-box) .layer-names {
+ height:58px;bottom:54px;width:112px;
+}
+.palace-box.layer-feixing:not(.center-box) .p-daxian-range-slot {font-size:calc(.88rem + 8px);height:24px;min-height:24px;line-height:24px}
+.palace-box.layer-feixing:not(.center-box) .p-benming-name {font-size:24px;line-height:27px}
+.palace-box.layer-feixing:not(.center-box) .p-bottom-center-column {
+ left:34px;right:34px;width:auto;bottom:3px;height:53px;
+}
+.palace-box.layer-feixing:not(.center-box) .p-bottom-right {font-size:calc(.85rem + 8px)}
+.palace-box.layer-feixing:not(.center-box) .p-month-indicator {font-size:17px;bottom:58px;right:5px;left:auto;max-width:70px;text-align:right}
+@media (max-width:700px) {
+ .palace-box.layer-feixing:not(.center-box) .p-top-left{right:91px}
+ .palace-box.layer-feixing:not(.center-box) .p-right-main{width:85px}
+}
+
+/* V8.36: controls stay visible with the chart, including optional one-screen mode. */
+.chart-mode-bar{display:flex;align-items:center;justify-content:center;gap:12px;
+ width:100%;max-width:1004px;min-height:52px;padding:7px 10px;margin-bottom:8px;
+ border:1px solid #bfdbfe;background:#eff6ff;border-radius:8px;position:sticky;top:0;z-index:100;}
+.chart-mode-title{font-size:17px;font-weight:700;color:#1e40af;margin-right:8px}
+.chart-mode-btn{font-size:19px;font-weight:800;line-height:1.3;padding:8px 19px;
+ border:2px solid #93c5fd;background:white;color:#1d4ed8;border-radius:8px;cursor:pointer}
+.chart-mode-btn.active{background:#1d4ed8;color:white;border-color:#1d4ed8}
+.chart-mode-tip{font-size:13px;color:#475569}
+body.chart-fit-active .chart-mode-bar{position:sticky;top:0;z-index:100}
+/* Make both annual and decade labels occupy the visual center of each palace. */
+.palace-box.layer-sanhe:not(.center-box) .layer-names,
+.palace-box.layer-feixing:not(.center-box) .layer-names{
+ top:50%;bottom:auto;left:50%;right:auto;
+ transform:translate(-50%,-50%);height:auto;max-height:none;
+ width:116px;gap:5px;align-items:center;justify-content:center;
+ background:#ffffffc7;border-radius:5px;padding:3px 2px;
+}
+.palace-box.layer-sanhe:not(.center-box) .layer-names > div,
+.palace-box.layer-feixing:not(.center-box) .layer-names > div{
+ font-size:26px;line-height:30px;min-height:30px;font-weight:800;
+ white-space:nowrap;overflow:visible;text-align:center;
+}
+/* Extra flying-mode reading size; scrolling remains available for densely populated palaces. */
+.palace-box.layer-feixing:not(.center-box) .p-top-left{
+ font-size:23px;line-height:1.35;right:116px;bottom:120px;overflow-y:auto;
+}
+.palace-box.layer-feixing:not(.center-box) .p-right-main{width:111px;bottom:116px}
+.palace-box.layer-feixing:not(.center-box) .star-col{font-size:29px;line-height:1.25}
+.palace-box.layer-feixing:not(.center-box) .p-benming-name{font-size:27px;line-height:30px}
+.palace-box.layer-feixing:not(.center-box) .p-daxian-range-slot{font-size:22px}
+.palace-box.layer-feixing:not(.center-box) .p-bottom-right{font-size:23px}
+.palace-box.layer-feixing:not(.center-box) .p-month-indicator{font-size:19px}
+@media(max-width:740px){.chart-mode-tip,.chart-mode-title{display:none}.chart-mode-btn{font-size:16px;padding:6px 10px}}
+
+/* V8.37: comfortable desktop size, with both timeline rows close to the chart. */
+@media (min-width:900px){
+ .ziwei-grid{grid-template-rows:repeat(4,205px)}
+ .palace-box{height:205px}
+ .palace-box:not(.center-box) .p-top-left{max-height:116px;height:116px}
+}
+/* 三合：大限/流年由26px减至22px，仍保持居中。 */
+.palace-box.layer-sanhe:not(.center-box) .layer-names > div{
+ font-size:22px;line-height:26px;min-height:26px;
+}
+/* 三合：本命宫名比上一版增加4px。 */
+.palace-box.layer-sanhe:not(.center-box) .p-benming-name{
+ font-size:calc(1.05rem + 6px);line-height:1.2;
+}
+/* Keep the central annual/decade labels clear of the natal labels. */
+.palace-box.layer-sanhe:not(.center-box) .layer-names{gap:3px}
+
+.full-report{margin:18px auto;padding:20px;max-width:1160px;background:white;border:1px solid #cbd5e1;border-radius:10px;color:#1e293b}
+.full-report h2{margin:0 0 12px;font-size:24px}.full-report h2 small{font-size:12px;color:#64748b}
+.report-options{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:18px;padding:12px;background:#eff6ff;border-radius:8px}
+.report-options label{white-space:nowrap;font-size:15px}.report-options button{padding:7px 12px;cursor:pointer}
+.report-print{background:#1d4ed8;color:white;border:0;border-radius:6px;font-weight:bold}
+.full-report section{margin:18px 0}.full-report h3{font-size:20px;border-bottom:2px solid #cbd5e1;padding-bottom:7px}
+.full-report h4{font-size:17px;margin:14px 0 7px;color:#1d4ed8}
+.report-palaces{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.report-palace{border:1px solid #e2e8f0;border-radius:7px;padding:13px;break-inside:avoid;page-break-inside:avoid;line-height:1.7;font-size:14px}
+.report-palace p{margin:5px 0}.report-meta{color:#64748b;font-size:13px}
+.report-caution{border-left:4px solid #d97706;padding:9px 12px;background:#fffbeb;line-height:1.6}
+@media(max-width:700px){.report-palaces{grid-template-columns:1fr}}
+@media print{
+ body{overflow:visible!important}
+ body.chart-fit-active #chart-workspace{display:none!important}
+ #full-report{display:block!important;position:static!important;max-width:none;border:0;margin:0;padding:0}
+ .report-options,.analysis-section,.workspace,header,.header,.navbar,.top-nav{display:none!important}
+ .report-palaces{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .report-palace{break-inside:avoid}
+ @page{size:A4;margin:14mm}
+}
+
+/* Print-safe, self-contained 4x4 natal/decade/annual/month diagrams */
+.report-ziwei-figure{margin:16px 0 22px;max-width:100%;break-inside:avoid;page-break-inside:avoid}
+.report-ziwei-figure figcaption{font-size:17px;font-weight:750;margin-bottom:8px;color:#1e40af}
+.report-ziwei-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(4,142px);gap:2px;width:100%;max-width:820px;margin:auto}
+.report-ziwei-palace{min-width:0;min-height:0;display:flex;flex-direction:column;justify-content:space-between;border:1px solid #64748b;padding:5px;font-size:10px;line-height:1.35;overflow:hidden;background:#fff}
+.report-ziwei-focus{border:2px solid #2563eb;background:#eff6ff}
+.report-ziwei-stars{overflow:hidden;overflow-wrap:anywhere;display:flex;flex-wrap:wrap;align-content:flex-start;gap:2px 5px}
+.report-ziwei-stars b{color:#1e40af;font-size:12px}.report-ziwei-stars span{font-size:9px}
+.report-ziwei-sihua{font-size:9px;color:#b45309;overflow-wrap:anywhere}
+.report-ziwei-bottom{display:flex;justify-content:space-between;align-items:flex-end;gap:4px;font-size:10px}
+.report-ziwei-bottom span{font-size:9px;color:#64748b}
+.report-ziwei-center{border:1px dashed #c0841b;background:#fffbeb;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:6px;padding:8px;font-size:13px}
+.report-ziwei-center p{margin:0}
+@media print{
+ .report-ziwei-figure{break-inside:avoid;page-break-inside:avoid}
+ .report-ziwei-grid{grid-template-rows:repeat(4,112px);max-width:100%}
+ .report-ziwei-palace{font-size:8px;padding:3px}
+ .report-ziwei-stars b{font-size:9px}.report-ziwei-stars span,.report-ziwei-sihua{font-size:7px}
+ .report-ziwei-bottom,.report-ziwei-bottom span{font-size:8px}
+ .report-ziwei-center{font-size:10px}
+}
+
+/* V8.47 report evidence references */
+.report-branch-link{display:inline;border:0;border-bottom:1px dashed #2563eb;background:transparent;color:#1d4ed8;padding:0 2px;cursor:pointer;font:inherit;text-align:left}
+.report-branch-link:hover{background:#dbeafe}
+.report-ziwei-palace.report-evidence-focus,.report-palace.report-evidence-focus{outline:3px solid #d97706;outline-offset:-3px;background:#fffbeb!important}
+@media print{.report-branch-link{color:inherit;border:0;padding:0}.report-ziwei-palace.report-evidence-focus,.report-palace.report-evidence-focus{outline:2px solid #b45309}}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="home-bar">
+        <a href="index.html" class="btn-home">🏠 首页</a>
+        <div class="header-mode-switch" role="radiogroup" aria-label="紫微斗数排盘模式">
+          <label><input type="radio" name="view-mode" value="sanhe" checked onchange="switchMode('sanhe')">🏛️ 三合派</label>
+          <label><input type="radio" name="view-mode" value="feixing" onchange="switchMode('feixing')">🌀 飞星派</label>
+        </div>
+        <div class="title-text">🌟 星轨智盘 (AstroMatrix SaaS) - 紫微斗数全盘联动系统</div>
+        <div class="user-tag" id="user-info-tag">正在读取登录数据...</div>
+    </div>
+
+    <details open><summary>📅 出生资料 · 动态排盘</summary><div class="layer-toolbar-content" style="gap:8px;flex-wrap:wrap">
+<label>姓名 <input id="birth-name" value="小叶" style="width:95px"></label><label>性别 <select id="birth-gender"><option>男</option><option>女</option></select></label>
+<label>历法 <select id="birth-calendar"><option value="solar">公历</option><option value="lunar">农历</option></select></label>
+<label>年 <input type="number" id="birth-year" value="1988" min="1900" max="2099" style="width:75px"></label><label>月 <input type="number" id="birth-month" value="11" min="1" max="12" style="width:55px"></label>
+<label>日 <input type="number" id="birth-day" value="12" min="1" max="31" style="width:55px"></label><label>时 <input type="number" id="birth-hour" value="13" min="0" max="23" step="1" inputmode="numeric" style="width:55px" title="请输入 0–23 的小时，例如 13"></label><label>分 <input type="number" id="birth-minute" value="45" min="0" max="59" style="width:55px"></label>
+<button type="button" onclick="calculate()" style="background:#d97706;color:white;border:0;border-radius:5px;padding:7px 14px;cursor:pointer">重新排盘</button></div><div id="ziwei-status" style="padding:8px;color:#9a3412;font-size:.8rem" role="status"></div></details>
+<!-- 模式与图层控制面板 -->
+    <details>
+        <summary>👁️ 点击展开/收起 显示图层设置</summary>
+        <div class="layer-toolbar-content">
+            <label class="layer-item"><input type="checkbox" id="chk-sihua" checked> 显示生年四化与自化</label>
+            <label class="layer-item"><input type="checkbox" id="chk-sanfang" checked> 高亮三方四正</label>
+        </div>
+    </details>
+
+    <!-- 盘面十二宫格画布区 -->
+    <div class="workspace" id="chart-workspace">
+        <div class="pan-container" id="chart-panel">
+            <div class="chart-mode-bar" id="chart-mode-bar" role="group" aria-label="排盘模式与显示尺寸">
+  <span class="chart-mode-title">紫微斗数</span>
+  <button type="button" class="chart-mode-btn" data-mode="sanhe" onclick="switchMode('sanhe')">🏛️ 三合派</button>
+  <button type="button" class="chart-mode-btn" data-mode="feixing" onclick="switchMode('feixing')">🌀 飞星派</button>
+  <span class="chart-mode-tip">阅读模式：大字显示</span>
+</div>
+<div style="width: 100%; max-width: 1004px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <div style="font-size: 0.82rem; font-weight: bold; color: #b45309;" id="pan-title-desc">
+                    🏛️ 三合派 · 42星自动排盘（已实现星曜全部显示）
+                </div>
+                <div style="display:flex;gap:8px;align-items:center">
+<button type="button" id="fit-chart-button" onclick="toggleChartFit()" style="padding:5px 9px;border:1px solid #2563eb;border-radius:5px;background:#eff6ff;color:#1d4ed8;font-weight:700;cursor:pointer">⛶ 一屏显示</button>
+<div style="font-size: 0.78rem; color: #0284c7; cursor: pointer; font-weight: bold;" onclick="window.print()">📄 导出报告</div></div>
+            </div>
+            <div class="sanhe-toolbar" id="sanhe-toolbar">
+              <strong>全星排盘（默认全部显示）</strong>
+              <label><input type="checkbox" id="sanhe-show-lucky" checked> 六吉星</label>
+              <label><input type="checkbox" id="sanhe-show-sha" checked> 六煞星</label>
+              <label><input type="checkbox" id="sanhe-show-other" checked> 禄存／杂曜</label>
+              <label id="sanhe-brightness-label" title="目前没有经过核验的亮度等级"><input type="checkbox" id="sanhe-show-brightness" disabled> 庙旺利陷（待校准）</label>
+              <span class="audit-info" id="sanhe-audit-info">亮度资料待核实</span>
+            </div>
+            <div class="decade-toolbar" id="decade-toolbar">
+              <strong>本命＋大限＋流年同盘</strong>
+              <label>大限 <select id="decade-age" onchange="chooseDecadeAge(this.value)"></select></label>
+              <label>流年 <select id="annual-year" onchange="chooseAnnualYear(this.value)"></select></label>
+              <span id="decade-summary" role="status">十二宫同时标示本命、大限、流年宫名</span>
+            </div>
+            <div class="fly-toolbar" id="fly-toolbar">
+              <label><input type="checkbox" id="chk-fly-arrows" checked> 显示四化箭头</label>
+              <label>方向 <select id="fly-direction"><option value="out">流出（选中宫飞往他宫）</option><option value="in">流入（他宫飞入选中宫）</option><option value="both">流入＋流出</option></select></label><span style="color:#92400e">范围：本命｜箭头：选中宫位</span>
+              <label><input type="checkbox" id="chk-self-arrows" checked> 显示宫内自化箭头</label>
+              <span class="fly-legend"><b class="lu">禄</b><b class="quan">权</b><b class="ke">科</b><b class="ji">忌</b>　点击宫位显示，再点同宫隐藏</span>
+            </div>
+            <!-- 12宫格容器 -->
+            <div class="ziwei-grid" id="ziwei-grid-container">
+                <!-- 动态渲染 12 地支宫位 -->
+            </div>
+            <div class="wm-timeline" id="wm-timeline" aria-label="大限与流年选择">
+              <div class="wm-row"><div class="wm-row-title">大限</div><div class="wm-row-scroll" id="wm-decades"></div></div>
+              <div class="wm-row"><div class="wm-row-title">流年</div><div class="wm-row-scroll" id="wm-years"></div></div>
+            </div>
+            <div class="layer-legend" id="wm-method-note">再次点击蓝色高亮的大限可同时取消大限与流年；再次点击流年仅取消流年。流年目前暂按公历年份计算年支（农历年交界待校准）；月份为斗君试算落宫，闰月及流派差异仍待核验。</div>
+        </div>
+    </div>
+
+    <section class="full-report" id="full-report">
+      <h2>命盘综合分析报告 <small>规则辅助解读 · 非确定性预测</small></h2>
+      <div class="report-options" id="report-options">
+        <label><input type="checkbox" id="print-chart" checked onchange="renderFullReport()"> 附上相应紫微命盘</label>
+        <label><input type="checkbox" id="print-natal" checked onchange="renderFullReport()"> 本命十二宫</label>
+        <label><input type="checkbox" id="print-decade" checked onchange="renderFullReport()"> 大限十二宫</label>
+        <label><input type="checkbox" id="print-annual" checked onchange="renderFullReport()"> 流年运程</label>
+        <label><input type="checkbox" id="print-month" checked onchange="renderFullReport()"> 流月运程</label>
+        <label><input type="checkbox" id="print-advanced" checked onchange="renderFullReport()"> 当前流派高阶分析</label>
+        <button type="button" onclick="setAllReportSections(true)">全选</button>
+        <button type="button" onclick="setAllReportSections(false)">清空</button>
+        <button type="button" class="report-print" onclick="printFullReport()">🖨️ 打印所选报告 / 保存 PDF</button>
+      </div>
+      <div class="report-options"><button type="button" onclick="runAdvancedAnalysis()">生成当前流派高阶分析</button></div><div id="advanced-analysis-result"></div><div id="full-report-content"><p>请先完成排盘，即可生成十二宫分层解读报告。</p></div>
+    </section>
+    <!-- AI 深度堪舆报告区 -->
+    <details class="analysis-section">
+        <summary>📜 点击展开 AI 深度堪舆与星盘解析报告</summary>
+        <div id="ai-report-content" style="padding: 2px 0;">
+            <div class="report-block">
+                <div class="report-block-title">💡 星盘双向联动排盘说明</div>
+                <div style="font-size: 0.78rem; line-height: 1.45; color: #334155;" id="report-sanhe">
+                    点击“日↑ / 日↓”或“时↑ / 时↓”时，整张命盘的星系组合、本命十二宫名、天干地支与大限均会同步实时变动！
+                </div>
+            </div>
+        </div>
+    </details>
+</div>
+
+<script>
+const gridMapping=[{r:0,c:0,zhi:'巳'},{r:0,c:1,zhi:'午'},{r:0,c:2,zhi:'未'},{r:0,c:3,zhi:'申'},{r:1,c:0,zhi:'辰'},{r:1,c:3,zhi:'酉'},{r:2,c:0,zhi:'卯'},{r:2,c:3,zhi:'戌'},{r:3,c:0,zhi:'寅'},{r:3,c:1,zhi:'丑'},{r:3,c:2,zhi:'子'},{r:3,c:3,zhi:'亥'}];
+let chart=null, selected='命宫', activeFlyPalace=null, chartLayer='combined', selectedDecadeZhi=null, selectedAnnualYear=2026, selectedLunarMonth=1, decadeLayerEnabled=true, annualLayerEnabled=true;
+const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function loadDatabaseProfile(){let p={};try{p=JSON.parse(localStorage.getItem('metaphysics_common_profile')||'{}')}catch(e){};
+ for(const k of ['name','gender','year','month','day','hour']){let el=document.getElementById('birth-'+k);if(el&&p[k]!==undefined)el.value=p[k]}
+ document.getElementById('user-info-tag').textContent='档案：'+(p.name||'新命盘');}
+let calculationSequence=0;
+function adjustTime(type){
+ // Always shift the Gregorian date returned by the last successful chart.
+ // The input fields may contain lunar dates; treating them as Gregorian was incorrect.
+ if(!chart || !chart.solar){document.getElementById('ziwei-status').textContent='请先成功排盘，再使用日时调整按钮。';return;}
+ const m=chart.solar.match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})$/);
+ if(!m){document.getElementById('ziwei-status').textContent='无法读取命盘公历日期，请重新排盘。';return;}
+ const dt=new Date(Date.UTC(+m[1],+m[2]-1,+m[3],+m[4],+m[5]));
+ if(type.startsWith('day'))dt.setUTCDate(dt.getUTCDate()+(type.endsWith('up')?1:-1));
+ else dt.setUTCHours(dt.getUTCHours()+(type.endsWith('up')?2:-2));
+ const values={year:dt.getUTCFullYear(),month:dt.getUTCMonth()+1,day:dt.getUTCDate(),hour:dt.getUTCHours(),minute:dt.getUTCMinutes()};
+ Object.entries(values).forEach(([k,v])=>document.getElementById('birth-'+k).value=v);
+ document.getElementById('birth-calendar').value='solar';
+ calculate();
+}
+function val(k){
+ const raw=document.getElementById('birth-'+k).value.trim();
+ if(['year','month','day','hour','minute'].includes(k)){
+  if(!/^\d+$/.test(raw))throw Error(k+'必须填写有效整数');
+  return Number(raw);
+ }
+ return raw;
+}
+function normalizeBirthTime(){
+ const hourEl=document.getElementById('birth-hour');
+ const minuteEl=document.getElementById('birth-minute');
+ const raw=hourEl.value.trim();
+ // Compatible with legacy HHMM profile values, e.g. 1345 -> 13:45.
+ if(/^\d{3,4}$/.test(raw)&&Number(raw)>23){
+  const hh=Math.floor(Number(raw)/100),mm=Number(raw)%100;
+  if(hh>23||mm>59)throw Error('出生时间不合法，请使用 0–23 时、0–59 分');
+  hourEl.value=hh;minuteEl.value=mm;
+ }
+ const h=Number(hourEl.value),m=Number(minuteEl.value);
+ if(!Number.isInteger(h)||h<0||h>23||!Number.isInteger(m)||m<0||m>59)throw Error('出生时间必须为 0–23 时、0–59 分');
+}
+function decadeItems(){return [...(chart?.decade_charts||[])].sort((a,b)=>Number(String(a.range).split('-')[0])-Number(String(b.range).split('-')[0]))}
+function activeDecade(){return decadeItems().find(x=>x.zhi===selectedDecadeZhi)||decadeItems()[0]||null}
+const LAYER_BRANCHES=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+const LAYER_PALACES=['命宫','兄弟宫','夫妻宫','子女宫','财帛宫','疾厄宫','迁移宫','交友宫','事业宫','田宅宫','福德宫','父母宫'];
+function layerPalaceName(origin,zhi){
+ const start=LAYER_BRANCHES.indexOf(origin),here=LAYER_BRANCHES.indexOf(zhi);
+ if(start<0||here<0)return '';
+ // 十二宫从命宫逆地支顺序排列
+ return LAYER_PALACES[(start-here+12)%12];
+}
+function shortLayerName(origin,zhi,prefix){
+ const full=layerPalaceName(origin,zhi);
+ const names={'命宫':'命','兄弟宫':'兄','夫妻宫':'夫','子女宫':'子','财帛宫':'财',
+ '疾厄宫':'疾','迁移宫':'迁','交友宫':'友','事业宫':'官','田宅宫':'田',
+ '福德宫':'福','父母宫':'父'};
+ return full?prefix+(names[full]||full):'';
+}
+function monthLabelsForBranch(year,zhi){
+ const names=['正','二','三','四','五','六','七','八','九','十','冬','腊'];
+ return names.filter((_,i)=>monthDouJunBranch(year,i+1)===zhi).map(x=>x+'月').join(' ');
+}
+function annualBranch(year){return LAYER_BRANCHES[((year-4)%12+12)%12]}
+function chooseAnnualYear(year){
+ const n=Number(year);if(!Number.isInteger(n)||n<1900||n>2200)return;
+ if(annualLayerEnabled&&n===selectedAnnualYear){annualLayerEnabled=false;}
+ else {selectedAnnualYear=n;annualLayerEnabled=true;selectedLunarMonth=1;
+  // Selecting a year does not automatically re-enable a decade manually deselected.
+  if(decadeLayerEnabled)syncDecadeWithYear();
+ }
+ renderGrid();
+}
+function syncDecadeWithYear(){
+ const birth=Number((chart?.solar||'').slice(0,4));if(!birth)return;
+ const age=selectedAnnualYear-birth+1;
+ const match=decadeItems().find(d=>{const [lo,hi]=String(d.range).split('-').map(Number);return age>=lo&&age<=hi});
+ if(match){selectedDecadeZhi=match.zhi;const el=document.getElementById('decade-age');if(el)el.value=match.zhi}
+}
+function setChartLayer(){renderGrid()}
+function decadeYearRange(d){
+ if(!d)return null;
+ const birth=Number((chart?.solar||'').slice(0,4));
+ const [lo,hi]=String(d.range).split('-').map(Number);
+ if(!Number.isInteger(birth)||!Number.isFinite(lo)||!Number.isFinite(hi))return null;
+ // Age is nominal age (虚岁): year = birthYear + age - 1.
+ return [birth+lo-1,birth+hi-1];
+}
+function syncAnnualDropdown(){
+ const el=document.getElementById('annual-year');if(!el)return;
+ if(el.options.length!==301){el.innerHTML=Array.from({length:301},(_,i)=>1900+i).map(y=>'<option value="'+y+'">'+y+' 年</option>').join('');}
+ el.value=String(selectedAnnualYear);
+}
+function chooseDecadeAge(zhi){
+ const d=decadeItems().find(x=>x.zhi===zhi);if(!d)return;
+ if(decadeLayerEnabled&&selectedDecadeZhi===zhi){
+  decadeLayerEnabled=false;annualLayerEnabled=false;activeFlyPalace=null;renderGrid();return;
+ }
+ selectedDecadeZhi=zhi;decadeLayerEnabled=true;annualLayerEnabled=true;
+ const range=decadeYearRange(d);
+ if(range){selectedAnnualYear=Math.max(1900,Math.min(2200,range[0]));}
+ selectedLunarMonth=1;activeFlyPalace=null;
+ syncAnnualDropdown();renderGrid();
+}
+function chooseLunarMonth(month){const n=Number(month);if(n>=1&&n<=12){selectedLunarMonth=n;renderGrid()}}
+function refreshDecadeSelector(){
+ const select=document.getElementById('decade-age');if(!select)return;
+ const items=decadeItems();select.innerHTML=items.map(x=>'<option value="'+esc(x.zhi)+'">'+esc(x.range)+' 岁 · '+esc(x.palace)+'</option>').join('');
+ const years=document.getElementById('annual-year');
+ if(years){if(selectedAnnualYear<1900||selectedAnnualYear>2200)selectedAnnualYear=new Date().getFullYear();syncAnnualDropdown();}
+
+ if(!items.some(x=>x.zhi===selectedDecadeZhi))selectedDecadeZhi=items.find(x=>x.palace==='命宫')?.zhi||items[0]?.zhi||null;
+ syncDecadeWithYear();select.value=selectedDecadeZhi||'';syncAnnualDropdown();
+}
+function monthDouJunBranch(year,month){
+ // 流年太岁起正月，逆数生月，再从该宫起子时顺数生时，作为正月斗君；其余月份顺行。
+ // 仍须核对闰月及不同流派的斗君细节。
+ const lunarMonth=Number(chart?.birth_lunar_month||1);
+ const hourIndex=LAYER_BRANCHES.indexOf(chart?.birth_hour_branch);
+ const origin=LAYER_BRANCHES.indexOf(annualBranch(year));
+ if(hourIndex<0)return null;
+ return LAYER_BRANCHES[((origin-(lunarMonth-1)+hourIndex+(month-1))%12+12)%12];
+}
+function renderTimeline(){
+ const decades=document.getElementById('wm-decades'),years=document.getElementById('wm-years');
+ if(!decades||!chart)return;
+ const active=activeDecade(),birth=Number((chart.solar||'').slice(0,4))||1988;
+ decades.innerHTML=decadeItems().map(d=>'<button type="button" aria-pressed="'+(decadeLayerEnabled&&active?.zhi===d.zhi)+'" class="wm-cell '+(decadeLayerEnabled&&active?.zhi===d.zhi?'active':'')+'" onclick="chooseDecadeAge(\''+esc(d.zhi)+'\')">'+esc(d.range)+'<small>'+esc(d.palace)+' · '+esc(d.zhi)+'</small></button>').join('');
+ const range=decadeYearRange(active);
+ const within=range&&selectedAnnualYear>=range[0]&&selectedAnnualYear<=range[1];
+ const fallbackStart=Math.max(1900,Math.min(2191,Math.floor(selectedAnnualYear/10)*10));
+ const start=within?Math.max(1900,range[0]):fallbackStart;
+ const end=within?Math.min(2200,range[1]):Math.min(2200,start+9);
+ years.innerHTML=Array.from({length:end-start+1},(_,i)=>start+i).map(y=>'<button type="button" aria-pressed="'+(annualLayerEnabled&&y===selectedAnnualYear)+'" class="wm-cell '+(annualLayerEnabled&&y===selectedAnnualYear?'active':'')+'" onclick="chooseAnnualYear('+y+')">'+y+'年<small>'+esc(annualBranch(y))+'年（暂按年支）</small></button>').join('');
+
+ syncAnnualDropdown();const activeYear=years.querySelector('.active');if(activeYear&&years.dataset.lastYear!==String(selectedAnnualYear)){activeYear.scrollIntoView({block:'nearest',inline:'center'});years.dataset.lastYear=String(selectedAnnualYear)}
+ const activeDec=decades.querySelector('.active');if(activeDec&&decades.dataset.lastDec!==selectedDecadeZhi){activeDec.scrollIntoView({block:'nearest',inline:'center'});decades.dataset.lastDec=selectedDecadeZhi}
+}
+function switchMode(mode){advancedAnalysisCache=null;const a=document.getElementById('advanced-analysis-result');if(a)a.innerHTML='';const radio=document.querySelector('input[name="view-mode"][value="'+mode+'"]');if(radio)radio.checked=true;activeFlyPalace=null;document.querySelectorAll('.chart-mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));document.getElementById('pan-title-desc').textContent=mode==='sanhe'?'🏛️ 三合派：点击宫位查看三方四正':'🌀 飞星派：十四主星及红色辅煞星（含六吉）；点击宫位显示／隐藏飞化箭头';renderGrid()}
+async function calculate(){const seq=++calculationSequence;let msg=document.getElementById('ziwei-status');msg.textContent='正在计算命盘…';
+ let payload;
+ try{normalizeBirthTime();payload={};for(const k of ['name','gender','year','month','day','hour','minute','calendar'])payload[k]=val(k);const res=await fetch('/api/ziwei/calculate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const data=await res.json();if(seq!==calculationSequence)return;if(!res.ok||data.status==='error')throw Error(data.message||'计算失败');chart=data;msg.textContent='排盘成功 · '+data.methodology;selected='命宫';activeFlyPalace=null;selectedDecadeZhi=null;decadeLayerEnabled=true;annualLayerEnabled=true;refreshDecadeSelector();renderGrid();}
+ catch(e){if(seq!==calculationSequence)return;chart=null;document.getElementById('ziwei-grid-container').innerHTML='';msg.textContent='⚠️ '+e.message+(e instanceof TypeError?'。请确认已运行 python server.py 并通过 http://127.0.0.1:8000/ziwei_view.html 访问。':'');if(e.message.includes('历法库'))msg.innerHTML+=' <a href="/api/ziwei/diagnostics" target="_blank">查看依赖诊断</a>';}}
+function drawFlyArrows(box, selectedName){
+ const overlay=document.createElementNS('http://www.w3.org/2000/svg','svg');
+ overlay.setAttribute('class','fly-overlay');overlay.setAttribute('aria-label','宫干四化飞入飞出方向图');
+ const cellW=245,cellH=198,gap=4,fullW=4*cellW+3*gap,fullH=4*cellH+3*gap;
+ overlay.setAttribute('viewBox',`0 0 ${fullW} ${fullH}`);overlay.setAttribute('preserveAspectRatio','none');
+ const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');overlay.appendChild(defs);
+ const colors={'化禄':'#16a34a','化权':'#2563eb','化科':'#ca8a04','化忌':'#dc2626'};
+ for(const [key,color] of Object.entries(colors)){
+  const marker=document.createElementNS('http://www.w3.org/2000/svg','marker');marker.setAttribute('id','fly-'+key);marker.setAttribute('markerWidth','8');marker.setAttribute('markerHeight','8');marker.setAttribute('refX','7');marker.setAttribute('refY','4');marker.setAttribute('orient','auto');
+  const tri=document.createElementNS('http://www.w3.org/2000/svg','path');tri.setAttribute('d','M0 0 L8 4 L0 8 Z');tri.setAttribute('fill',color);marker.appendChild(tri);defs.appendChild(marker);
+ }
+ const positions={};for(const x of gridMapping)positions[x.zhi]={x:x.c*(cellW+gap)+cellW/2,y:x.r*(cellH+gap)+cellH/2};
+ const dir=document.getElementById('fly-direction').value;
+ const edges=(chart.flying_transformations||[]).filter(f=>{
+   if(f.self_transform)return false; // 自化固定显示在各宫内，不绘制跨宫 SVG 回环
+
+   return (dir==='out'||dir==='both')&&f.from_palace===selectedName || (dir==='in'||dir==='both')&&f.to_palace===selectedName;
+ });
+ const svgEl=(tag,attrs)=>{const e=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v] of Object.entries(attrs))e.setAttribute(k,String(v));overlay.appendChild(e);return e};
+ edges.forEach((f,i)=>{
+  const a=positions[f.from],b=positions[f.to],color=colors[f.transformation]||'#64748b';if(!a||!b)return;
+  {
+   const vx=b.x-a.x,vy=b.y-a.y,length=Math.hypot(vx,vy)||1;
+   const sx=a.x+vx/length*39,sy=a.y+vy/length*39,tx=b.x-vx/length*44,ty=b.y-vy/length*44;
+   const perpX=-vy/length,perpY=vx/length,offset=((i%5)-2)*10;
+   const mx=(sx+tx)/2+perpX*offset,my=(sy+ty)/2+perpY*offset;
+   svgEl('path',{d:`M${sx} ${sy} Q${mx} ${my} ${tx} ${ty}`,stroke:color,'stroke-width':2,fill:'none',opacity:.85,'marker-end':`url(#fly-${f.transformation})`});
+   const t=svgEl('text',{x:mx,y:my-5,'text-anchor':'middle',fill:color});t.textContent=f.transformation.slice(-1);
+  }
+ });
+ box.appendChild(overlay);
+}
+// V8.24: 单一星曜分区入口，避免飞星六吉在主星过滤后丢失。
+function partitionPalaceStars(p,mode){
+ const lucky=new Set(['文昌','文曲','左辅','右弼','天魁','天钺']);
+ const sha=new Set(['擎羊','陀罗','火星','铃星','地空','地劫']);
+ const flyExtras=new Set(['天刑','天姚','禄存']);
+ const all=[...new Set([...(p.mainStars||[]),...(p.minorStars||[])])];
+ const main=(p.mainStars||[]).filter(s=>!lucky.has(s));
+ const left=mode==='feixing'?all.filter(s=>lucky.has(s)||sha.has(s)||flyExtras.has(s)):
+   all.filter(s=>!(p.mainStars||[]).includes(s)||lucky.has(s));
+ return {main,left};
+}
+function renderGrid(){if(!chart)return;document.querySelectorAll('.chart-mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===(document.querySelector('input[name=view-mode]:checked')?.value||'sanhe')));let box=document.getElementById('ziwei-grid-container');box.innerHTML='';let showShas=true,showFour=document.getElementById('chk-sihua').checked,highlight=document.getElementById('chk-sanfang').checked;let mode=document.querySelector('input[name=view-mode]:checked')?.value||'sanhe';document.getElementById('fly-toolbar').style.display=mode==='feixing'?'flex':'none';document.getElementById('sanhe-toolbar').style.display=mode==='sanhe'?'flex':'none';let current=Object.values(chart.palaces).find(x=>x.name===selected);let related=current?.san_fang_si_zheng||[];const candidateDecade=activeDecade();const dr=decadeYearRange(candidateDecade);const decade=decadeLayerEnabled&&dr&&selectedAnnualYear>=dr[0]&&selectedAnnualYear<=dr[1]?candidateDecade:null;const annualZhi=annualBranch(selectedAnnualYear);const monthZhi=monthDouJunBranch(selectedAnnualYear,selectedLunarMonth);document.getElementById('decade-summary').textContent=
+ !decadeLayerEnabled&&!annualLayerEnabled?'仅显示本命（大限与流年已取消）':
+ !decadeLayerEnabled?'仅显示本命＋流年 '+selectedAnnualYear+'（'+annualZhi+'）':
+ !annualLayerEnabled?'本命＋大限 '+(decade?.range||'未配置')+'岁（流年已取消）':
+ decade?'大限 '+decade.range+'岁（'+decade.zhi+'）｜流年 '+selectedAnnualYear+'（'+annualZhi+'）｜本命同时显示':
+ '流年 '+selectedAnnualYear+'｜超出已配置大限范围（仅显示流年）';
+ for(const item of gridMapping){let p=chart.palaces[item.zhi],el=document.createElement('div');el.className='palace-box '+(mode==='feixing'?'layer-feixing':'layer-sanhe');el.style.gridRow=item.r+1;el.style.gridColumn=item.c+1;el.style.cursor='pointer';if(mode==='feixing'&&activeFlyPalace===p.name)el.classList.add('fly-active-palace');if(highlight&&related.includes(item.zhi)&&!decade)el.style.background='#fef3c7';if(decade&&item.zhi===decade.zhi)el.classList.add('decade-active');if(item.zhi===annualZhi)el.classList.add('annual-active');
+ const brightnessToggleEarly=document.getElementById('sanhe-show-brightness');
+ const availableBrightness=Number(chart.brightness_reference?.verified_entries||0);
+ if(brightnessToggleEarly&&brightnessToggleEarly.disabled&&availableBrightness>0){brightnessToggleEarly.disabled=false;brightnessToggleEarly.checked=true;}
+ const isSanhe=mode==='sanhe';
+ const luckySet=new Set(['文昌','文曲','左辅','右弼','天魁','天钺']);
+ const shaSet=new Set(['擎羊','陀罗','火星','铃星','地空','地劫']);
+ const flyRedSet=new Set(['擎羊','陀罗','火星','铃星','地空','地劫','天刑','天姚','禄存',...luckySet]);
+ const showLucky=!isSanhe||document.getElementById('sanhe-show-lucky').checked;
+ const showSha=isSanhe?document.getElementById('sanhe-show-sha').checked:showShas;
+ const showOther=!isSanhe||document.getElementById('sanhe-show-other').checked;
+ const showBright=isSanhe&&document.getElementById('sanhe-show-brightness').checked;
+ const starGroups=partitionPalaceStars(p,mode);
+ const allStars=[...new Set([...(p.mainStars||[]),...(p.minorStars||[])])];
+ const provisional=new Set(Object.keys(chart.extra_star_audit?.supplemental_positions||{}));
+ const minor=starGroups.left.filter(st=>isSanhe?true:flyRedSet.has(st)).filter(st=>isSanhe?(shaSet.has(st)?showSha:luckySet.has(st)?showLucky:showOther):flyRedSet.has(st)).map(st=>{
+  const b=showBright?p.star_brightness?.[st]:null;
+  const cls=(!isSanhe||shaSet.has(st))?'star-sha':luckySet.has(st)?'star-lucky':'star-other';
+  return '<span class="'+cls+(isSanhe&&provisional.has(st)?' star-provisional':'')+'" title="'+esc(st+(isSanhe&&provisional.has(st)?'（安星规则待逐宫校准）':'')+(b?' '+b:''))+'">'+esc(st)+(b?'<small class="star-brightness">'+esc(b)+'</small>':'')+'</span>';
+ }).join('');
+ let main=starGroups.main.map(st=>{let t='';for(const [key,cls] of [['shengian','sihua'],['zihua','zihua']])if(showFour&&(key!=='zihua'||(mode==='feixing'&&document.getElementById('chk-self-arrows').checked))&&p[key][st]){let q=p[key][st];t+='<span class="'+cls+'-'+q.type+'" title="'+esc(st+(key==='zihua'?' 自化':' 生年化')+q.val.slice(-1))+'">'+(key==='zihua'?'↺'+esc(q.val.slice(-1)):esc(q.val))+'</span>'}let bright=showBright?p.star_brightness?.[st]:null;return '<div class="star-col"><span>'+esc(st)+'</span>'+(bright?'<small class="star-brightness" title="公开资料亮度等级（尚未与文墨天机逐项核对）">'+esc(bright)+'</small>':'')+t+'</div>'}).join('');
+ el.innerHTML='<div class="p-top-left">'+minor+'</div><div class="p-right-main">'+main+'</div><div class="layer-names"><div class="layer-annual">'+esc(annualLayerEnabled?shortLayerName(annualZhi,item.zhi,'流'):'')+'</div><div class="layer-decade">'+esc(decadeLayerEnabled?shortLayerName(decade?.zhi,item.zhi,'大'):'')+'</div></div><div class="p-month-indicator" title="流年月份落宫（斗君试算，待校准）">'+esc(annualLayerEnabled?monthLabelsForBranch(selectedAnnualYear,item.zhi):'')+'</div><div class="p-bottom-left-column">'+(p.shen?'<div class="tag-month-box">身宫</div>':'')+'</div><div class="p-bottom-center-column"><div class="p-daxian-range-slot">'+esc(p.decade)+'</div><div class="p-benming-name">'+esc(p.name)+'</div></div><div class="p-bottom-right">'+esc(p.gan_zhi)+'</div>';
+ el.onclick=()=>{if(mode==='feixing')activeFlyPalace=activeFlyPalace===p.name?null:p.name;selected=p.name;renderGrid()};box.appendChild(el)}
+ const brightStatus=chart.brightness_reference||{};const brightnessToggle=document.getElementById('sanhe-show-brightness');const verifiedCount=Number(brightStatus.verified_entries||0);if(brightnessToggle){if(verifiedCount>0&&brightnessToggle.disabled)brightnessToggle.checked=true;brightnessToggle.disabled=verifiedCount===0;if(verifiedCount===0)brightnessToggle.checked=false;brightnessToggle.parentElement.title=verifiedCount===0?'当前没有已核验的亮度等级；完成校准后此开关自动启用':('已录入公开亮度资料 '+verifiedCount+' 项；尚未与文墨天机逐项核对，可切换显示');brightnessToggle.parentElement.style.opacity=verifiedCount===0?'0.65':'1';brightnessToggle.parentElement.lastChild.textContent=verifiedCount===0?' 庙旺利陷（待校准）':' 庙旺利陷·公开表（'+verifiedCount+'项）';}const auditEl=document.getElementById('sanhe-audit-info');if(auditEl)auditEl.textContent='自动展示：十四主星、六吉、六煞、禄存、常用辅杂曜、博士/长生/岁前/将前十二神及补充杂曜（共108项）。'+'已排六吉六煞各6颗（仅核对存在数量）；'+(brightStatus.message||'庙旺利陷尚未核验')+'。公开亮度表仅作参考，未与文墨天机逐项核对；新增40项含未经逐宫核对的试算规则，尚未与文墨天机逐项核对。';
+ let center=document.createElement('div');center.className='palace-box center-box';center.style.gridRow='2 / 4';center.style.gridColumn='2 / 4';center.innerHTML='<div class="center-mode-title" style="font-weight:bold;color:#b45309;font-size:calc(.88rem + 4px)">🌟 星轨智盘 · '+esc(mode==='sanhe'?'三合派':'飞星派')+'</div><div class="center-birth-details" style="text-align:left;line-height:1.65;font-size:calc(.85rem + 4px)"><div><b>姓名：</b>'+esc(chart.name)+'　<b>性别：</b>'+esc(chart.gender)+'</div><div><b>阳历：</b>'+esc(chart.solar)+'</div><div><b>农历：</b>'+esc(chart.lunar)+'</div><div><b>干支：</b>'+esc(chart.year_gan_zhi)+'　<b>生肖：</b>'+esc(chart.animal)+'</div><div><b>五行局：</b>'+esc(chart.bureau)+'　<b>命宫：</b>'+esc(chart.ming_gong)+'　<b>身宫：</b>'+esc(chart.shen_gong)+'</div></div><div class="time-btn-group"><button class="time-btn" onclick="adjustTime(&apos;day_up&apos;)" title="公历日期加一天，自动重新计算农历">日 ↑</button><button class="time-btn" onclick="adjustTime(&apos;hour_up&apos;)">时 ↑</button><button class="time-btn" onclick="adjustTime(&apos;hour_down&apos;)">时 ↓</button><button class="time-btn" onclick="adjustTime(&apos;day_down&apos;)">日 ↓</button></div>';box.appendChild(center);renderTimeline();invalidateOutdatedAnalysis();renderFullReport();if(chartFitActive)requestAnimationFrame(resizeChartFit);
+ if(mode==='feixing'&&document.getElementById('chk-fly-arrows').checked&&activeFlyPalace)drawFlyArrows(box,activeFlyPalace);
+ let fly=chart.flying_transformations.filter(x=>x.from_palace===selected);
+ const incoming=(chart.flying_transformations||[]).filter(x=>x.to_palace===selected&&!x.self_transform);
+ const palace=Object.values(chart.palaces).find(x=>x.name===selected);
+ const trace='<details style="margin-top:8px"><summary style="cursor:pointer;font-weight:bold">V8 飞星路径核查（点击展开）</summary>'+
+ '<div style="line-height:1.7;padding:8px 0">宫位：'+esc(selected)+'　宫干：'+esc(palace?.gan||'')+'<br>飞出：'+(fly.map(x=>esc(x.star+' '+x.transformation+' → '+x.to_palace+(x.self_transform?'（自化）':''))).join('；')||'无')+
+ '<br>飞入：'+(incoming.map(x=>esc(x.from_palace+' '+x.star+' '+x.transformation)).join('；')||'无')+
+ '<br><b>逆水忌／对逆水四化：</b>规则待确认，暂不自动判定，避免误报。<br><small>参考校验：'+esc(chart.verification?.scope||'仅单样盘')+'</small></div></details>';
+ const palaceStars=[...(palace?.mainStars||[]),...(palace?.minorStars||[])];
+ const trialSet=new Set(Object.keys(chart.extra_star_audit?.supplemental_positions||{}));
+ const provisionalHere=palaceStars.filter(s=>trialSet.has(s));
+ const palaceAudit='<div class="sanhe-palace-audit"><b>本宫星曜：'+palaceStars.length+' 项</b>　主星／六吉 '+(palace?.mainStars||[]).length+' 项，其他 '+(palace?.minorStars||[]).length+' 项。'+(provisionalHere.length?'<div>⚠ 待逐宫校准：'+provisionalHere.map(esc).join('、')+'</div>':'')+'<details><summary style="cursor:pointer">展开本宫全部星曜</summary>'+palaceStars.map(esc).join('、')+'</details></div>';
+ let html=decade?'<b>大限四化（以大限命宫宫干起）：</b>'+Object.entries(decade.four).map(([k,v])=>esc(k+' '+v)).join('；')+'<br>飞化落宫：'+decade.flying_transformations.map(x=>esc(x.star+x.transformation+' → '+x.to_palace+(x.self_transform?'（同宫）':''))).join('；'):mode==='sanhe'?'<b>三方四正：</b>'+related.map(z=>esc(chart.palaces[z].name)+'('+esc(z)+')').join('、'):'<b>本命宫干四化（点击宫位显示箭头）：</b>'+fly.map(x=>esc(x.star+x.transformation+' → '+x.to_palace+(x.self_transform?'（自化）':''))).join('；');document.getElementById('report-sanhe').innerHTML='<b>当前选中：</b>'+esc(selected)+'<p>'+html+'</p>'+(mode==='sanhe'?palaceAudit:'')+trace+'<small>流年命宫以流年太岁地支定位（公历年份简化计算，立春/农历年界线尚未校准）；大限宫名按大限命宫逆布，需与文墨天机核对。流年四化暂未实现，不冒充已计算。'+chart.warnings.map(esc).join('；')+'</small>';
+}
+
+
+const REPORT_MEANINGS={
+'命宫':['个性、气质、行动方式与人生取向','作为本命主体观察个人选择；转换为大命或流命时观察该阶段的主导议题'],
+'兄弟宫':['兄弟姐妹、同辈、合作伙伴、资源往来与财库关系','转换宫位可观察团队协作、同辈支持、资源流动与财务协调'],
+'夫妻宫':['婚姻、伴侣、亲密关系、长期合作与契约','转换宫位可观察合作关系、协议责任及阶段性亲密关系议题'],
+'子女宫':['孩子、晚辈、下属、教育培养、生育议题、情欲桃花与合伙延伸','转换宫位可观察团队带领、后辈培养、创作成果及亲密关系变化；不据此诊断生育能力'],
+'财帛宫':['收入、现金流、理财方式、资金配置与价值交换','转换宫位可观察阶段性收入结构、资源调度与财务决策'],
+'疾厄宫':['身体保养、压力反应、作息与健康风险管理','转换宫位可观察阶段性健康管理及生活节奏；不作为医疗诊断'],
+'迁移宫':['外部环境、出行、迁居、市场拓展与对外表现','转换宫位可观察外部机会、异地合作与环境适应'],
+'交友宫':['朋友、社群、客户、人脉、同事与部属互动','转换宫位可观察人际网络、合作对象与组织关系'],
+'事业宫':['事业方向、职业角色、职责、名望与工作成果','转换宫位可观察职务变化、项目推进与社会角色'],
+'田宅宫':['住宅、不动产、家庭空间、资产基础与长期积累','转换宫位可观察居住安排、资产配置与家庭稳定度'],
+'福德宫':['精神满足、价值观、休闲、内在压力与享受方式','转换宫位可观察阶段性的心理资源、生活质量与恢复能力'],
+'父母宫':['父母、长辈、上级、制度、文书与支持资源','转换宫位可观察上级关系、合规制度、文书事项与贵人支持']
+};
+function setAllReportSections(on){for(const id of ['print-natal','print-decade','print-annual','print-month','print-advanced','print-chart'])document.getElementById(id).checked=on;renderFullReport()}
+function reportEnabled(id){return document.getElementById(id)?.checked===true}
+function reportStars(p){return [...new Set([...(p?.mainStars||[]),...(p?.minorStars||[])])]}
+function reportPalaceHTML(title,p,zhi,extra){
+ const m=REPORT_MEANINGS[p?.name]||['宫位主题待确认','请核对宫位转换规则'];
+ const stars=reportStars(p);
+ const birth=Object.entries(p?.shengian||{}).map(([star,v])=>star+' '+(v.val||v.type||'')).join('、');
+ const trial=new Set(Object.keys(chart?.extra_star_audit?.supplemental_positions||{}));
+ const flagged=stars.filter(x=>trial.has(x));
+ return '<article class="report-palace" data-report-palace="'+esc(zhi)+'"><h4>'+esc(title)+'</h4><p class="report-meta">本命落宫：'+esc(p?.name||'未知')+' · '+esc(zhi)+' · '+esc(p?.gan_zhi||'')+'</p>'+
+ '<p><b>宫位所主：</b>'+esc(m[0])+'。</p><p><b>转换取象：</b>'+esc(extra||m[1])+'。</p>'+
+ '<p><b>宫内星曜：</b>'+esc(stars.join('、')||'无已排星曜')+'。</p>'+
+ (birth?'<p><b>生年四化：</b>'+esc(birth)+'。</p>':'')+
+ '<p><b>分析重点：</b>'+esc(stars.length?'结合本宫星曜、三方四正、四化飞入飞出与实际生活背景综合观察，不以单颗星直接断吉凶。':'本宫暂无已排星曜，应结合对宫、三方四正及宫干四化综合判断。')+'</p>'+
+ (flagged.length?'<p class="report-meta">待校准星曜：'+esc(flagged.join('、'))+'</p>':'')+'</article>';
+}
+function reportSection(title,content){return '<section><h3>'+esc(title)+'</h3>'+content+'</section>'}
+// Independent, printable chart snapshots; never alter the interactive on-screen chart.
+function printableZiweiChart(layer,monthNumber){
+ if(!chart||!reportEnabled('print-chart'))return '';
+ const decade=activeDecade(), annual=annualBranch(selectedAnnualYear);
+ const month=monthNumber||selectedLunarMonth;
+ const monthZhi=monthDouJunBranch(selectedAnnualYear,month);
+ const mode=document.querySelector('input[name="view-mode"]:checked')?.value||'sanhe';
+ const labels={natal:'本命盘',decade:'大限盘',annual:'流年盘',month:'流月盘（试算）'};
+ const title=labels[layer]||'紫微命盘';
+ let cells='';
+ for(const item of gridMapping){
+  const p=chart.palaces?.[item.zhi];if(!p)continue;
+  const starGroups=partitionPalaceStars(p,mode);
+  const stars=mode==='feixing'?[...starGroups.main,...starGroups.left.filter(st=>['文昌','文曲','左辅','右弼','天魁','天钺','擎羊','陀罗','火星','铃星','地空','地劫','天刑','天姚','禄存'].includes(st))]:[...starGroups.main,...starGroups.left];
+  const unique=[...new Set(stars)];
+  const mainSet=new Set(starGroups.main);
+  const main=unique.filter(st=>mainSet.has(st));
+  const other=unique.filter(st=>!mainSet.has(st));
+  const sihua=Object.entries(p.shengian||{}).map(([star,x])=>star+' '+(x.val||x.type||'')).join('、');
+  let active='';
+  if(layer==='decade'&&decade?.zhi===item.zhi)active=' report-ziwei-focus';
+  if(layer==='annual'&&annual===item.zhi)active=' report-ziwei-focus';
+  if(layer==='month'&&monthZhi===item.zhi)active=' report-ziwei-focus';
+  let layered='';
+  if(layer==='decade')layered='大'+shortLayerName(decade?.zhi,item.zhi,'')+' · '+p.name;
+  else if(layer==='annual')layered='流'+shortLayerName(annual,item.zhi,'')+' · 大'+shortLayerName(decade?.zhi,item.zhi,'')+' · '+p.name;
+  else if(layer==='month')layered=(monthZhi===item.zhi?'本月命宫 · ':'')+'流'+shortLayerName(annual,item.zhi,'')+' · '+p.name;
+  else layered=p.name;
+  cells+='<div class="report-ziwei-palace'+active+'" data-report-branch="'+esc(item.zhi)+'" data-report-layer="'+esc(layer)+'" style="grid-row:'+(item.r+1)+';grid-column:'+(item.c+1)+'">'+
+   '<div class="report-ziwei-stars">'+main.map(st=>'<b>'+esc(st)+'</b>').join(' ')+
+   '<span>'+esc(other.join('、'))+'</span></div>'+
+   (sihua?'<div class="report-ziwei-sihua">'+esc(sihua)+'</div>':'')+
+   '<div class="report-ziwei-bottom"><b>'+esc(layered)+'</b><span>'+esc(item.zhi)+' · '+esc(p.gan_zhi||'')+'</span></div></div>';
+ }
+ const center='<div class="report-ziwei-center" style="grid-row:2 / 4;grid-column:2 / 4"><b>星轨智盘 · '+esc(mode==='sanhe'?'三合派':'飞星派')+'</b>'+
+ '<p>'+esc(chart.name||'')+' · '+esc(chart.gender||'')+'</p><p>阳历 '+esc(chart.solar||'')+'</p><p>农历 '+esc(chart.lunar||'')+'</p>'+
+ '<p>命宫 '+esc(chart.ming_gong||'')+' · 身宫 '+esc(chart.shen_gong||'')+'</p>'+
+ '<p>大限 '+esc(decade?.range||'未选')+'岁 · '+esc(selectedAnnualYear)+'年</p>'+
+ (layer==='month'?'<p>农历'+esc(month)+'月（试算）</p>':'')+'</div>';
+ return '<figure class="report-ziwei-figure"><figcaption>'+esc(title)+' · '+esc(mode==='sanhe'?'三合派':'飞星派')+'</figcaption>'+
+ '<div class="report-ziwei-grid">'+cells+center+'</div><p class="report-meta">飞化证据中的地支宫位可在本图定位；点击报告中的宫位链接会高亮对应的物理宫格。此图取自当前排盘数据。'+
+ (layer==='month'?'流月斗君、闰月与流月四化尚待校准。':layer==='annual'?'流年年界及四化尚待校准。':'星曜与四化部分规则仍待校准。')+'</p></figure>';
+}
+function renderFullReport(){
+ const adv=document.getElementById('advanced-analysis-result');if(adv)adv.style.display=reportEnabled('print-advanced')?'':'none';
+ const target=document.getElementById('full-report-content');if(!target)return;
+ if(!chart){target.innerHTML='<p>请先完成排盘。</p>';return;}
+ const natalByName=Object.entries(chart.palaces||{}).map(([zhi,p])=>({zhi,p}));
+ const ordered=LAYER_PALACES.map(name=>natalByName.find(x=>x.p.name===name)).filter(Boolean);
+ const decade=activeDecade();
+ const decadeRange=decade?.range||'未配置';
+ let out='<p><b>'+esc(chart.name||'命主')+'</b> · '+esc(chart.solar||'')+' · '+esc(chart.bureau||'')+
+ ' · 选定大限 '+esc(decadeRange)+' 岁 · 流年 '+esc(selectedAnnualYear)+' 年</p>'+
+ '<p class="report-caution"><b>解读边界：</b>本报告目前为规则辅助的宫位主题与星曜清单，不是已完成校验的专业断盘。部分辅杂星、庙旺利陷、大限与流年安宫、流月斗君及四化规则尚待逐项核对；不据此断定疾病、生育能力、投资收益或具体事件。</p>';
+ if(reportEnabled('print-natal')){
+  out+=reportSection('一、本命盘：十二宫主题、转换取象与星曜',
+  printableZiweiChart('natal')+'<div class="report-palaces">'+ordered.map(({zhi,p})=>reportPalaceHTML(p.name,p,zhi)).join('')+'</div>');
+ }
+ if(reportEnabled('print-decade')){
+  const blocks=LAYER_PALACES.map(name=>{
+   const item=natalByName.find(x=>layerPalaceName(decade?.zhi,x.zhi)===name);
+   if(!item)return '';
+   const topic=REPORT_MEANINGS[name]||['阶段主题',''];
+   return reportPalaceHTML('大'+shortLayerName(decade?.zhi,item.zhi,'').replace(/^$/,'')+' · '+name,item.p,item.zhi,
+    '本大限 '+decadeRange+' 岁，此处转换为'+name+'，重点观察'+topic[0]+'；与本命'+item.p.name+'的原有主题交叉分析');
+  }).join('');
+  out+=reportSection('二、大限：'+decadeRange+'岁 · 十二宫转换与阶段主题',
+   '<p>大限命宫位于'+esc(decade?.zhi||'未知')+'；本节按已排大限宫位转换列出十二宫。'+
+   '本命宫位与大限宫位同时解读，不将大限名称误当作本命宫名。</p>'+printableZiweiChart('decade')+'<div class="report-palaces">'+blocks+'</div>');
+ }
+ if(reportEnabled('print-annual')){
+  const zhi=annualBranch(selectedAnnualYear);
+  const blocks=LAYER_PALACES.map(name=>{
+   const item=natalByName.find(x=>layerPalaceName(zhi,x.zhi)===name);
+   if(!item)return '';
+   return reportPalaceHTML('流'+shortLayerName(zhi,item.zhi,'')+' · '+name,item.p,item.zhi,
+    selectedAnnualYear+'年转换为'+name+'，可观察'+REPORT_MEANINGS[name][0]+'；与本命'+item.p.name+'、所选大限交叉分析');
+  }).join('');
+  out+=reportSection('三、流年：'+selectedAnnualYear+'年 · 十二宫主题',
+   '<p>流年宫位当前以公历年份推算太岁地支'+esc(zhi)+'，农历交界与流年四化尚未校准，以下为试算主题。</p>'+printableZiweiChart('annual')+'<div class="report-palaces">'+blocks+'</div>');
+ }
+ if(reportEnabled('print-month')){
+  const months=['正月','二月','三月','四月','五月','六月','七月','八月','九月','十月','冬月','腊月'];
+  const blocks=months.map((name,i)=>{
+   const zhi=monthDouJunBranch(selectedAnnualYear,i+1);
+   const p=chart.palaces?.[zhi];
+   return '<article class="report-palace"><h4>'+esc(name)+' · '+esc(zhi||'待校准')+'宫</h4><p>试算月份落在本命'+esc(p?.name||'未知')+'；可关注'+esc(REPORT_MEANINGS[p?.name]?.[0]||'相关生活主题')+'。</p><p class="report-meta">仅为斗君试算，未校准闰月、农历交界及流月四化，不作为具体事件预测。</p></article>';
+  }).join('');
+  out+=reportSection('四、流月：'+selectedAnnualYear+'年 · 十二个月主题（试算）',printableZiweiChart('month',selectedLunarMonth)+'<div class="report-palaces">'+blocks+'</div>');
+ }
+ target.innerHTML=out;
+}
+
+// V8.47: report evidence -> the same physical branch in the printed chart.
+// This is a reading aid, not a new astrological inference.
+function reportEvidenceLink(zhi,caption){
+ if(!['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'].includes(zhi))return esc(caption);
+ return '<button type="button" class="report-branch-link" data-branch="'+esc(zhi)+'" onclick="focusReportBranch(this.dataset.branch)">'+esc(caption)+'</button>';
+}
+function focusReportBranch(zhi){
+ if(!['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'].includes(zhi))return;
+ document.querySelectorAll('.report-ziwei-palace').forEach(el=>{
+   el.classList.toggle('report-evidence-focus',el.dataset.reportBranch===zhi);
+ });
+ document.querySelectorAll('[data-report-palace]').forEach(el=>{
+   el.classList.toggle('report-evidence-focus',el.dataset.reportPalace===zhi);
+ });
+ const target=document.querySelector('.report-ziwei-palace[data-report-branch="'+zhi+'"]');
+ if(target)target.scrollIntoView({behavior:'smooth',block:'center'});
+}
+function analysisContextKey(){
+ if(!chart)return '';
+ return [chart.solar,chart.name,document.querySelector('input[name=view-mode]:checked')?.value||'sanhe',activeDecade()?.zhi,selectedAnnualYear].join('|');
+}
+let advancedAnalysisContextKey='';
+function invalidateOutdatedAnalysis(){
+ if(!advancedAnalysisCache)return;
+ if(advancedAnalysisContextKey===analysisContextKey())return;
+ advancedAnalysisCache=null;advancedAnalysisContextKey='';
+ const target=document.getElementById('advanced-analysis-result');
+ if(target)target.innerHTML='<p class="report-caution">排盘、流派、大限或流年已变更。请重新点击「生成当前流派高阶分析」，避免打印旧命盘的分析。</p>';
+}
+
+let advancedAnalysisCache=null;
+async function runAdvancedAnalysis(){
+ const target=document.getElementById('advanced-analysis-result');
+ if(!chart){target.textContent='请先排盘';return;}
+ const decade=activeDecade();
+ target.textContent='正在计算宫干四化路径及跨层汇集…';
+ try{
+  const response=await fetch('/api/ziwei/analyze',{method:'POST',
+   headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({chart,school:document.querySelector('input[name=view-mode]:checked')?.value||'sanhe',decade_zhi:decade?.zhi,year:selectedAnnualYear})});
+  const data=await response.json();
+  if(!response.ok||data.status!=='success')throw new Error(data.message||'计算失败');
+  advancedAnalysisCache=data.analysis;advancedAnalysisContextKey=analysisContextKey();
+  const a=data.analysis;
+  if(a.school==='三合派'){
+   let html='<section><h3>三合派 · 十二宫三方四正星曜证据</h3>'+
+     '<p class="report-caution">星曜与三方四正为分析依据，不代表格局或事件已经成立。</p><div class="report-palaces">';
+   html+=a.palaces.map(p=>'<article class="report-palace"><h4>'+esc(p.palace)+'（'+esc(p.zhi)+'）</h4>'+p.three_harmony_four_positions.map(q=>
+    '<p><b>'+esc(q.role)+' · '+esc(q.palace)+'（'+esc(q.zhi)+'）</b>：'+esc(q.stars.join('、')||'无已排星曜')+'</p>').join('')+
+    '<p><b>主星分布：</b>'+esc((p.star_evidence?.major_star_distribution||[]).map(x=>x.star+'（'+x.positions.map(y=>y.role).join('、')+'）').join('；')||'未排出主星')+'</p>'+
+    (p.star_evidence?.supporting_star_groups||[]).map(g=>'<p><b>'+esc(g.group)+'（'+g.count+'颗）：</b>'+esc(g.present.map(x=>x.star+'（'+x.positions.map(y=>y.role).join('、')+'）').join('；')||'未排出')+'</p>').join('')+
+    '<p class="report-meta">亮度参考：'+esc((p.star_evidence?.brightness_observations||[]).map(x=>x.star+' '+x.grade+'（'+x.role+'）').join('；')||'无可用亮度数据')+'。仅为星曜分布与待核验亮度，不作吉凶评分或格局判定。</p>'+ 
+    '<details><summary>三方四正条件检查（非格局判定）</summary>'+((p.conditional_observations?.checks)||[]).map(c=>'<p><b>'+esc(c.met?'已观察到':'未观察到')+' · '+esc(c.label)+'</b>：'+esc(c.meaning)+'。证据：'+esc((c.evidence||[]).map(x=>x.star||x.grade).join('、')||'无')+'</p>').join('')+
+    '<details><summary>双星同宫位置核对（不代表传统格局成立）</summary>'+((p.pair_audit?.rules)||[]).map(r=>'<p><b>'+esc(r.observed?'观察到同宫':'未观察到同宫')+' · '+esc(r.label)+'</b>：'+esc((r.witnesses||[]).map(w=>w.role+' '+w.zhi+'宫').join('、')||'无同宫证据')+'。'+esc(r.status)+'</p>').join('')+'</details>'+
+    '<details><summary>传统格局位置条件候选（非格局成立）</summary>'+((p.pattern_candidates?.candidates)||[]).map(c=>'<p><b>'+esc(c.label)+'：'+esc(c.state)+'</b>；'+esc(c.stars.map(st=>st+' '+(c.positions[st]||[]).map(x=>x.role+'('+x.zhi+')').join('、')).join('；'))+'；待核验：煞忌、亮度与流派格局定义。</p>').join('')+'</details>'+
+    '<details><summary>V8.59 格局规则库来源门槛与核验状态（仅位置必要条件）</summary>'+((p.rule_registry_audit?.rules)||[]).map(r=>'<p><b>'+esc(r.title)+' · '+esc(r.position_state)+'</b>：'+esc(r.necessary_conditions.join('；'))+'。见证宫位：'+(r.witnesses.map(w=>reportEvidenceLink(w.zhi,w.role+'（'+w.zhi+'）')).join('、')||'无')+'；缺项星曜：'+esc(r.missing_stars.join('、')||'无')+'。来源状态：'+esc(r.provenance?.source_status||'待核验')+'；文献：'+esc(r.provenance?.citation||'尚无已核验文献')+'；规则来源：'+esc(r.source)+'；传统格局、煞忌、亮度门槛及四化仍待核验。</p>').join('')+'</details>'+
+    '<details><summary>V8.60 格局六项证据门槛（未校准条件不作结论）</summary>'+((p.rule_gate_matrix?.rules)||[]).map(r=>'<p><b>'+esc(r.title)+'</b>：位置 '+esc(r.gates.position)+'；来源 '+esc(r.gates.source)+'；煞星 '+esc(r.gates.sha)+'；亮度 '+esc(r.gates.brightness)+'；四化 '+esc(r.gates.four_transformations)+'；流派定义 '+esc(r.gates.school_definition)+'。'+(r.sha_evidence.map(w=>reportEvidenceLink(w.zhi,w.zhi+'宫')+' 煞星：'+esc(w.observed.join('、')||'无')).join('；')||'无同宫证据')+'。亮度缺项：'+esc(r.brightness_evidence.map(w=>w.zhi+'宫 '+(w.missing.join('、')||'无')).join('；')||'不适用')+'。格局与事件均未确认。</p>').join('')+'</details>'+
+    '<details><summary>V8.57 煞星与亮度同宫证据（不作吉凶判定）</summary>'+((p.pattern_context?.observations)||[]).map(o=>'<p><b>'+esc(o.label)+' · '+esc(o.position_state)+'</b>：'+esc((o.witnesses||[]).map(w=>w.role+'（'+w.zhi+'）：煞星 '+(w.sha_same_palace.join('、')||'未观察到')+'；已提供亮度 '+(Object.entries(w.brightness_observed).map(([k,v])=>k+' '+v).join('、')||'无')+'；亮度缺项 '+(w.brightness_missing.join('、')||'无')).join('；')||'无同宫见证')+'。四化、煞忌影响及格局判据未核验。</p>').join('')+'</details>'+
+    '<p class="report-caution">'+esc(p.conditional_observations?.status||'条件未核验')+'；仍缺：'+esc((p.conditional_observations?.missing||[]).join('、'))+'</p></details></article>').join('');
+   target.innerHTML=html+'</div><p class="report-meta">'+a.limitations.map(esc).join('；')+'</p></section>';
+   return;
+  }
+  let html='<section><h3>飞星派 · 可追溯四化路径与飞伏候选</h3>'+
+   '<p class="report-caution">以下为四化路径及跨层汇集候选，不代表事件已成立。四化飞伏的流派判据尚待核对。</p>';
+  const layerAudit=a.layer_consistency_audit||{};
+  const annualAudit=a.annual_integrity_audit||{};
+  const decadeAudit=a.decade_integrity_audit||{};
+  const auditLabel=x=>x===true?'落宫记录一致':x===false?'记录存在不一致':'未核验／未选择';
+  html+='<details open><summary>V8.65 限年四化与跨层独立性核验</summary>'+
+    '<p>流年四化：'+esc(auditLabel(annualAudit.all_consistent))+'；年度干：'+esc(annualAudit.stem||'—')+'；年界校准：未完成。</p>'+
+    '<p>大限四化：'+esc(auditLabel(decadeAudit.all_consistent))+'；所选大限：'+esc(decadeAudit.decade_zhi||'未选择')+'；流派起法校准：未完成。</p>'+
+    '<p>原始跨层路径：'+esc(layerAudit.raw_paths??'—')+'；独立物理路径：'+esc(layerAudit.independent_physical_paths??'—')+'；跨层重复：'+esc((layerAudit.reused_paths||[]).length)+'。</p>'+
+    '<p class="report-caution">'+esc(layerAudit.warning||'路径一致性不代表事件成立')+'</p>'+
+    '<details><summary>流年四化逐项核对</summary>'+((annualAudit.checks)||[]).map(c=>'<p>'+esc(c.hua+' '+c.star+'：'+c.integrity+'；落宫 '+(c.expected_positions||[]).join('、'))+'</p>').join('')+'</details>'+
+    '<details><summary>大限四化逐项核对</summary>'+((decadeAudit.checks)||[]).map(c=>'<p>'+esc(c.hua+' '+c.star+'：'+c.integrity+'；落宫 '+(c.expected_positions||[]).join('、'))+'</p>').join('')+'</details></details>';
+  html+='<h4>本命／大限／流年飞化路径（'+a.edges.length+'条）</h4><div class="report-palaces">';
+  html+=a.edges.slice(0,80).map(e=>'<article class="report-palace"><b>'+esc(e.layer)+' · '+esc(e.source_natal)+'（'+esc(e.source)+'宫）</b> → '+esc(e.target_natal)+'（'+esc(e.target)+'宫）'+
+    '<p>'+esc(e.gan)+'干 '+esc(e.star)+' '+esc(e.hua)+(e.self?' · 自化':'')+'</p><p>落宫：'+reportEvidenceLink(e.target,e.target+'宫 · '+e.target_natal)+'</p>'+
+    '<p class="report-meta">重叠：大限 '+esc(e.target_decade||'—')+'；流年 '+esc(e.target_annual||'—')+'</p></article>').join('');
+  html+='</div><h4>跨层飞化汇集（'+a.latent_candidates.length+'处）</h4>';
+  html+=a.latent_candidates.map(c=>'<p><b>'+esc(c.natal_palace)+'（'+esc(c.target)+'）</b>：'+esc(c.layers.join('、'))+' 层有飞化进入，属于待验证伏象候选。</p>').join('');
+  const audit=a.independence_audit;
+  if(audit){html+='<h4>跨层证据独立性审计</h4><p>层级路径 '+audit.raw_layer_paths+' 条；独立物理宫干路径 '+audit.independent_physical_paths+' 条；跨层重复 '+audit.repeated_across_layers.length+' 条。</p><p class="report-caution">'+esc(audit.warning)+'</p>';}
+  html+='<h4>四化组合与冲照 · 证据候选（'+(a.transformation_patterns||[]).length+'）</h4><div class="report-palaces">';
+  html+=(a.transformation_patterns||[]).slice(0,80).map(x=>'<article class="report-palace"><h4>'+esc(x.kind)+' · '+esc(x.target)+'宫</h4><p>'+x.paths.map(e=>esc(e.source+'宫 '+e.gan+'干 '+e.star+e.hua+' → '+e.target+'宫')).join('；')+'</p><p class="report-meta">'+esc(x.explanation)+'</p></article>').join('');
+  html+='</div>';
+  html+='<h4>十二宫逐宫飞化证据 · 可对照报告命盘</h4><div class="report-palaces">';
+  html+=(a.palace_evidence||[]).map(p=>'<article class="report-palace"><h4>'+reportEvidenceLink(p.zhi,p.natal_palace+'（'+p.zhi+'）')+'</h4>'+
+    '<p>叠宫：大限 '+esc(p.decade_palace||'—')+'／流年 '+esc(p.annual_palace||'—')+'</p>'+
+    '<p>主星：'+esc(p.main_stars.join('、')||'无')+'</p>'+
+    '<p>飞入（独立物理路径 '+p.incoming.length+'）：'+(p.incoming.slice(0,8).map(e=>reportEvidenceLink(e.source,e.source+'宫')+' '+esc(e.star+e.hua)).join('；')||'无')+'</p>'+
+    '<p>飞出（独立物理路径 '+p.outgoing.length+'）：'+(p.outgoing.slice(0,8).map(e=>esc(e.star+e.hua+' → ')+reportEvidenceLink(e.target,e.target+'宫')).join('；')||'无')+'</p>'+
+    '<p class="report-meta">跨层重复记录 '+p.reused_layer_paths+' 条，未当成独立印证。</p></article>').join('');
+  html+='</div><h4>事件结构条件审计 · 不代表事件成立</h4><div class="report-palaces">';
+  html+=(a.event_conditions||[]).map(c=>'<article class="report-palace"><h4>'+reportEvidenceLink(c.zhi,c.palace+'（'+c.zhi+'）')+'</h4>'+
+    '<p>不同来源宫：'+c.distinct_sources+'；组合：'+esc(c.combinations.map(x=>x.kind).join('、')||'无')+'</p>'+
+    '<p>自化路径 '+c.self_count+'；对宫飞入 '+c.opposite_count+'</p>'+
+    '<p class="report-meta">'+esc(c.stage)+'；待核：'+esc(c.required.join('、'))+'</p></article>').join('');
+  html+='</div>';
+  html+='<h4>六大主题 · 分层事件证据审计</h4>';
+  html+=(a.event_evidence||[]).map(t=>'<article class="report-palace"><h4>'+esc(t.topic)+' · '+esc(t.status)+'</h4>'+
+    '<p>独立物理路径：'+t.distinct_physical_paths+'；跨层双向候选：'+t.reciprocal_candidate_count+'</p>'+
+    '<p>本命 / 大限 / 流年路径：'+['本命','大限','流年'].map(x=>x+': '+(t.path_counts_by_layer[x]||0)).join('；')+'</p>'+
+    '<p><b>飞化依据：</b>'+t.evidence.slice(0,6).map(e=>(esc(e.layer+' '+e.source_palace+' '+e.hua+'（'+e.star+'）→')+reportEvidenceLink(e.target,'本命'+e.natal_palace+'／大限'+(e.decade_palace||'—')+'／流年'+(e.annual_palace||'—')))).join('；')+'</p>'+
+    '<p class="report-meta">尚缺：'+t.missing_checks.map(esc).join('；')+'</p></article>').join('');
+  if(a.verification){
+    const v=a.verification;
+    html+='<h4>V8.50 独立证据核验与未落星诊断</h4>'+
+      '<p>本命独立物理路径 '+v.physical_natal_paths.length+' 条；年度天干四化 '+v.annual_stem_paths.length+
+      ' 条；本命与年干同宫呼应 '+v.natal_annual_overlaps.length+' 处；未能落星 '+v.unresolved_transformations.length+' 条。</p>';
+    html+='<p class="report-caution">'+esc(v.warning)+'</p>';
+    html+=v.natal_annual_overlaps.slice(0,12).map(o=>'<p>'+reportEvidenceLink(o.target,o.natal_palace+'（'+o.target+'）')+
+      '：本命宫干路径 '+o.natal_paths+' 条，年度天干四化 '+o.annual_stem_paths+' 条；不代表事件成立。</p>').join('');
+    html+=v.unresolved_transformations.slice(0,18).map(o=>'<p class="report-meta">'+esc(o.source+'宫 '+(o.gan||'无宫干')+' '+(o.star||'')+(o.hua||''))+'：'+esc(o.reason)+'</p>').join('');
+  }
+  if(a.direction_audit){
+    const d=a.direction_audit;
+    html+='<h4>V8.51 双向飞化真实性审计</h4>'+
+      '<p>检查跨层映射 '+d.cross_layer_paths_checked+' 条；疑似双向路径 '+d.reciprocal_aliases_checked+
+      ' 对；已核验的独立双向飞化 '+d.certified_reciprocal_count+' 对。</p>'+
+      '<p class="report-caution">'+esc(d.status)+'</p>';
+    html+='<h4>本命宫干 × 年度天干同宫证据（非事件成立）</h4>';
+    html+=d.natal_annual_pairs.slice(0,24).map(x=>'<p>'+reportEvidenceLink(x.target,x.target+'宫')+
+      '：本命 '+esc(x.natal_source+'宫 '+x.natal_stem+'干 '+x.natal_star+x.natal_hua)+
+      '；年度 '+esc(x.annual_stem+'干 '+x.annual_star+x.annual_hua)+'</p>').join('');
+    html+='<p class="report-meta">正式判断尚需：'+d.required_for_confirmation.map(esc).join('；')+'</p>';
+  }
+  if(a.palace_narratives){
+    html+='<h4>V8.52 十二宫逐宫飞入／飞出 · 命盘对应解读</h4>';
+    html+=a.palace_narratives.map(p=>'<article class="report-palace"><h4>'+reportEvidenceLink(p.zhi,p.natal_palace+'（'+p.zhi+'）')+'</h4>'+
+      '<p class="report-meta">大限叠宫：'+esc(p.decade_palace||'未选择')+'；流年叠宫：'+esc(p.annual_palace||'—')+'</p>'+
+      '<p>实际排盘星曜：'+esc(p.stars.join('、')||'暂无已排星曜')+'</p>'+
+      '<p><b>飞出（'+p.outgoing.length+'）：</b>'+ (p.outgoing.length?p.outgoing.slice(0,12).map(e=>esc(e.source_natal+' '+e.gan+'干 '+e.star+e.hua+' → ')+reportEvidenceLink(e.target,e.target_natal+'（'+e.target+'）')+(e.self_path?'〔同宫〕':'')+(e.opposite_path?'〔对宫〕':'')).join('；'):'暂无可定位路径')+'</p>'+
+      '<p><b>飞入（'+p.incoming.length+'）：</b>'+ (p.incoming.length?p.incoming.slice(0,12).map(e=>reportEvidenceLink(e.source,e.source_natal+'（'+e.source+'）')+esc(' '+e.gan+'干 '+e.star+e.hua+' → 本宫')).join('；'):'暂无可定位路径')+'</p>'+
+      '<p><b>年度天干四化（'+p.annual_stem.length+'）：</b>'+esc(p.annual_stem.map(e=>e.gan+'干 '+e.star+e.hua).join('、')||'无落宫记录')+'</p>'+
+      '<p class="report-caution">'+esc(p.note)+'</p></article>').join('');
+  }
+  html+='<h4>事件判断条件核验 · 逐项说明依据与缺口</h4>';
+  html+=(a.event_readiness||[]).map(t=>'<article class="report-palace"><h4>'+esc(t.topic)+' · '+esc(t.status)+'</h4>'+
+    '<p>独立物理路径：'+t.physical_path_count+'；相关落宫：'+t.palace_evidence.length+'</p>'+
+    t.palace_evidence.slice(0,5).map(p=>'<p>'+reportEvidenceLink(p.zhi,p.palace+'（'+p.zhi+'）')+'：'+esc(p.stars.join('、')||'无已排星曜')+'；'+esc(p.transformations.join('、'))+
+      (p.has_self?'；含自化路径':'')+(p.has_opposition?'；含对宫路径':'')+
+      (p.has_lu_ji?'；禄忌同宫':'')+(p.has_quan_ji?'；权忌同宫':'')+(p.has_ke_ji?'；科忌同宫':'')+'</p>').join('')+
+    '<p><b>判断门槛：</b>'+t.gate_checks.map(g=>(g.passed?'已具路径：':'尚待核验：')+esc(g.name)+'（'+esc(g.note)+'）').join('；')+'</p>'+
+    '<p class="report-caution">'+esc(t.conclusion)+'</p></article>').join('');
+  html+='<h4>议题线索（非事件断言）</h4>';
+  html+=a.topics.map(t=>'<p><b>'+esc(t.topic)+'</b>：'+esc(t.layers.join('、')||'暂无')+' 层存在相关路径；'+esc(t.status)+'。</p>').join('');
+  html+='<p class="report-meta">'+a.limitations.map(esc).join('；')+'</p></section>';
+  target.innerHTML=html;
+ }catch(err){target.textContent='分析失败：'+err.message;}
+}
+
+function printFullReport(){invalidateOutdatedAnalysis();if(!chart){alert('请先排盘');return;}if(!['print-chart','print-natal','print-decade','print-annual','print-month','print-advanced'].some(reportEnabled)){alert('请至少选择一个报告部分');return;}renderFullReport();document.body.dataset.ziweiPrintReady='true';window.print();}
+
+let chartFitActive=false;
+function resizeChartFit(){
+ if(!chartFitActive)return;
+ const panel=document.getElementById('chart-panel');
+ const workspace=document.getElementById('chart-workspace');
+ if(!panel||!workspace)return;
+ panel.style.zoom='1';
+ panel.style.width='1040px';
+ // The grid uses a 1004px design width; retain its typography and proportions.
+ const naturalHeight=panel.scrollHeight;
+ const widthAvailable=Math.max(300,window.innerWidth-12);
+ const heightAvailable=Math.max(300,window.innerHeight-12);
+ const scale=Math.min(1,widthAvailable/1040,heightAvailable/naturalHeight);
+ panel.style.zoom=String(Math.max(0.35,scale));
+ workspace.scrollTop=0;
+ workspace.scrollLeft=0;
+}
+function toggleChartFit(force){
+ chartFitActive=typeof force==='boolean'?force:!chartFitActive;
+ document.body.classList.toggle('chart-fit-active',chartFitActive);
+ const panel=document.getElementById('chart-panel');
+ if(!chartFitActive&&panel){panel.style.zoom='';panel.style.width='';}
+ const button=document.getElementById('fit-chart-button');
+ if(button)button.textContent=chartFitActive?'↩ 返回正常页面':'⛶ 一屏显示';
+ if(chartFitActive)resizeChartFit();
+}
+window.addEventListener('resize',resizeChartFit);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&chartFitActive)toggleChartFit(false)});
+
+document.addEventListener('DOMContentLoaded',()=>{document.querySelector('input[name="view-mode"][value="sanhe"]').checked=true;loadDatabaseProfile();for(const id of ['chk-sihua','chk-sanfang','chk-fly-arrows','chk-self-arrows','fly-direction','sanhe-show-lucky','sanhe-show-sha','sanhe-show-other','sanhe-show-brightness'])document.getElementById(id).addEventListener('change',renderGrid);calculate()});
+</script>
+
+</body>
+</html>
