@@ -576,6 +576,18 @@ body.chart-fit-active .chart-mode-bar{position:sticky;top:0;z-index:100}
  body.mobile-chart-reading #chart-panel{zoom:1}
  body.chart-fit-active #chart-panel{min-width:0}
 }
+
+.report-ganzhi-stack{display:inline-flex;flex-direction:column;align-items:center;line-height:1.1}
+/* 宫干在上、地支在下，明确纵向叠排（适用三合及飞星）。 */
+.palace-box:not(.center-box) .p-bottom-right {
+ writing-mode:horizontal-tb!important; text-orientation:mixed!important;
+ display:flex!important;flex-direction:column!important;align-items:center!important;
+ justify-content:flex-end!important;gap:0!important;line-height:1.05!important;
+ letter-spacing:0!important;bottom:5px!important;right:5px!important;
+ max-height:none!important;overflow:visible!important;
+}
+.p-bottom-right .gz-stem,.p-bottom-right .gz-branch{display:block;white-space:nowrap}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="xinggui_session.js"></script>
@@ -886,6 +898,12 @@ function partitionPalaceStars(p,mode){
    all.filter(s=>!(p.mainStars||[]).includes(s)||lucky.has(s));
  return {main,left};
 }
+function ganZhiStack(p){
+ const raw=String(p?.gan_zhi||'').replace(/\s/g,'');
+ const gan=String(p?.gan||raw.charAt(0)||'');
+ const zhi=String(p?.zhi||raw.charAt(1)||'');
+ return '<span class="gz-stem">'+esc(gan)+'</span><span class="gz-branch">'+esc(zhi)+'</span>';
+}
 function renderGrid(){if(!chart)return;document.querySelectorAll('.chart-mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===(document.querySelector('input[name=view-mode]:checked')?.value||'sanhe')));let box=document.getElementById('ziwei-grid-container');box.innerHTML='';let showShas=true,showFour=document.getElementById('chk-sihua').checked,highlight=document.getElementById('chk-sanfang').checked;let mode=document.querySelector('input[name=view-mode]:checked')?.value||'sanhe';document.getElementById('fly-toolbar').style.display=mode==='feixing'?'flex':'none';document.getElementById('sanhe-toolbar').style.display=mode==='sanhe'?'flex':'none';let current=Object.values(chart.palaces).find(x=>x.name===selected);let related=current?.san_fang_si_zheng||[];const candidateDecade=activeDecade();const dr=decadeYearRange(candidateDecade);const decade=decadeLayerEnabled&&dr&&selectedAnnualYear>=dr[0]&&selectedAnnualYear<=dr[1]?candidateDecade:null;const annualZhi=annualBranch(selectedAnnualYear);const monthZhi=monthDouJunBranch(selectedAnnualYear,selectedLunarMonth);document.getElementById('decade-summary').textContent=
  !decadeLayerEnabled&&!annualLayerEnabled?'仅显示本命（大限与流年已取消）':
  !decadeLayerEnabled?'仅显示本命＋流年 '+selectedAnnualYear+'（'+annualZhi+'）':
@@ -1103,7 +1121,7 @@ function printableZiweiChart(layer,monthNumber){
    '<div class="report-ziwei-stars">'+main.map(st=>'<b>'+esc(st)+'</b>').join(' ')+
    '<span>'+esc(other.join('、'))+'</span></div>'+
    (sihua?'<div class="report-ziwei-sihua">'+esc(sihua)+'</div>':'')+
-   '<div class="report-ziwei-bottom"><b>'+esc(layered)+'</b><span>'+esc(item.zhi)+' · '+esc(p.gan_zhi||'')+'</span></div></div>';
+   '<div class="report-ziwei-bottom"><b>'+esc(layered)+'</b><span class="report-ganzhi-stack">'+ganZhiStack(p)+'</span></div></div>';
  }
  const center='<div class="report-ziwei-center" style="grid-row:2 / 4;grid-column:2 / 4"><b>星轨智盘 · '+esc(mode==='sanhe'?'三合派':'飞星派')+'</b>'+
  '<p>'+esc(chart.name||'')+' · '+esc(chart.gender||'')+'</p><p>阳历 '+esc(chart.solar||'')+'</p><p>农历 '+esc(chart.lunar||'')+'</p>'+

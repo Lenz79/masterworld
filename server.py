@@ -226,7 +226,7 @@ class MainGatewayHandler(SimpleHTTPRequestHandler):
         # ------------------------------------------------------------------
         elif self.path == '/api/ziwei/analyze':
             try:
-                from ziwei_analysis import build_analysis, build_sanhe_analysis, build_school_readings
+                from ziwei_analysis import build_analysis, build_sanhe_analysis, build_school_readings, build_transfer_ji_paths
                 request = self._parse_json_body()
                 if request.get('school') not in (None, 'sanhe', 'flying', 'feixing'):
                     raise ValueError('不支持的分析流派')
@@ -243,6 +243,8 @@ class MainGatewayHandler(SimpleHTTPRequestHandler):
                           if request.get('school') == 'sanhe'
                           else build_analysis(request.get('chart') or {},
                                               request.get('decade_zhi'), request.get('year')))
+                if request.get('school') != 'sanhe':
+                    result.setdefault('transfer_ji_paths', build_transfer_ji_paths(request['chart']))
                 result['school_readings'] = build_school_readings(request['chart'], 'sanhe' if request.get('school') == 'sanhe' else 'flying', result)
                 from ziwei_delivery_audit import audit_chart
                 result['delivery_audit'] = audit_chart(request['chart'])

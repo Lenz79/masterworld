@@ -25,6 +25,48 @@ def layer_name(origin, zhi):
 def year_branch(year):
     return DI_ZHI[(int(year)-4)%12]
 
+
+
+def build_transfer_ji_paths(chart, max_hops=12):
+    """宫干化忌 -> 落宫 -> 以落宫宫干继续转忌；循环终止并保留证据。
+
+    仅计算本命物理宫位路径；不把重复路径当作大限/流年独立事件。
+    """
+    palaces=chart.get('palaces') or {}
+    if len(palaces)!=12 or any(z not in palaces for z in DI_ZHI):
+        raise ValueError('转忌需要完整十二宫')
+    positions=defaultdict(list)
+    for z,p in palaces.items():
+        for star in set((p.get('mainStars') or [])+(p.get('minorStars') or [])):
+            positions[star].append(z)
+    results=[]
+    for origin in DI_ZHI:
+        steps=[]; current=origin; visited=set(); stop='达到最大追踪深度'
+        for _ in range(max_hops):
+            if current in visited:
+                stop='转忌回到已访问宫位，停止循环';break
+            visited.add(current)
+            gan=palaces[current].get('gan')
+            ji_star=BIRTH_FOUR_TRANSFORMATIONS.get(gan,{}).get('化忌')
+            if not ji_star:
+                stop='当前宫干无可用化忌表项';break
+            targets=positions.get(ji_star,[])
+            if len(targets)!=1:
+                stop='化忌星曜落点缺失或不唯一，不能继续';break
+            target=targets[0]
+            steps.append({'from':current,'from_palace':palaces[current].get('name'),
+                          'gan':gan,'star':ji_star,'hua':'化忌','to':target,
+                          'to_palace':palaces[target].get('name'),
+                          'self':current==target,
+                          'opposite':(DI_ZHI.index(current)-DI_ZHI.index(target))%12==6})
+            if target==current:
+                stop='化忌落回本宫（自化忌路径），停止';break
+            current=target
+        results.append({'source':origin,'source_palace':palaces[origin].get('name'),
+                        'steps':steps,'stop_reason':stop,
+                        'status':'宫干转忌路径证据；不是事件或应期判定'})
+    return results
+
 def build_analysis(chart, decade_zhi=None, year=None):
     palaces=chart.get("palaces") or {}
     if len(palaces)!=12 or any(z not in palaces for z in DI_ZHI):
@@ -134,6 +176,7 @@ def build_analysis(chart, decade_zhi=None, year=None):
       "event_readiness":build_event_readiness({"edges":edges},palaces),
       "verification":__import__("ziwei_verification").verify_evidence({"edges":edges,"annual_stem_four":annual_four},chart),
       "palace_narratives":build_palace_narratives(edges,palaces,decade_zhi,annual_zhi,annual_four),
+       "transfer_ji_paths":build_transfer_ji_paths(chart),
       "direction_audit":__import__("ziwei_verification").audit_directional_claims(
           {"edges":edges,"cross_layer_paths":cross,"reciprocal_candidates":reciprocal,
            "annual_stem_four":annual_four},chart),
@@ -576,12 +619,14 @@ def build_school_readings(chart, school, analysis_result):
                 "caveat": "星曜分布只支持条件式分析；格局和庙旺利陷尚未校准。"
             })
     else:
+        transfers={x["source"]:x for x in analysis_result.get("transfer_ji_paths", [])}
         for item in analysis_result.get("palace_narratives", []):
             incoming = item.get("incoming") or []
             outgoing = item.get("outgoing") or []
             records.append({
                 "palace": item.get("natal_palace"), "zhi": item.get("zhi"), "school": "飞星派",
-                "focus": "本宫四化飞入、飞出与来源去向",
+                "focus": "宫干四化、飞宫转忌与来源去向",
+                "transfer_ji": transfers.get(item.get("zhi"), {}),
                 "observed": "飞入：" + ("；".join(x.get("description", "") for x in incoming[:5]) or "无已记录路径") +
                     "；飞出：" + ("；".join(x.get("description", "") for x in outgoing[:5]) or "无已记录路径"),
                 "favorable": "可追溯的禄科飞入：" + str(sum("禄" in x.get("hua", "") or "科" in x.get("hua", "") for x in incoming)),
