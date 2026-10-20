@@ -950,18 +950,60 @@ const REPORT_MEANINGS={
 function setAllReportSections(on){for(const id of ['print-natal','print-decade','print-annual','print-month','print-advanced','print-chart'])document.getElementById(id).checked=on;renderFullReport()}
 function reportEnabled(id){return document.getElementById(id)?.checked===true}
 function reportStars(p){return [...new Set([...(p?.mainStars||[]),...(p?.minorStars||[])])]}
+// 基于实际星曜、四化与三方四正的证据驱动式逐宫解释；未排出者不推断。
+const ZW_STAR_MEANINGS={
+ '紫微':'重视统筹、责任与主导权','天机':'善于思考、策划与因应变化','太阳':'重视表现、付出与公共责任','武曲':'强调执行、财务纪律与成果','天同':'倾向协调、舒适与关系维护','廉贞':'关注原则、界限与人际互动','天府':'重视稳健管理与资源积累','太阴':'关注细节、积累与内在安全感','贪狼':'追求多元体验、社交与资源拓展','巨门':'重视表达、辨析与信息核实','天相':'倾向制度、协作与公平','天梁':'重视原则、保护与责任承担','七杀':'倾向独立决断与突破','破军':'倾向改革、调整与重建',
+ '左辅':'团队支持与协调资源','右弼':'协作与外部助力','文昌':'文书、学习与逻辑表达','文曲':'表达、审美与知识运用','天魁':'外部提携与机会','天钺':'人脉支持与贵人资源','禄存':'资源保存与稳定性','天马':'迁动、流动与跨域发展','擎羊':'决策中的冲突与压力','陀罗':'延迟、纠结与反复打磨','火星':'行动速度与突发波动','铃星':'压力、敏感与急迫感','地空':'预期与现实之间的落差','地劫':'资源耗损与计划变化','孤辰':'独处需求与自主空间','寡宿':'独立性与情感距离','天姚':'人际吸引与情感互动','天刑':'规范、责任与边界意识'};
+const ZW_HUA_MEANINGS={'禄':'相关主题的资源与吸引力增加','权':'相关主题的主导、执行或责任增强','科':'相关主题的学习、声誉或专业认可受到强调','忌':'相关主题的牵挂、阻力或反复检视增加'};
+const ZW_SHA=new Set(['擎羊','陀罗','火星','铃星','地空','地劫']);
+const ZW_SUPPORT=new Set(['左辅','右弼','文昌','文曲','天魁','天钺','禄存']);
+function zwHuaPairs(p){
+ const rows=[];
+ for(const [star,v] of Object.entries(p?.shengian||{})){
+  const raw=String(v?.val||v?.type||v||'');
+  const hua=['禄','权','科','忌'].find(x=>raw.includes(x));
+  if(hua)rows.push({star,hua});
+ }
+ return rows;
+}
+function zwRelated(zhi){
+ const branches='子丑寅卯辰巳午未申酉戌亥'.split('');
+ const i=branches.indexOf(zhi);
+ return i<0?[]:[{zhi:branches[(i+4)%12],role:'三合宫一'},{zhi:branches[(i+8)%12],role:'三合宫二'},{zhi:branches[(i+6)%12],role:'对宫'}];
+}
+function zwEvidenceParagraphs(p,zhi){
+ const stars=reportStars(p),main=p?.mainStars||[],minor=p?.minorStars||[];
+ const lines=[];
+ if(main.length){
+  lines.push('<p><b>本宫主轴：</b>'+esc(main.filter(x=>ZW_STAR_MEANINGS[x]).map(x=>x+'对应'+ZW_STAR_MEANINGS[x]).join('；')||'主星解释资料待补齐')+'。这是该宫的主题倾向，不等于事件必然发生。</p>');
+ }else lines.push('<p><b>本宫主轴：</b>未排出可解读的主星，需以对宫及三方四正补充，不能凭空断定吉凶。</p>');
+ const good=minor.filter(x=>ZW_SUPPORT.has(x)),sha=minor.filter(x=>ZW_SHA.has(x));
+ if(good.length)lines.push('<p><b>助力条件：</b>'+esc(good.map(x=>x+'提示'+ZW_STAR_MEANINGS[x]).join('；'))+'。需结合对应宫位验证实际发挥方式。</p>');
+ if(sha.length)lines.push('<p><b>需要留意：</b>'+esc(sha.map(x=>x+'提示'+ZW_STAR_MEANINGS[x]).join('；'))+'。这些是传统象意上的压力线索，不可直接断定灾祸。</p>');
+ const hua=zwHuaPairs(p);
+ if(hua.length)lines.push('<p><b>本宫生年四化：</b>'+esc(hua.map(x=>x.star+'化'+x.hua+'，'+(ZW_HUA_MEANINGS[x.hua]||'待核验')).join('；'))+'。以上只说明已标注的化象，飞入飞出须另核对宫干路径。</p>');
+ const related=zwRelated(zhi);
+ if(related.length){
+  const details=related.map(x=>{
+   const q=chart?.palaces?.[x.zhi],ms=(q?.mainStars||[]).filter(st=>ZW_STAR_MEANINGS[st]);
+   return x.role+' '+(q?.name||'未知')+'（'+x.zhi+'）：'+(ms.length?ms.map(st=>st+'—'+ZW_STAR_MEANINGS[st]).join('、'):'无可解释主星');
+  });
+  lines.push('<p><b>三方四正交叉观察：</b>'+esc(details.join('；'))+'。需将本宫与这些宫位合看，不能只凭本宫星曜作结论。</p>');
+ }
+ const notable=stars.filter(x=>!ZW_STAR_MEANINGS[x]);
+ if(notable.length)lines.push('<p class="report-meta">其他已排星曜（暂不自动赋义）：'+esc(notable.join('、'))+'。</p>');
+ if(!main.length&&!hua.length&&!good.length&&!sha.length)lines.push('<p>本宫可用证据有限，暂不作具体判断。</p>');
+ return lines.join('');
+}
 function reportPalaceHTML(title,p,zhi,extra){
  const m=REPORT_MEANINGS[p?.name]||['宫位主题待确认','请核对宫位转换规则'];
  const stars=reportStars(p);
- const birth=Object.entries(p?.shengian||{}).map(([star,v])=>star+' '+(v.val||v.type||'')).join('、');
  const trial=new Set(Object.keys(chart?.extra_star_audit?.supplemental_positions||{}));
  const flagged=stars.filter(x=>trial.has(x));
  return '<article class="report-palace" data-report-palace="'+esc(zhi)+'"><h4>'+esc(title)+'</h4><p class="report-meta">本命落宫：'+esc(p?.name||'未知')+' · '+esc(zhi)+' · '+esc(p?.gan_zhi||'')+'</p>'+
- '<p><b>宫位所主：</b>'+esc(m[0])+'。</p><p><b>转换取象：</b>'+esc(extra||m[1])+'。</p>'+
- '<p><b>宫内星曜：</b>'+esc(stars.join('、')||'无已排星曜')+'。</p>'+
- (birth?'<p><b>生年四化：</b>'+esc(birth)+'。</p>':'')+
- '<p><b>分析重点：</b>'+esc(stars.length?'结合本宫星曜、三方四正、四化飞入飞出与实际生活背景综合观察，不以单颗星直接断吉凶。':'本宫暂无已排星曜，应结合对宫、三方四正及宫干四化综合判断。')+'</p>'+
- (flagged.length?'<p class="report-meta">待校准星曜：'+esc(flagged.join('、'))+'</p>':'')+'</article>';
+ '<p><b>宫位议题：</b>'+esc(extra||m[0])+'。</p>'+
+ '<p><b>星曜证据：</b>'+esc(stars.join('、')||'无已排星曜')+'。</p>'+zwEvidenceParagraphs(p,zhi)+
+ (flagged.length?'<p class="report-caution">待校准星曜：'+esc(flagged.join('、'))+'。相关解释仅供核对。</p>':'')+'</article>';
 }
 function reportSection(title,content){return '<section><h3>'+esc(title)+'</h3>'+content+'</section>'}
 // Independent, printable chart snapshots; never alter the interactive on-screen chart.
@@ -1017,9 +1059,9 @@ function renderFullReport(){
  const decadeRange=decade?.range||'未配置';
  let out='<p><b>'+esc(chart.name||'命主')+'</b> · '+esc(chart.solar||'')+' · '+esc(chart.bureau||'')+
  ' · 选定大限 '+esc(decadeRange)+' 岁 · 流年 '+esc(selectedAnnualYear)+' 年</p>'+
- '<p class="report-caution"><b>解读边界：</b>本报告目前为规则辅助的宫位主题与星曜清单，不是已完成校验的专业断盘。部分辅杂星、庙旺利陷、大限与流年安宫、流月斗君及四化规则尚待逐项核对；不据此断定疾病、生育能力、投资收益或具体事件。</p>';
+ '<p class="report-caution"><b>解读边界：</b>本报告提供基于本命星曜、已标注生年四化与三方四正的逐宫条件性解释；不构成已核验的完整专业断盘。部分辅杂星、庙旺利陷、大限与流年安宫、流月斗君及四化规则尚待逐项核对；不据此断定疾病、生育能力、投资收益或具体事件。</p>';
  if(reportEnabled('print-natal')){
-  out+=reportSection('一、本命盘：十二宫主题、转换取象与星曜',
+  out+=reportSection('一、本命盘：十二宫星曜证据与条件性解读',
   printableZiweiChart('natal')+'<div class="report-palaces">'+ordered.map(({zhi,p})=>reportPalaceHTML(p.name,p,zhi)).join('')+'</div>');
  }
  if(reportEnabled('print-decade')){
