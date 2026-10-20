@@ -865,7 +865,7 @@ body.chart-fit-active .chart-mode-bar{position:sticky;top:0;z-index:100}
             <div class="fly-toolbar" id="fly-toolbar">
               <label><input type="checkbox" id="chk-fly-arrows" checked> 显示四化箭头</label>
               <label>方向 <select id="fly-direction"><option value="out">流出（选中宫飞往他宫）</option><option value="in">流入（他宫飞入选中宫）</option><option value="both">流入＋流出</option></select></label><span style="color:#92400e">范围：本命｜箭头：选中宫位</span>
-              <label><input type="checkbox" id="chk-self-arrows" checked> 显示宫内自化箭头</label>
+              <label><input type="checkbox" id="chk-opposite-only"> 仅显示射出（对宫）</label> <label><input type="checkbox" id="chk-self-arrows" checked> 显示宫内自化箭头</label>
               <span class="fly-legend"><b class="lu">禄</b><b class="quan">权</b><b class="ke">科</b><b class="ji">忌</b>　点击宫位显示，再点同宫隐藏</span>
             </div>
             <!-- 12宫格容器 -->
@@ -1065,6 +1065,22 @@ async function calculate(){const seq=++calculationSequence;let msg=document.getE
  let payload;
  try{normalizeBirthTime();payload={};for(const k of ['name','gender','year','month','day','hour','minute','calendar'])payload[k]=val(k);const res=await fetch('/api/ziwei/calculate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const data=await res.json();if(seq!==calculationSequence)return;if(!res.ok||data.status==='error')throw Error(data.message||'计算失败');chart=data;msg.textContent='排盘成功 · '+data.methodology;selected='命宫';activeFlyPalace=null;selectedDecadeZhi=null;decadeLayerEnabled=true;annualLayerEnabled=true;refreshDecadeSelector();renderGrid();syncMobileChartLayout();}
  catch(e){if(seq!==calculationSequence)return;chart=null;document.getElementById('ziwei-grid-container').innerHTML='';msg.textContent='⚠️ '+e.message+(e instanceof TypeError?'。请确认已运行 python server.py 并通过 http://127.0.0.1:8000/ziwei_view.html 访问。':'');if(e.message.includes('历法库'))msg.innerHTML+=' <a href="/api/ziwei/diagnostics" target="_blank">查看依赖诊断</a>';}}
+// 逆水判定：仅本命命/财/官三合宫射向对应对宫；目标必须有同类生年四化且无任何自化。
+function classifyReverseWater(f){
+ if(!chart||!f||f.self_transform)return null;
+ const source=Object.values(chart.palaces||{}).find(p=>p.name===f.from_palace);
+ const target=chart.palaces?.[f.to];
+ if(!source||!target||source.name!==f.from_palace||target.name!==f.to_palace)return null;
+ const pairs={'命宫':'迁移宫','财帛宫':'福德宫','事业宫':'夫妻宫','官禄宫':'夫妻宫'};
+ if(pairs[source.name]!==target.name)return null;
+ const branches='子丑寅卯辰巳午未申酉戌亥';
+ if(!branches.includes(f.from)||!branches.includes(f.to)||Math.abs(branches.indexOf(f.from)-branches.indexOf(f.to))!==6)return null;
+ const hua=String(f.transformation||'').replace(/^化/,'');
+ if(!['禄','权','忌'].includes(hua))return null;
+ if(Object.keys(target.zihua||{}).length>0)return null;
+ const hasSameYear=Object.values(target.shengian||{}).some(x=>String(x?.val||x?.type||'').replace(/^化/,'').includes(hua));
+ return hasSameYear?'逆水'+hua:null;
+}
 function drawFlyArrows(box, selectedName){
  const overlay=document.createElementNS('http://www.w3.org/2000/svg','svg');
  overlay.setAttribute('class','fly-overlay');overlay.setAttribute('aria-label','宫干四化飞入飞出方向图');
@@ -1078,8 +1094,12 @@ function drawFlyArrows(box, selectedName){
  }
  const positions={};for(const x of gridMapping)positions[x.zhi]={x:x.c*(cellW+gap)+cellW/2,y:x.r*(cellH+gap)+cellH/2};
  const dir=document.getElementById('fly-direction').value;
+ const oppositeOnly=document.getElementById('chk-opposite-only')?.checked;
+ const branches='子丑寅卯辰巳午未申酉戌亥';
+ const isOpposite=f=>branches.includes(f.from)&&branches.includes(f.to)&&((branches.indexOf(f.from)-branches.indexOf(f.to)+12)%12===6);
  const edges=(chart.flying_transformations||[]).filter(f=>{
    if(f.self_transform)return false; // 自化固定显示在各宫内，不绘制跨宫 SVG 回环
+   if(oppositeOnly&&!isOpposite(f))return false;
 
    return (dir==='out'||dir==='both')&&f.from_palace===selectedName || (dir==='in'||dir==='both')&&f.to_palace===selectedName;
  });
@@ -1092,8 +1112,17 @@ function drawFlyArrows(box, selectedName){
    const perpX=-vy/length,perpY=vx/length,offset=((i%5)-2)*10;
    const mx=(sx+tx)/2+perpX*offset,my=(sy+ty)/2+perpY*offset;
    svgEl('path',{d:`M${sx} ${sy} Q${mx} ${my} ${tx} ${ty}`,stroke:color,'stroke-width':2,fill:'none',opacity:.85,'marker-end':`url(#fly-${f.transformation})`});
-   const t=svgEl('text',{x:mx,y:my-5,'text-anchor':'middle',fill:color});t.textContent=f.transformation.slice(-1);
+   const shoot=isOpposite(f);
+   const reverse=shoot?classifyReverseWater(f):null;
+   if(reverse){const path=overlay.lastElementChild;path.setAttribute('marker-start',`url(#fly-${f.transformation})`);path.setAttribute('stroke-width','3.5');path.setAttribute('opacity','1');}
+   const t=svgEl('text',{x:mx,y:my-7,'text-anchor':'middle',fill:color,'font-size':shoot?16:13,'font-weight':shoot?'bold':'normal'});t.textContent=reverse|| (shoot?'射出'+f.transformation.slice(-1):f.transformation.slice(-1));
   }
+ });
+ // 在发出宫旁标注逆水（双箭头），不把标记误放在接收宫。
+ const reverseEdges=edges.filter(f=>isOpposite(f)&&classifyReverseWater(f)&&f.from_palace===selectedName);
+ reverseEdges.forEach((f,i)=>{const a=positions[f.from];if(!a)return;
+  const lab=svgEl('text',{x:a.x,y:a.y-52-i*19,'text-anchor':'middle',fill:colors[f.transformation]||'#334155','font-size':16,'font-weight':'bold'});
+  lab.textContent='⇄ '+classifyReverseWater(f);
  });
  box.appendChild(overlay);
 }
@@ -1146,7 +1175,7 @@ function renderGrid(){if(!chart)return;document.querySelectorAll('.chart-mode-bt
  const trace='<details style="margin-top:8px"><summary style="cursor:pointer;font-weight:bold">V8 飞星路径核查（点击展开）</summary>'+
  '<div style="line-height:1.7;padding:8px 0">宫位：'+esc(selected)+'　宫干：'+esc(palace?.gan||'')+'<br>飞出：'+(fly.map(x=>esc(x.star+' '+x.transformation+' → '+x.to_palace+(x.self_transform?'（自化）':''))).join('；')||'无')+
  '<br>飞入：'+(incoming.map(x=>esc(x.from_palace+' '+x.star+' '+x.transformation)).join('；')||'无')+
- '<br><b>逆水忌／对逆水四化：</b>规则待确认，暂不自动判定，避免误报。<br><small>参考校验：'+esc(chart.verification?.scope||'仅单样盘')+'</small></div></details>';
+ '<br><b>逆水禄／权／忌：</b>'+(fly.filter(x=>classifyReverseWater(x)).map(x=>esc(classifyReverseWater(x)+'（'+x.from_palace+'→'+x.to_palace+'）')).join('；')||'本宫没有符合条件的逆水')+'<br><small>参考校验：'+esc(chart.verification?.scope||'仅单样盘')+'</small></div></details>';
  const palaceStars=[...(palace?.mainStars||[]),...(palace?.minorStars||[])];
  const trialSet=new Set(Object.keys(chart.extra_star_audit?.supplemental_positions||{}));
  const provisionalHere=palaceStars.filter(s=>trialSet.has(s));
@@ -1587,7 +1616,7 @@ function toggleChartFit(force){
 window.addEventListener('resize',resizeChartFit);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&chartFitActive)toggleChartFit(false)});
 
-document.addEventListener('DOMContentLoaded',async()=>{try{await XingguiSession.ready}catch(e){alert('登录服务不可用：'+e.message);location.replace('index.html');return}if(!XingguiSession.requireLogin())return;document.querySelector('input[name="view-mode"][value="sanhe"]').checked=true;loadDatabaseProfile();for(const id of ['chk-sihua','chk-sanfang','chk-fly-arrows','chk-self-arrows','fly-direction','sanhe-show-lucky','sanhe-show-sha','sanhe-show-other','sanhe-show-brightness'])document.getElementById(id).addEventListener('change',renderGrid);calculate();syncMobileChartLayout()});
+document.addEventListener('DOMContentLoaded',async()=>{try{await XingguiSession.ready}catch(e){alert('登录服务不可用：'+e.message);location.replace('index.html');return}if(!XingguiSession.requireLogin())return;document.querySelector('input[name="view-mode"][value="sanhe"]').checked=true;loadDatabaseProfile();for(const id of ['chk-sihua','chk-sanfang','chk-fly-arrows','chk-opposite-only','chk-self-arrows','fly-direction','sanhe-show-lucky','sanhe-show-sha','sanhe-show-other','sanhe-show-brightness'])document.getElementById(id).addEventListener('change',renderGrid);calculate();syncMobileChartLayout()});
 </script>
 
 </body>
