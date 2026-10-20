@@ -26,6 +26,8 @@
         }
         .auth-tab-btn.active { color: #f59e0b; border-bottom-color: #f59e0b; }
 
+        .social-button {display:block;width:100%;padding:12px;margin:8px 0;border:1px solid #475569;border-radius:9px;background:#273449;color:#f8fafc;font-weight:600;cursor:pointer;}
+        .social-button:hover {border-color:#f59e0b;}
         .auth-form { display: none; }
         .auth-form.active { display: block; }
 
@@ -97,6 +99,21 @@
             <div class="auth-tab-btn" onclick="switchAuthTab('login', this)">🔑 账号登录 (Log In)</div>
         </div>
 
+        <section class="social-auth" aria-label="其他登录方式" style="margin:15px 0 22px;text-align:center">
+            <button type="button" class="social-button" onclick="handleGoogleAuth()">🌐 使用 Google 登录 / 注册</button>
+            <button type="button" class="social-button" onclick="showPhoneAuth()">📱 手机验证码登录 / 注册</button>
+            <button type="button" class="social-button" onclick="handleWeChatAuth()">💬 微信登录 / 注册（待配置）</button>
+            <p style="font-size:.78rem;color:#94a3b8">首次使用将创建账号；已有账号可继续登录。微信需要额外的官方接入配置。</p>
+        </section>
+        <div id="form-phone" class="auth-form">
+            <h3>📱 手机验证码登录 / 注册</h3>
+            <p style="color:#94a3b8;font-size:.85rem">请填写国际格式号码，例如 +60123456789。须先在 Supabase 配置 Phone 和短信供应商。</p>
+            <div class="form-group"><label>手机号码</label><input type="tel" id="phone-number" autocomplete="tel" placeholder="+60123456789"></div>
+            <button class="btn-submit" type="button" onclick="handleSendPhoneOtp()">发送短信验证码</button>
+            <div class="form-group" style="margin-top:12px"><label>6 位验证码</label><input type="text" id="phone-otp" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000"></div>
+            <button class="btn-submit" type="button" onclick="handleVerifyPhoneOtp()">验证并登录</button>
+            <button class="btn-submit" type="button" style="background:#334155;color:white" onclick="showLoginForm()">返回邮箱登录</button>
+        </div>
         <!-- 注册表单 -->
         <div id="form-signup" class="auth-form active">
             <div class="form-group" style="margin-bottom: 12px;">
@@ -121,7 +138,22 @@
                 <input type="password" id="li-pwd" placeholder="输入密码" autocomplete="off">
             </div>
             <button class="btn-submit" onclick="handleLogin()">🔑 立即登录</button>
+            <div style="text-align:right;margin-top:12px"><button type="button" onclick="showResetForm()" style="background:none;border:0;color:#38bdf8;cursor:pointer">忘记密码？</button></div>
         </div>
+        <div id="form-reset" class="auth-form">
+            <h3>找回密码</h3>
+            <p style="color:#94a3b8">输入注册邮箱，我们将发送密码重设链接。</p>
+            <div class="form-group"><label>注册邮箱</label><input type="email" id="reset-email" autocomplete="email" placeholder="your@email.com"></div>
+            <button class="btn-submit" onclick="handlePasswordResetRequest()">发送重设邮件</button>
+            <button class="btn-submit" style="background:#334155;color:#fff" onclick="showLoginForm()">返回登录</button>
+        </div>
+        <div id="form-new-password" class="auth-form">
+            <h3>设置新密码</h3>
+            <div class="form-group"><label>新密码（至少8位）</label><input type="password" id="new-password" autocomplete="new-password"></div>
+            <div class="form-group"><label>确认新密码</label><input type="password" id="confirm-password" autocomplete="new-password"></div>
+            <button class="btn-submit" onclick="handleNewPassword()">保存新密码</button>
+        </div>
+        <p id="auth-message" role="status" aria-live="polite" style="color:#38bdf8"></p>
     </div>
 
     <!-- 2. 注册第二步：完善生辰档案表单区 (初始隐藏) -->
@@ -164,6 +196,7 @@
             </div>
         </div>
         <button class="btn-submit" onclick="saveUserDatabaseAndEnter()">🚀 提交注册并保存数据库</button>
+        <button class="btn-submit" style="background:#334155;color:#fff" onclick="checkLoginState()">稍后填写 / 返回首页</button>
     </div>
 
     <!-- 3. 已登录状态：顶部账号状态栏 -->
@@ -174,6 +207,8 @@
         <div style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 10px;">
             绑定生辰：<span id="display-user-bazi" style="color: #f59e0b; font-weight: bold;">-</span>
         </div>
+        <button onclick="showProfileEditorFromStatus()" style="background:#334155;color:#38bdf8;border:1px solid #38bdf8;padding:5px 12px;border-radius:6px;cursor:pointer;margin-right:8px">编辑出生档案</button>
+        <button onclick="showChangePassword()" style="background:#334155;color:#38bdf8;border:1px solid #38bdf8;padding:5px 12px;border-radius:6px;cursor:pointer;margin-right:8px">修改密码</button>
         <button onclick="handleLogOut()" style="background: #334155; color: #f43f5e; border: 1px solid #f43f5e; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold;">退出登录</button>
     </div>
 
@@ -249,7 +284,53 @@
 </div>
 
 <script>
-    window.addEventListener('DOMContentLoaded', async()=>{try{await XingguiSession.ready;checkLoginState()}catch(e){alert('认证配置错误：'+e.message)}});
+    window.addEventListener('DOMContentLoaded', async()=>{
+      if(!window.XingguiSession){showAuthMessage('登录组件加载失败：请检查 xinggui_session.js 是否与 index.html 位于同一目录，并检查 Render 静态文件路由。');return}
+      try{
+        await XingguiSession.ready;
+        XingguiSession.onPasswordRecovery(()=>{document.getElementById('auth-box').style.display='block';document.getElementById('profile-card-box').style.display='none';document.getElementById('user-status-box').style.display='none';showAuthForm('new-password')});
+        const url=new URL(location.href);
+        if(url.searchParams.get('error'))showAuthMessage('邮箱验证失败：'+(url.searchParams.get('error_description')||url.searchParams.get('error')));
+        checkLoginState();
+        if(location.hash.includes('type=recovery')||url.searchParams.get('type')==='recovery'){document.getElementById('auth-box').style.display='block';document.getElementById('user-status-box').style.display='none';showAuthForm('new-password')}
+      }catch(e){showAuthMessage('认证配置错误：'+e.message)}
+    });
+    function showAuthMessage(message){const e=document.getElementById('auth-message');if(e)e.textContent=message;else console.error(message)}
+    function showAuthForm(name){document.querySelectorAll('.auth-form').forEach(e=>e.classList.remove('active'));document.getElementById('form-'+name).classList.add('active');}
+    async function handleGoogleAuth(){
+      try{await XingguiSession.ready;showAuthMessage('正在前往 Google 安全登录页面…');await XingguiSession.loginWithGoogle()}
+      catch(e){showAuthMessage('Google 登录无法启动：'+e.message+'。请检查 Supabase Google Provider 配置。')}
+    }
+    function showPhoneAuth(){showAuthForm('phone');showAuthMessage('')}
+    async function handleSendPhoneOtp(){
+      const phone=document.getElementById('phone-number').value.trim();
+      if(!/^\+[1-9]\d{7,14}$/.test(phone)){showAuthMessage('请填写国际格式手机号码，例如 +60123456789');return}
+      try{await XingguiSession.ready;await XingguiSession.sendPhoneOtp(phone);showAuthMessage('如短信服务配置正确，验证码已发送。请检查手机。')}
+      catch(e){showAuthMessage('发送短信失败：'+e.message+'。请检查 Supabase Phone Auth / SMS Provider。')}
+    }
+    async function handleVerifyPhoneOtp(){
+      const phone=document.getElementById('phone-number').value.trim(),token=document.getElementById('phone-otp').value.trim();
+      if(!/^\d{6}$/.test(token)){showAuthMessage('请输入 6 位验证码');return}
+      try{await XingguiSession.verifyPhoneOtp(phone,token);checkLoginState();showAuthMessage('手机验证成功')}
+      catch(e){showAuthMessage('验证失败：'+e.message)}
+    }
+    function handleWeChatAuth(){showAuthMessage('微信登录尚未开通：需先申请微信开放平台网站应用及授权对接，不能直接使用 Supabase 内置微信 Provider。')}
+    function showResetForm(){showAuthForm('reset');showAuthMessage('')}
+    function showLoginForm(){showAuthForm('login');showAuthMessage('')}
+    async function handlePasswordResetRequest(){
+      const email=document.getElementById('reset-email').value.trim();
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showAuthMessage('请输入有效邮箱');return}
+      try{await XingguiSession.ready;await XingguiSession.sendPasswordReset(email);showAuthMessage('如该邮箱已注册，您将收到重设邮件。请检查收件箱及垃圾邮件。')}
+      catch(e){showAuthMessage('发送失败：'+e.message)}
+    }
+    async function handleNewPassword(){
+      const p=document.getElementById('new-password').value,c=document.getElementById('confirm-password').value;
+      if(p.length<8||p!==c){showAuthMessage('密码至少8位，且两次输入必须一致');return}
+      try{await XingguiSession.updatePassword(p);history.replaceState(null,'',location.pathname);showAuthMessage('密码已更新，请重新登录');await XingguiSession.logout();showLoginForm();showAuthMessage('密码已更新，请使用新密码登录')}
+      catch(e){showAuthMessage('更新密码失败：'+e.message)}
+    }
+    function showProfileEditorFromStatus(){const a=XingguiSession.account();if(!a)return;showProfileEditor(a.email);if(a.profile){const p=a.profile;for(const field of ['name','gender','year','month','day','hour']){const el=document.getElementById('reg-'+field);if(el)el.value=p[field]??''}}}
+    function showChangePassword(){const p=prompt('请输入新密码（至少8位）');if(p===null)return;if(p.length<8){alert('密码至少8位');return}XingguiSession.updatePassword(p).then(()=>alert('密码已修改')).catch(e=>alert('修改失败：'+e.message))}
 
     let tempSignupEmail = "";
     let tempSignupPwd = "";
@@ -271,7 +352,7 @@
         const result=await XingguiSession.signup(email,pwd);
         tempSignupEmail=email;tempSignupPwd='';
         if(!result.session){alert('注册请求已提交，请先打开邮箱验证链接，然后返回此页登录。登录后再填写出生档案。');return}
-        showProfileEditor(email);
+        await XingguiSession.refresh();checkLoginState();
       }catch(e){alert('注册失败：'+e.message)}
     }
     function showProfileEditor(email){
@@ -292,18 +373,18 @@
       const email=document.getElementById('li-email').value.trim();
       const pwd=document.getElementById('li-pwd').value;
       try{await XingguiSession.ready;const a=await XingguiSession.login(email,pwd);
-        if(!a?.profile){showProfileEditor(email);return}checkLoginState()
+        checkLoginState()
       }catch(e){alert('登录失败：'+e.message)}
     }
     function checkLoginState(){
       const a=XingguiSession.account();
       const auth=document.getElementById('auth-box'),editor=document.getElementById('profile-card-box'),status=document.getElementById('user-status-box');
       if(!a){auth.style.display='block';editor.style.display='none';status.style.display='none';return}
-      if(!a.profile){showProfileEditor(a.id);return}
+      
       auth.style.display='none';editor.style.display='none';status.style.display='block';
-      const p=a.profile;
-      document.getElementById('display-auth-user').textContent=(p.name||'用户')+' ('+(p.email||'')+')';
-      document.getElementById('display-user-bazi').textContent=`${p.year}年${p.month}月${p.day}日 ${p.hour}时 (${p.gender})`;
+      const p=a.profile||{};
+      document.getElementById('display-auth-user').textContent=(p.name||'用户')+' ('+(a.email||'')+')';
+      document.getElementById('display-user-bazi').textContent=p?`${p.year}年${p.month}月${p.day}日 ${p.hour}时 (${p.gender})`:'尚未填写，可稍后完善';
     }
     async function handleLogOut(){try{await XingguiSession.logout();checkLoginState()}catch(e){alert(e.message)}}
     async function openModule(target){
