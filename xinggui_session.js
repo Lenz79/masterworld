@@ -38,7 +38,7 @@ async function login(email,password){
 }
 async function loginWithGoogle(){
  if(!client)throw Error('登录服务尚未就绪');
- const redirectTo=new URL('index.html',root.location.href).href;
+ const redirectTo=new URL('/index.html',root.location.origin).href;
  const {data,error}=await client.auth.signInWithOAuth({provider:'google',options:{redirectTo}});
  if(error)throw Error(error.message);
  return data;
@@ -62,7 +62,7 @@ async function saveProfile(p){
 }
 async function sendPasswordReset(email){
  if(!client)throw Error('登录服务尚未就绪');
- const redirectTo=new URL('index.html',root.location.href).href;
+ const redirectTo=new URL('/index.html',root.location.origin).href;
  const {error}=await client.auth.resetPasswordForEmail(email,{redirectTo});
  if(error)throw Error(error.message);
 }
