@@ -28,6 +28,9 @@
 
         .social-button {display:block;width:100%;padding:12px;margin:8px 0;border:1px solid #475569;border-radius:9px;background:#273449;color:#f8fafc;font-weight:600;cursor:pointer;}
         .social-button:hover {border-color:#f59e0b;}
+        .auth-switch-hint {text-align:center;color:#94a3b8;margin:20px 0 0;font-size:.9rem}
+        .auth-link {background:none;border:0;color:#38bdf8;cursor:pointer;font-size:inherit;font-weight:600;padding:4px}
+        .auth-link:hover {text-decoration:underline}
         .auth-form { display: none; }
         .auth-form.active { display: block; }
 
@@ -95,42 +98,43 @@
     <!-- 1. 登录 / 注册 切换选项卡卡片 -->
     <div class="auth-card" id="auth-box">
         <div class="auth-tabs">
-            <div class="auth-tab-btn active" onclick="switchAuthTab('signup', this)">📝 账号注册 (Sign Up)</div>
-            <div class="auth-tab-btn" onclick="switchAuthTab('login', this)">🔑 账号登录 (Log In)</div>
+            <div class="auth-tab-btn active" onclick="switchAuthTab('signup')">📝 账号注册 (Sign Up)</div>
+            <div class="auth-tab-btn" onclick="switchAuthTab('login')">🔑 账号登录 (Log In)</div>
         </div>
 
-        <section class="social-auth" aria-label="其他登录方式" style="margin:15px 0 22px;text-align:center">
-            <button type="button" class="social-button" onclick="handleGoogleAuth()">🌐 使用 Google 登录 / 注册</button>
-            <button type="button" class="social-button" onclick="showPhoneAuth()">📱 手机验证码登录 / 注册</button>
-            <button type="button" class="social-button" onclick="handleWeChatAuth()">💬 微信登录 / 注册（待配置）</button>
-            <p style="font-size:.78rem;color:#94a3b8">首次使用将创建账号；已有账号可继续登录。微信需要额外的官方接入配置。</p>
+        <section class="social-auth" aria-label="第三方认证" style="margin:15px 0 22px;text-align:center">
+            <button type="button" id="google-auth-btn" class="social-button" onclick="handleGoogleAuth()">🌐 使用 Google 注册</button>
+            <button type="button" id="phone-auth-btn" class="social-button" onclick="showPhoneAuth()">📱 使用手机号码注册</button>
+            <p id="social-auth-hint" style="font-size:.78rem;color:#94a3b8">Google 首次授权会创建账号，已有账号则直接登录。</p>
+            <p style="color:#94a3b8;font-size:.8rem;margin:14px 0 0">── 或使用邮箱 ──</p>
         </section>
         <div id="form-phone" class="auth-form">
-            <h3>📱 手机验证码登录 / 注册</h3>
+            <h3 id="phone-auth-title">📱 手机号码注册</h3>
             <p style="color:#94a3b8;font-size:.85rem">请填写国际格式号码，例如 +60123456789。须先在 Supabase 配置 Phone 和短信供应商。</p>
             <div class="form-group"><label>手机号码</label><input type="tel" id="phone-number" autocomplete="tel" placeholder="+60123456789"></div>
             <button class="btn-submit" type="button" onclick="handleSendPhoneOtp()">发送短信验证码</button>
             <div class="form-group" style="margin-top:12px"><label>6 位验证码</label><input type="text" id="phone-otp" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000"></div>
             <button class="btn-submit" type="button" onclick="handleVerifyPhoneOtp()">验证并登录</button>
-            <button class="btn-submit" type="button" style="background:#334155;color:white" onclick="showLoginForm()">返回邮箱登录</button>
+            <button class="btn-submit" type="button" style="background:#334155;color:white" onclick="returnFromPhoneAuth()">返回邮箱方式</button>
         </div>
         <!-- 注册表单 -->
         <div id="form-signup" class="auth-form active">
             <div class="form-group" style="margin-bottom: 12px;">
-                <label>您的 Google 邮箱或账号</label>
+                <label>邮箱地址</label>
                 <input type="text" id="su-email" placeholder="输入您的邮箱，例如 myname@gmail.com" autocomplete="off">
             </div>
             <div class="form-group" style="margin-bottom: 15px;">
                 <label>设置登录密码</label>
                 <input type="password" id="su-pwd" placeholder="设置您的登录密码" autocomplete="off">
             </div>
-            <button class="btn-submit" onclick="proceedToProfileSetup()">下一步：填写生辰档案 ➔</button>
+            <button class="btn-submit" onclick="proceedToProfileSetup()">创建账号</button>
+            <p class="auth-switch-hint">已有账号？ <button type="button" class="auth-link" onclick="switchAuthTab('login')">立即登录</button></p>
         </div>
 
         <!-- 登录表单 -->
         <div id="form-login" class="auth-form">
             <div class="form-group" style="margin-bottom: 12px;">
-                <label>Google 邮箱或账号</label>
+                <label>邮箱地址</label>
                 <input type="text" id="li-email" placeholder="输入注册时的邮箱" autocomplete="off">
             </div>
             <div class="form-group" style="margin-bottom: 15px;">
@@ -138,7 +142,8 @@
                 <input type="password" id="li-pwd" placeholder="输入密码" autocomplete="off">
             </div>
             <button class="btn-submit" onclick="handleLogin()">🔑 立即登录</button>
-            <div style="text-align:right;margin-top:12px"><button type="button" onclick="showResetForm()" style="background:none;border:0;color:#38bdf8;cursor:pointer">忘记密码？</button></div>
+            <div style="text-align:right;margin-top:12px"><button type="button" onclick="showResetForm()" class="auth-link">忘记密码？</button></div>
+            <p class="auth-switch-hint">还没有账号？ <button type="button" class="auth-link" onclick="switchAuthTab('signup')">立即注册</button></p>
         </div>
         <div id="form-reset" class="auth-form">
             <h3>找回密码</h3>
@@ -301,7 +306,7 @@
       try{await XingguiSession.ready;showAuthMessage('正在前往 Google 安全登录页面…');await XingguiSession.loginWithGoogle()}
       catch(e){showAuthMessage('Google 登录无法启动：'+e.message+'。请检查 Supabase Google Provider 配置。')}
     }
-    function showPhoneAuth(){showAuthForm('phone');showAuthMessage('')}
+    function showPhoneAuth(){updateAuthModeUI();showAuthForm('phone');showAuthMessage('')}
     async function handleSendPhoneOtp(){
       const phone=document.getElementById('phone-number').value.trim();
       if(!/^\+[1-9]\d{7,14}$/.test(phone)){showAuthMessage('请填写国际格式手机号码，例如 +60123456789');return}
@@ -316,7 +321,7 @@
     }
     function handleWeChatAuth(){showAuthMessage('微信登录尚未开通：需先申请微信开放平台网站应用及授权对接，不能直接使用 Supabase 内置微信 Provider。')}
     function showResetForm(){showAuthForm('reset');showAuthMessage('')}
-    function showLoginForm(){showAuthForm('login');showAuthMessage('')}
+    function showLoginForm(){switchAuthTab('login')}
     async function handlePasswordResetRequest(){
       const email=document.getElementById('reset-email').value.trim();
       if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showAuthMessage('请输入有效邮箱');return}
@@ -335,13 +340,24 @@
     let tempSignupEmail = "";
     let tempSignupPwd = "";
 
-    // 切换登录/注册卡片 Tab
-    function switchAuthTab(tab, btnEl) {
-        document.querySelectorAll('.auth-tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-        if(btnEl) btnEl.classList.add('active');
-        document.getElementById(`form-${tab}`).classList.add('active');
+    // 两个独立入口，共用 Supabase Auth 会话与 Google OAuth 回调。
+    let currentAuthMode='signup';
+    function updateAuthModeUI(){
+        const signup=currentAuthMode==='signup';
+        document.getElementById('google-auth-btn').textContent=signup?'🌐 使用 Google 注册':'🌐 使用 Google 登录';
+        document.getElementById('phone-auth-btn').textContent=signup?'📱 使用手机号码注册':'📱 使用手机验证码登录';
+        document.getElementById('phone-auth-title').textContent=signup?'📱 手机号码注册':'📱 手机验证码登录';
+        document.getElementById('social-auth-hint').textContent=signup?'首次授权将创建账号；已有账号可切换登录。':'使用已注册账号登录；Google 授权会自动识别已有账号。';
+        document.querySelectorAll('.auth-tab-btn').forEach((el,i)=>el.classList.toggle('active',i===(signup?0:1)));
     }
+    function switchAuthTab(tab){
+        if(tab!=='signup'&&tab!=='login')return;
+        currentAuthMode=tab;
+        updateAuthModeUI();
+        showAuthForm(tab);
+        showAuthMessage('');
+    }
+    function returnFromPhoneAuth(){switchAuthTab(currentAuthMode)}
 
     async function proceedToProfileSetup(){
       const email=document.getElementById('su-email').value.trim();
