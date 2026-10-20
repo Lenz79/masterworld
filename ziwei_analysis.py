@@ -553,3 +553,39 @@ def build_palace_narratives(edges, palaces, decade_zhi=None, annual_zhi=None, an
           'status':'物理宫干路径证据，非事件成立',
           'note':'大限及流年宫名为同一物理宫位叠宫映射，不代表独立宫干飞化。'})
     return cards
+
+# Independent school-specific reading summaries for the high-level analysis API.
+# This is an interpretive rule-based reading, not an assertion of real-world events.
+def build_school_readings(chart, school, analysis_result):
+    palaces = chart.get("palaces") or {}
+    records = []
+    if school == "sanhe":
+        for item in analysis_result.get("palaces", []):
+            parts = item.get("three_harmony_four_positions") or []
+            local = parts[0] if parts else {}
+            related = parts[1:]
+            supportive = sorted({s for p in related for s in p.get("stars", []) if s in SANHE_STAR_GROUPS["六吉"]})
+            stressful = sorted({s for p in related for s in p.get("stars", []) if s in SANHE_STAR_GROUPS["六煞"]})
+            records.append({
+                "palace": item.get("palace"), "zhi": item.get("zhi"), "school": "三合派",
+                "focus": "本宫星曜、三方四正与吉煞会照",
+                "observed": "本宫可见：" + ("、".join(local.get("stars") or []) or "暂无已排星曜") +
+                    "；三方四正可见：" + ("、".join(sorted({s for p in related for s in p.get("stars", [])})) or "暂无已排星曜"),
+                "favorable": "会照的辅助星曜：" + ("、".join(supportive) or "未观察到已核验吉曜"),
+                "unfavorable": "会照的压力星曜：" + ("、".join(stressful) or "未观察到已核验煞曜"),
+                "caveat": "星曜分布只支持条件式分析；格局和庙旺利陷尚未校准。"
+            })
+    else:
+        for item in analysis_result.get("palace_narratives", []):
+            incoming = item.get("incoming") or []
+            outgoing = item.get("outgoing") or []
+            records.append({
+                "palace": item.get("natal_palace"), "zhi": item.get("zhi"), "school": "飞星派",
+                "focus": "本宫四化飞入、飞出与来源去向",
+                "observed": "飞入：" + ("；".join(x.get("description", "") for x in incoming[:5]) or "无已记录路径") +
+                    "；飞出：" + ("；".join(x.get("description", "") for x in outgoing[:5]) or "无已记录路径"),
+                "favorable": "可追溯的禄科飞入：" + str(sum("禄" in x.get("hua", "") or "科" in x.get("hua", "") for x in incoming)),
+                "unfavorable": "可追溯的忌飞入：" + str(sum("忌" in x.get("hua", "") for x in incoming)),
+                "caveat": "限年独立宫干规则尚未校准，飞化路径不等于事件成立或应期。"
+            })
+    return records
