@@ -864,7 +864,7 @@ body.chart-fit-active .chart-mode-bar{position:sticky;top:0;z-index:100}
             </div>
             <div class="fly-toolbar" id="fly-toolbar">
               <label><input type="checkbox" id="chk-fly-arrows" checked> 显示四化箭头</label>
-              <label>方向 <select id="fly-direction"><option value="out">流出（选中宫飞往他宫）</option><option value="in">流入（他宫飞入选中宫）</option><option value="both">流入＋流出</option></select></label><span style="color:#92400e">范围：本命｜箭头：选中宫位</span>
+              <label>方向 <select id="fly-direction"><option value="out">流出（选中宫飞往他宫）</option><option value="in">流入（他宫飞入选中宫）</option><option value="both">流入＋流出</option></select></label><span style="color:#92400e">范围：本命｜射出与逆水自动显示，普通飞化点击宫位</span>
               <label><input type="checkbox" id="chk-opposite-only"> 仅显示射出（对宫）</label> <label><input type="checkbox" id="chk-self-arrows" checked> 显示宫内自化箭头</label>
               <span class="fly-legend"><b class="lu">禄</b><b class="quan">权</b><b class="ke">科</b><b class="ji">忌</b>　点击宫位显示，再点同宫隐藏</span>
             </div>
@@ -1078,7 +1078,7 @@ function classifyReverseWater(f){
  const hua=String(f.transformation||'').replace(/^化/,'');
  if(!['禄','权','忌'].includes(hua))return null;
  if(Object.keys(target.zihua||{}).length>0)return null;
- const hasSameYear=Object.values(target.shengian||{}).some(x=>String(x?.val||x?.type||'').replace(/^化/,'').includes(hua));
+ const hasSameYear=Object.values(target.shengian||target.shengnian||{}).some(x=>String(typeof x==='string'?x:(x?.val||x?.type||x?.transformation||'')).replace(/^化/,'').includes(hua));
  return hasSameYear?'逆水'+hua:null;
 }
 function drawFlyArrows(box, selectedName){
@@ -1101,7 +1101,9 @@ function drawFlyArrows(box, selectedName){
    if(f.self_transform)return false; // 自化固定显示在各宫内，不绘制跨宫 SVG 回环
    if(oppositeOnly&&!isOpposite(f))return false;
 
-   return (dir==='out'||dir==='both')&&f.from_palace===selectedName || (dir==='in'||dir==='both')&&f.to_palace===selectedName;
+   // 射出及逆水属于本命固定关系，无需先点击发出宫；普通飞化仍按选中宫筛选。
+   if(isOpposite(f))return true;
+   return !!selectedName&&(((dir==='out'||dir==='both')&&f.from_palace===selectedName)||((dir==='in'||dir==='both')&&f.to_palace===selectedName));
  });
  const svgEl=(tag,attrs)=>{const e=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v] of Object.entries(attrs))e.setAttribute(k,String(v));overlay.appendChild(e);return e};
  edges.forEach((f,i)=>{
@@ -1115,14 +1117,9 @@ function drawFlyArrows(box, selectedName){
    const shoot=isOpposite(f);
    const reverse=shoot?classifyReverseWater(f):null;
    if(reverse){const path=overlay.lastElementChild;path.setAttribute('marker-start',`url(#fly-${f.transformation})`);path.setAttribute('stroke-width','3.5');path.setAttribute('opacity','1');}
-   const t=svgEl('text',{x:mx,y:my-7,'text-anchor':'middle',fill:color,'font-size':shoot?16:13,'font-weight':shoot?'bold':'normal'});t.textContent=reverse|| (shoot?'射出'+f.transformation.slice(-1):f.transformation.slice(-1));
+   const labelX=shoot?a.x:mx, labelY=shoot?(a.y-58-(i%3)*17):(my-7);
+   const t=svgEl('text',{x:labelX,y:labelY,'text-anchor':'middle',fill:color,'font-size':shoot?15:13,'font-weight':shoot?'bold':'normal'});t.textContent=reverse|| (shoot?'射出'+f.transformation.slice(-1):f.transformation.slice(-1));
   }
- });
- // 在发出宫旁标注逆水（双箭头），不把标记误放在接收宫。
- const reverseEdges=edges.filter(f=>isOpposite(f)&&classifyReverseWater(f)&&f.from_palace===selectedName);
- reverseEdges.forEach((f,i)=>{const a=positions[f.from];if(!a)return;
-  const lab=svgEl('text',{x:a.x,y:a.y-52-i*19,'text-anchor':'middle',fill:colors[f.transformation]||'#334155','font-size':16,'font-weight':'bold'});
-  lab.textContent='⇄ '+classifyReverseWater(f);
  });
  box.appendChild(overlay);
 }
@@ -1168,7 +1165,7 @@ function renderGrid(){if(!chart)return;document.querySelectorAll('.chart-mode-bt
  el.onclick=()=>{if(mode==='feixing')activeFlyPalace=activeFlyPalace===p.name?null:p.name;selected=p.name;renderGrid()};box.appendChild(el)}
  const brightStatus=chart.brightness_reference||{};const brightnessToggle=document.getElementById('sanhe-show-brightness');const verifiedCount=Number(brightStatus.verified_entries||0);if(brightnessToggle){if(verifiedCount>0&&brightnessToggle.disabled)brightnessToggle.checked=true;brightnessToggle.disabled=verifiedCount===0;if(verifiedCount===0)brightnessToggle.checked=false;brightnessToggle.parentElement.title=verifiedCount===0?'当前没有已核验的亮度等级；完成校准后此开关自动启用':('已录入公开亮度资料 '+verifiedCount+' 项；尚未与文墨天机逐项核对，可切换显示');brightnessToggle.parentElement.style.opacity=verifiedCount===0?'0.65':'1';brightnessToggle.parentElement.lastChild.textContent=verifiedCount===0?' 庙旺利陷（待校准）':' 庙旺利陷·公开表（'+verifiedCount+'项）';}const auditEl=document.getElementById('sanhe-audit-info');if(auditEl)auditEl.textContent='自动展示：十四主星、六吉、六煞、禄存、常用辅杂曜、博士/长生/岁前/将前十二神及补充杂曜（共108项）。'+'已排六吉六煞各6颗（仅核对存在数量）；'+(brightStatus.message||'庙旺利陷尚未核验')+'。公开亮度表仅作参考，未与文墨天机逐项核对；新增40项含未经逐宫核对的试算规则，尚未与文墨天机逐项核对。';
  let center=document.createElement('div');center.className='palace-box center-box';center.style.gridRow='2 / 4';center.style.gridColumn='2 / 4';center.innerHTML='<div class="center-mode-title" style="font-weight:bold;color:#b45309;font-size:calc(.88rem + 4px)">🌟 星轨智盘 · '+esc(mode==='sanhe'?'三合派':'飞星派')+'</div><div class="center-birth-details" style="text-align:left;line-height:1.65;font-size:calc(.85rem + 4px)"><div><b>姓名：</b>'+esc(chart.name)+'　<b>性别：</b>'+esc(chart.gender)+'</div><div><b>阳历：</b>'+esc(chart.solar)+'</div><div><b>农历：</b>'+esc(chart.lunar)+'</div><div><b>干支：</b>'+esc(chart.year_gan_zhi)+'　<b>生肖：</b>'+esc(chart.animal)+'</div><div><b>五行局：</b>'+esc(chart.bureau)+'　<b>命宫：</b>'+esc(chart.ming_gong)+'　<b>身宫：</b>'+esc(chart.shen_gong)+'</div></div><div class="time-btn-group"><button class="time-btn" onclick="adjustTime(&apos;day_up&apos;)" title="公历日期加一天，自动重新计算农历">日 ↑</button><button class="time-btn" onclick="adjustTime(&apos;hour_up&apos;)">时 ↑</button><button class="time-btn" onclick="adjustTime(&apos;hour_down&apos;)">时 ↓</button><button class="time-btn" onclick="adjustTime(&apos;day_down&apos;)">日 ↓</button></div>';box.appendChild(center);renderTimeline();invalidateOutdatedAnalysis();renderFullReport();if(chartFitActive)requestAnimationFrame(resizeChartFit);
- if(mode==='feixing'&&document.getElementById('chk-fly-arrows').checked&&activeFlyPalace)drawFlyArrows(box,activeFlyPalace);
+ if(mode==='feixing'&&document.getElementById('chk-fly-arrows').checked)drawFlyArrows(box,activeFlyPalace);
  let fly=chart.flying_transformations.filter(x=>x.from_palace===selected);
  const incoming=(chart.flying_transformations||[]).filter(x=>x.to_palace===selected&&!x.self_transform);
  const palace=Object.values(chart.palaces).find(x=>x.name===selected);
