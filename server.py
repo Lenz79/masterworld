@@ -17,7 +17,7 @@ import math
 from urllib.parse import urlparse
 
 def _is_loopback_host(host):
-    return isinstance(host, str) and host.lower() in ('localhost','0.0.0.0','::1')
+    return isinstance(host, str) and host.lower() in ('localhost','127.0.0.1','::1')
 
 def _origin_allowed(origin, host_header=None):
     if not origin: return True
@@ -148,7 +148,7 @@ class MainGatewayHandler(SimpleHTTPRequestHandler):
             super().do_GET()
 
     def do_POST(self):
-        # 0.0.0.0 / localhost loopback policy is implemented by _host_allowed.
+        # 127.0.0.1 / localhost loopback policy is implemented by _host_allowed.
         if not _host_allowed(self.headers.get('Host')):
             self._send_json({'status':'error','message':'不允许的主机'},403)
             return
@@ -372,7 +372,7 @@ class MainGatewayHandler(SimpleHTTPRequestHandler):
 if __name__ == '__main__':
     port = _require_int(int(os.environ.get('PORT', '8000')), 'PORT', 1, 65535)
     print("--------------------------------------------------", flush=True)
-    print(f"🚀 命理总调度 Server 已成功启动！监听端口: 0.0.0..0:{port}", flush=True)
+    print(f"🚀 命理总调度 Server 已成功启动！监听端口: 0.0.0.0:{port}", flush=True)
     print("--------------------------------------------------", flush=True)
     server = ThreadingHTTPServer(('0.0.0.0', port), MainGatewayHandler)
     server.serve_forever()

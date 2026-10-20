@@ -179,6 +179,8 @@ class BaziEngine:
         except ValueError:
             raise ValueError("出生日期不是有效公历日期") from None
         hh,mm = parse_birth_time(req_data.get('hour'))
+        if (year,month,day) > (date.today().year,date.today().month,date.today().day):
+            raise ValueError("出生日期不能晚于今天")
         solar = Solar.fromYmdHms(year,month,day,hh,mm,0)
         lunar = solar.getLunar()
         ec = lunar.getEightChar()

@@ -169,7 +169,7 @@
                 <div class="form-group"><label>出生年份 (公历)</label><input type="number" id="input-year" placeholder="例: 1986"></div>
                 <div class="form-group"><label>出生月份</label><input type="number" id="input-month" placeholder="例: 5"></div>
                 <div class="form-group"><label>出生日期</label><input type="number" id="input-day" placeholder="例: 15"></div>
-                <div class="form-group"><label>出生时辰 (0-23 或如 1730)</label><input type="number" id="input-hour" placeholder="例: 1730 或 17"></div>
+                <div class="form-group"><label>出生时辰 (0-23 或如 1730)</label><input type="text" inputmode="numeric" id="input-hour" placeholder="例: 13:45 / 1345 / 13"></div>
             </div>
             <button class="btn-submit" onclick="calculateAndSaveBazi()">🚀 生成专业排盘与详批报告</button>
             <div style="text-align: center; margin-top: 15px;">
@@ -572,7 +572,7 @@
             year: parseInt(year),
             month: parseInt(month),
             day: parseInt(day),
-            hour: isNaN(Number(hour)) ? 10 : Number(hour)
+            hour: hour
         };
 
         try {
