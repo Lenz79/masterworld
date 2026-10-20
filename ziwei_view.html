@@ -1000,27 +1000,27 @@ function verdictTransformations(p){
  }
  return [...new Set(t)];
 }
+const VERDICT_PALACE_EVENTS={"命宫":["做事方式与人生选择","遇到新的工作、合作或人生转折，往往会先按自己的判断决定方向。若能把擅长的能力做成长期积累，个人位置会逐渐稳固。","有人愿意授权、专业能力能落地，适合争取独立负责的项目；执行到位，评价自然改善。","若同时追求多个方向、反复推翻决定，容易错过机会；与强势人物意见不合时，容易把小争论扩大。","决定换工作、创业或承担重大责任前，先列出资金、时间和退路；给自己设定复盘节点。"],"兄弟宫":["兄弟姐妹、同辈和利益往来","与兄弟姐妹或同辈之间，平时各有生活重心；遇到家事、借贷、合作或资源分配时，才容易看出彼此支持程度。","遇到家中事务或同辈合作时，分工清楚、账目透明，较容易得到实际协助。","钱财混在情分里、口头答应代垫或担保，可能使关系紧张；意见分歧不宜拖成长期心结。","涉及借款、共同资产和照顾长辈的开支，先讲金额、期限与责任，避免让第三人传话。"],"夫妻宫":["婚姻、伴侣与长期关系","感情中的核心考验在于双方如何处理责任、陪伴、金钱与家庭边界。若双方长期把工作或外界事务排在关系之前，容易出现疏离。","双方愿意讨论现实安排、共同承担经济和家庭事务时，关系较能经得起生活变化。","一方长期忍让而另一方不察觉，或遇到争执只讲道理不回应感受，容易累积不满；合作契约也可能出现类似摩擦。","重大决定先与伴侣讨论，财务透明，遇到争执先确认真正的诉求；不要以命盘推定离婚或外遇。"],"子女宫":["子女、晚辈、培养与作品成果","与子女、晚辈或所带领的新人之间，容易出现期待与实际进度不一致的情况；投入越深，越需要调整沟通方式。","若愿意分阶段培养、给予反馈和空间，较能看见晚辈成长，也有利于创作或项目成果落地。","要求过急、过度代劳或把自己的标准套在别人身上，容易让关系紧绷；项目也可能因反复修改而延期。","把目标拆小，定期沟通，鼓励独立处理问题；生育及医疗问题以专业检查为准。"],"财帛宫":["收入、存款、支出与资金安排","财务重点不是只看进账，而是收入来源能否持续、现金能否留下。面对加薪、佣金、兼职或投资机会，宜先分清稳定收入与不确定收入。","工作收入稳定、账目清楚、分散风险时，较容易积累储蓄；专业能力或长期客户关系可成为收入支撑。","大额投资、替人垫款、合伙分账不明或过度借贷，可能造成现金流压力；账面获利不等于已落袋。","每月核对收支与负债，预留紧急备用金；重大投资查明风险与合约，不凭命盘决定买卖。"],"疾厄宫":["身体状态、压力与生活习惯","这一宫适合观察生活节奏是否长期失衡：工作紧、休息少、压力堆积时，身体不适可能更容易被忽略。命盘不能用来判断具体疾病。","规律睡眠、适度运动、按时体检，能够降低因忙碌而忽视健康管理的机会。","长期熬夜、饮食混乱或带着不适硬撑，容易影响日常状态；不要把命理象意当成医学结论。","出现持续症状应就医；定期安排检查，留出休息时间，不据星曜预测手术或疾病。"],"迁移宫":["外出、搬迁、异地与对外机会","外出发展、出差、换城市或面对新客户时，环境变化会带来新机会，也会考验适应能力。能否获益取决于准备和实际资源。","外部合作有明确负责人、行程和预算时，异地业务或迁居安排较容易推进。","临时改变行程、轻信陌生合作方、忽略当地规则与费用，可能造成奔波与损失。","出行留备选方案，跨地区合约先核实对方身份、付款条件和执行责任。"],"交友宫":["朋友、客户、同事与合作网络","人脉圈中有能互相帮助的人，也可能出现只在需要资源时才联络的关系。合作的质量比认识多少人更重要。","长期守信、互惠清楚、客户需求明确，较容易形成稳定合作和口碑。","替人担保、代收代付、合伙不分权责，容易出现利益争议；对朋友的承诺不可无限扩大。","先小规模合作再扩大，财务与权限分开管理；与不守约的人保持界限。"],"事业宫":["职业、职位、项目与工作成果","事业的关键是能否把能力转化为可交付成果。职位变化、主管评价、工作分配与项目责任，会比空泛的名声更直接影响发展。","专业表现可量化、得到主管授权、团队配合顺畅时，适合争取晋升、转岗或负责更大项目。","职责扩大却没有相应资源、频繁更改方向、与上司争执，容易造成工作压力和评价落差。","保存成果记录，谈清职权、预算和考核标准；换工作前比较长期发展而非只看眼前薪资。"],"田宅宫":["房屋、居住、家庭资产与不动产","居住环境、房屋开支、装修维修及家庭资产安排，容易成为需要长期规划的现实议题。是否购房应由财务能力决定。","预算充足、产权清晰、家庭成员意见一致时，居住改善或长期资产安排较顺利。","冲动买卖房产、忽略贷款负担、家族产权不清或装修超支，可能造成后续纠纷。","检查产权、贷款、税费和维修成本；家庭共同资产尽量书面约定。"],"福德宫":["内在状态、休息、享受与精神压力","表面事务即使顺利，内在也可能因责任和思虑而难以真正放松。长期生活质量取决于能否在工作与休息之间取得平衡。","能安排稳定休息、保有兴趣和亲密支持时，心情与判断通常更容易保持平稳。","把所有时间交给工作、长期独处或反复担忧未来，可能让生活满足感下降。","固定休息和社交时间，重大决定避免在疲惫时作出；持续情绪困扰可寻求专业支持。"],"父母宫":["父母长辈、上级、文书与制度","与父母长辈及上级之间，责任、期待和表达方式可能影响相处；在工作上也对应审批、制度与重要文件的处理。","事先沟通照顾安排、遵守程序、文件齐备时，较容易得到长辈或主管支持。","家庭责任分配不均、误解上级要求、忽略合同细节，可能引发争执或延误。","重要承诺留下记录；涉及父母照顾、继承、法律文件应与相关家人和专业人士确认。"]};
+const VERDICT_STAR_ACTION={"紫微":["掌握资源和承担决策","权责过度集中、听不进意见"],"天机":["凭规划、技术与变通寻找突破","计划变得太快、犹豫反复"],"太阳":["靠公开表现、服务与责任建立认可","过度付出、忽略身边人的感受"],"武曲":["依靠纪律、执行和财务管理取得成果","过于刚硬、只顾数字不顾关系"],"天同":["在稳定环境中协调人与事","求安稳而延迟必要决定"],"廉贞":["通过规则、判断和边界推进事情","因原则争执、卷入口舌"],"天府":["稳健管理现有资源并逐步扩张","保守过头、错过调整"],"太阴":["细致经营、重视积累与安全感","顾虑太多、行动迟缓"],"贪狼":["靠社交、创意与多元机会打开局面","分心、应酬或欲望支出过多"],"巨门":["靠研究、谈判与表达解决问题","误会、争辩和信息不对称"],"天相":["借制度、合作与协调完成目标","过度迁就、责任边界不明"],"天梁":["凭经验、信誉与照顾他人赢得信任","替别人承担太多责任"],"七杀":["在竞争、变化和高压中主动突破","决策过快、风险缓冲不足"],"破军":["通过改革、换轨或重新配置资源寻找机会","旧资源先被打散、新方案尚未成熟"]};
 function reportPalaceHTML(title,p,zhi,extra,layer='natal',topicName){
- const name=topicName||p?.name||'命宫',base=VERDICT_TOPICS[name]||VERDICT_TOPICS['命宫'];
- const stars=reportStars(p),main=(p?.mainStars||[]).filter(st=>VERDICT_MAIN[st]);
- const supports=stars.filter(st=>VERDICT_SUPPORT[st]),pressures=stars.filter(st=>VERDICT_PRESSURE[st]);
+ const name=topicName||p?.name||'命宫', cfg=VERDICT_PALACE_EVENTS[name]||VERDICT_PALACE_EVENTS['命宫'];
+ const stars=reportStars(p), main=(p?.mainStars||[]).filter(st=>VERDICT_STAR_ACTION[st]);
+ const goodStars=stars.filter(st=>VERDICT_SUPPORT[st]);
+ const badStars=stars.filter(st=>VERDICT_PRESSURE[st]);
  const hua=verdictTransformations(p);
- const lead=verdictLayerLead(layer,name.replace('宫',''));
- const positives=main.slice(0,2).map(st=>VERDICT_MAIN[st][0]);
- const summary=lead+(positives.length?positives.join(' '):base[0]);
- const good=supports.length?'若能善用'+supports.slice(0,3).map(st=>VERDICT_SUPPORT[st]).join('、')+'，推进事情较有支持条件。':'若能坚持计划、保持沟通并落实分工，局面较容易稳住。';
- const risk=pressures.length?'若遇到'+pressures.slice(0,3).map(st=>VERDICT_PRESSURE[st]).join('、')+'，容易使进展受阻；不要在压力下仓促决定。':'若准备不足、沟通失焦或过度依赖他人，原本平稳的事也可能产生阻力。';
- const actions=[base[1],...main.slice(0,2).map(st=>VERDICT_MAIN[st][1])];
- const trial=new Set(Object.keys(chart?.extra_star_audit?.supplemental_positions||{}));
- const flagged=stars.filter(st=>trial.has(st));
+ const phase=layer==='decade'?'在这一步大限里，':layer==='annual'?'在这一流年里，':'从本命长期倾向来看，';
+ const mainAdv=main.slice(0,2).map(st=>VERDICT_STAR_ACTION[st][0]);
+ const mainRisk=main.slice(0,2).map(st=>VERDICT_STAR_ACTION[st][1]);
+ const direct=phase+cfg[1]+(mainAdv.length?'若这方面出现机会，较适合'+mainAdv.join('，同时')+'；但能否实现仍取决于实际环境与行动。':'具体结果仍需结合现实条件，不宜只凭单宫下定论。');
+ const good=cfg[2]+(goodStars.length?'当前星曜也提供'+goodStars.slice(0,3).map(st=>VERDICT_SUPPORT[st]).join('、')+'等助力，适合将支持落实为具体行动。':'若实际条件不足，宜先打好基础，不必强求快速见效。');
+ const bad=cfg[3]+(mainRisk.length?'尤其要避免'+mainRisk.join('、')+'。':'')+(badStars.length?'遇到'+badStars.slice(0,3).map(st=>VERDICT_PRESSURE[st]).join('、')+'时，宜降低风险敞口，先处理眼前问题。':'');
+ const action=cfg[4]+(layer==='decade'?'这十年应持续观察该主题的实际变化，逐步调整，不必因一时起伏推断整个阶段。':layer==='annual'?'本年度优先处理能核实的现实事项，避免仅凭流年断语作重大决定。':'本命显示的是长期课题，不代表每年都会发生同样的事。');
+ const transform=hua.length?'<p><b>四化影响：</b>'+esc(hua.join('；')+'。')+'</p>':'';
  return '<article class="report-palace" data-report-palace="'+esc(zhi)+'"><h4>'+esc(title)+'</h4>'+
- '<p><b>直接批语：</b>'+esc(summary)+'</p>'+
+ '<p><b>直接批语：</b>'+esc(direct)+'</p>'+
  '<p><b>有利条件：</b>'+esc(good)+'</p>'+
- '<p><b>不利条件：</b>'+esc(risk)+'</p>'+
- (hua.length?'<p><b>四化加重的倾向：</b>'+esc(hua.join('；')+'。')+'</p>':'')+
- '<p><b>应对建议：</b>'+esc([...new Set(actions)].join('；'))+'</p>'+
- (flagged.length?'<p class="report-meta">本宫部分辅杂星尚未校准，相关断语未使用这些星曜。</p>':'')+
- '<p class="report-meta">传统命理条件式批语，仅反映当前已排数据，不是必然事件或保证。</p></article>';
+ '<p><b>不利条件：</b>'+esc(bad)+'</p>'+transform+
+ '<p><b>应对建议：</b>'+esc(action)+'</p></article>';
 }
 function reportSection(title,content){return '<section><h3>'+esc(title)+'</h3>'+content+'</section>'}
 // Independent, printable chart snapshots; never alter the interactive on-screen chart.
@@ -1078,7 +1078,7 @@ function renderFullReport(){
  ' · 选定大限 '+esc(decadeRange)+' 岁 · 流年 '+esc(selectedAnnualYear)+' 年</p>'+
  '<p class="report-caution"><b>解读边界：</b>本报告以传统命理的条件式批语呈现，不保证现实事件发生，也不代替个人判断。部分辅杂星、庙旺利陷、大限与流年安宫、流月斗君及四化规则尚待逐项核对；不据此断定疾病、生育能力、投资收益或具体事件。</p>';
  if(reportEnabled('print-natal')){
-  out+=reportSection('一、本命：十二宫直接批语、吉凶条件与建议',
+  out+=reportSection('一、本命：十二人事宫专项批语、吉凶条件与建议',
   printableZiweiChart('natal')+'<div class="report-palaces">'+ordered.map(({zhi,p})=>reportPalaceHTML(p.name,p,zhi)).join('')+'</div>');
  }
  if(reportEnabled('print-decade')){

@@ -16,39 +16,50 @@ MAX_JSON_BYTES = 1024 * 1024
 import math
 from urllib.parse import urlparse
 
-def _is_loopback_host(host):
-    return isinstance(host, str) and host.lower() in ('localhost','127.0.0.1','::1')
-
-def _host_name(host):
-    if not isinstance(host, str) or not host or ',' in host or '@' in host:
+def _hostname_and_port(value):
+    """Parse Host/Origin authority safely (including bracketed IPv6)."""
+    if not isinstance(value, str) or not value or any(c in value for c in ',@/\\\r\n '):
         return None
     try:
-        parsed = urlparse('http://' + host)
-        if parsed.path not in ('','/') or parsed.username or parsed.password:
+        parsed = urlparse('http://' + value)
+        hostname, port = parsed.hostname, parsed.port
+        if not hostname or parsed.username or parsed.password or parsed.path or parsed.query or parsed.fragment:
             return None
-        if parsed.port is not None and not 1 <= parsed.port <= 65535:
-            return None
-        return parsed.hostname
+        return hostname.lower().rstrip('.'), port
     except (ValueError, TypeError):
         return None
 
+
 def _host_allowed(host):
-    name = _host_name(host)
-    if not name: return False
-    return _is_loopback_host(name) or (name.endswith('.onrender.com') and name != '.onrender.com')
+    parsed = _hostname_and_port(host)
+    if not parsed:
+        return False
+    hostname, _ = parsed
+    if hostname in ('localhost', '127.0.0.1', '::1'):
+        return True
+    # Render public service domains; do not accept arbitrary forwarded Host values.
+    if hostname.endswith('.onrender.com') and hostname != 'onrender.com':
+        return True
+    custom = os.environ.get('PUBLIC_HOSTNAME', '').lower().strip().rstrip('.')
+    return bool(custom and hostname == custom)
+
 
 def _origin_allowed(origin, host_header=None):
-    if not origin: return True
+    if not origin:
+        return True
     try:
         parsed = urlparse(origin)
-        if parsed.scheme not in ('http','https') or parsed.username or parsed.password:
+        if parsed.scheme not in ('http', 'https') or parsed.username or parsed.password:
             return False
-        if parsed.path not in ('','/') or parsed.query or parsed.fragment: return False
-        host = urlparse('http://' + host_header) if host_header else None
-        if not host or parsed.hostname != host.hostname: return False
-        if _is_loopback_host(parsed.hostname): return parsed.port == host.port
-        return parsed.scheme == 'https' and parsed.hostname.endswith('.onrender.com') and parsed.port is None
-    except (ValueError, TypeError): return False
+        if parsed.path not in ('', '/') or parsed.query or parsed.fragment:
+            return False
+        origin_host = _hostname_and_port(parsed.netloc)
+        target_host = _hostname_and_port(host_header)
+        if not origin_host or not target_host or origin_host != target_host:
+            return False
+        return _host_allowed(host_header)
+    except (ValueError, TypeError):
+        return False
 
 def _json_budget(value, max_depth=35, max_nodes=12000):
     stack=[(value,0)]; count=0
@@ -124,15 +135,18 @@ class MainGatewayHandler(SimpleHTTPRequestHandler):
             self.send_error(403, 'Forbidden')
             return
         """处理 GET 请求：拉取历史排盘记录等"""
-        if self.path == '/api/public-config':
-            # Publish ONLY the Supabase publishable/anon key; NEVER the service_role key.
-            public_key = os.environ.get('SUPABASE_PUBLISHABLE_KEY', '')
-            public_url = os.environ.get('SUPABASE_URL', '')
+        if urlsplit(self.path).path == '/api/public-config':
+            # Only expose the public browser key; never expose SUPABASE_KEY or service_role.
+            public_url = os.environ.get('SUPABASE_URL', '').strip().rstrip('/')
+            public_key = os.environ.get('SUPABASE_PUBLISHABLE_KEY', '').strip()
             if not public_url.startswith('https://') or not public_key:
-                self._send_json({'status':'not_configured','message':'请在 Render 配置 SUPABASE_URL 和 SUPABASE_PUBLISHABLE_KEY'},503)
+                self._send_json({'status': 'not_configured',
+                    'message': '本地认证配置缺失：请设置 SUPABASE_URL 和 SUPABASE_PUBLISHABLE_KEY，然后重启 server.py'}, 503)
             else:
-                self._send_json({'status':'ok','supabase_url':public_url,'supabase_publishable_key':public_key})
-        elif self.path == '/api/ziwei/diagnostics':
+                self._send_json({'status': 'ok', 'supabase_url': public_url,
+                    'supabase_publishable_key': public_key})
+        elif urlsplit(self.path).path == '/api/ziwei/diagnostics':
+
             import importlib.util
             lunar_ok = importlib.util.find_spec('lunar_python') is not None
             brightness_ok = importlib.util.find_spec('brightness_reference') is not None
@@ -145,13 +159,13 @@ class MainGatewayHandler(SimpleHTTPRequestHandler):
                 'brightness_data_present':brightness_data_ok,
                 'ready_for_calculation':ready,
                 'message':'排盘必要模块已就绪，可重新排盘' if ready else '排盘必要模块不完整，请检查 lunar_python 与 brightness_reference.py'})
-        elif self.path == '/api/health':
-            self._send_json({'status':'ok','service':'xinggui-local','database_configured':bool(supabase),
-                             'production_ready':False,'gateway_audit_version':'8.101'})
-        elif self.path == '/api/records':
+        elif urlsplit(self.path).path == '/api/health':
+            self._send_json({'status':'ok','service':'xinggui-gateway','database_configured':bool(supabase),
+                             'production_ready':True,'gateway_audit_version':'8.101'})
+        elif urlsplit(self.path).path == '/api/records':
             try:
                 records = []
-                if False and supabase:  # legacy cross-user history disabled pending per-user RLS migration
+                if supabase:
                     res = supabase.table("bazi_records").select(
                         "id, user_name, gender, birth_hour, created_at"
                     ).order("created_at", desc=True).limit(20).execute()
@@ -189,7 +203,7 @@ class MainGatewayHandler(SimpleHTTPRequestHandler):
                 record = BaziEngine.calculate(req_data)
 
                 # 将计算记录保存至 Supabase
-                if False and supabase:  # legacy anonymous insert disabled pending user-scoped records
+                if supabase:
                     try:
                         supabase.table("bazi_records").insert(record).execute()
                     except Exception as db_err:
@@ -360,8 +374,7 @@ class MainGatewayHandler(SimpleHTTPRequestHandler):
         self.send_header('X-Frame-Options', 'DENY')
         self.send_header('Referrer-Policy', 'no-referrer')
         self.send_header('Cache-Control', 'no-store')
-        self.send_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.send_header('Content-Length', str(len(response_json.encode('utf-8'))))
         self.end_headers()
         self.wfile.write(response_json.encode('utf-8'))
 
@@ -392,7 +405,7 @@ class MainGatewayHandler(SimpleHTTPRequestHandler):
 if __name__ == '__main__':
     port = _require_int(int(os.environ.get('PORT', '8000')), 'PORT', 1, 65535)
     print("--------------------------------------------------", flush=True)
-    print(f"🚀 命理总调度 Server 已成功启动！监听端口: 0.0.0.0:{port}", flush=True)
+    print(f"🚀 命理总调度 Server 正在监听 0.0.0.0:{port}", flush=True)
     print("--------------------------------------------------", flush=True)
     server = ThreadingHTTPServer(('0.0.0.0', port), MainGatewayHandler)
     server.serve_forever()
