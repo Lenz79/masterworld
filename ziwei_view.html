@@ -577,16 +577,39 @@ body.chart-fit-active .chart-mode-bar{position:sticky;top:0;z-index:100}
  body.chart-fit-active #chart-panel{min-width:0}
 }
 
-.report-ganzhi-stack{display:inline-flex;flex-direction:column;align-items:center;line-height:1.1}
-/* 宫干在上、地支在下，明确纵向叠排（适用三合及飞星）。 */
-.palace-box:not(.center-box) .p-bottom-right {
- writing-mode:horizontal-tb!important; text-orientation:mixed!important;
- display:flex!important;flex-direction:column!important;align-items:center!important;
- justify-content:flex-end!important;gap:0!important;line-height:1.05!important;
- letter-spacing:0!important;bottom:5px!important;right:5px!important;
- max-height:none!important;overflow:visible!important;
+/* V8.39 修正：宫干/宫支分成两行，固定右下角；防止被旧版 writing-mode 覆盖。 */
+.palace-box:not(.center-box) .p-bottom-right,
+.palace-box.layer-feixing:not(.center-box) .p-bottom-right {
+ position:absolute;right:5px;bottom:5px;left:auto;top:auto;
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ width:31px;height:62px;max-height:none;overflow:visible;
+ writing-mode:horizontal-tb;text-orientation:mixed;letter-spacing:0;
+ font-size:23px;line-height:29px;font-weight:800;z-index:12;
+ background:#fff;border-radius:3px;white-space:nowrap;
 }
-.p-bottom-right .gz-stem,.p-bottom-right .gz-branch{display:block;white-space:nowrap}
+.palace-box:not(.center-box) .p-bottom-right span{display:block;width:100%;text-align:center;}
+/* 底栏留出右侧干支位，避免宫名和干支碰撞。 */
+.palace-box:not(.center-box) .p-bottom-center-column,
+.palace-box.layer-feixing:not(.center-box) .p-bottom-center-column {
+ left:36px;right:38px;width:auto;max-width:none;
+}
+.palace-box:not(.center-box) .p-benming-name{font-size:clamp(16px,1.5vw,23px);}
+.palace-box.layer-feixing:not(.center-box) .p-benming-name{font-size:23px;}
+/* 星曜和叠宫标签分区：上方星曜、中央叠宫、底部宫名。 */
+.palace-box.layer-feixing:not(.center-box) .p-top-left{bottom:122px;right:111px;font-size:20px;}
+.palace-box.layer-feixing:not(.center-box) .p-right-main{bottom:120px;width:104px;}
+.palace-box.layer-feixing:not(.center-box) .star-col{font-size:26px;}
+.palace-box.layer-feixing:not(.center-box) .layer-names,
+.palace-box.layer-sanhe:not(.center-box) .layer-names{
+ top:auto;bottom:58px;left:50%;right:auto;transform:translateX(-50%);
+ width:112px;max-width:calc(100% - 80px);padding:2px;
+ background:rgba(255,255,255,.93);gap:0;
+}
+.palace-box.layer-feixing:not(.center-box) .layer-names > div,
+.palace-box.layer-sanhe:not(.center-box) .layer-names > div{
+ font-size:20px;line-height:24px;min-height:24px;
+}
+.palace-box:not(.center-box) .p-month-indicator{right:5px;bottom:87px;}
 
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -898,12 +921,6 @@ function partitionPalaceStars(p,mode){
    all.filter(s=>!(p.mainStars||[]).includes(s)||lucky.has(s));
  return {main,left};
 }
-function ganZhiStack(p){
- const raw=String(p?.gan_zhi||'').replace(/\s/g,'');
- const gan=String(p?.gan||raw.charAt(0)||'');
- const zhi=String(p?.zhi||raw.charAt(1)||'');
- return '<span class="gz-stem">'+esc(gan)+'</span><span class="gz-branch">'+esc(zhi)+'</span>';
-}
 function renderGrid(){if(!chart)return;document.querySelectorAll('.chart-mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===(document.querySelector('input[name=view-mode]:checked')?.value||'sanhe')));let box=document.getElementById('ziwei-grid-container');box.innerHTML='';let showShas=true,showFour=document.getElementById('chk-sihua').checked,highlight=document.getElementById('chk-sanfang').checked;let mode=document.querySelector('input[name=view-mode]:checked')?.value||'sanhe';document.getElementById('fly-toolbar').style.display=mode==='feixing'?'flex':'none';document.getElementById('sanhe-toolbar').style.display=mode==='sanhe'?'flex':'none';let current=Object.values(chart.palaces).find(x=>x.name===selected);let related=current?.san_fang_si_zheng||[];const candidateDecade=activeDecade();const dr=decadeYearRange(candidateDecade);const decade=decadeLayerEnabled&&dr&&selectedAnnualYear>=dr[0]&&selectedAnnualYear<=dr[1]?candidateDecade:null;const annualZhi=annualBranch(selectedAnnualYear);const monthZhi=monthDouJunBranch(selectedAnnualYear,selectedLunarMonth);document.getElementById('decade-summary').textContent=
  !decadeLayerEnabled&&!annualLayerEnabled?'仅显示本命（大限与流年已取消）':
  !decadeLayerEnabled?'仅显示本命＋流年 '+selectedAnnualYear+'（'+annualZhi+'）':
@@ -931,7 +948,7 @@ function renderGrid(){if(!chart)return;document.querySelectorAll('.chart-mode-bt
   return '<span class="'+cls+(isSanhe&&provisional.has(st)?' star-provisional':'')+'" title="'+esc(st+(isSanhe&&provisional.has(st)?'（安星规则待逐宫校准）':'')+(b?' '+b:''))+'">'+esc(st)+(b?'<small class="star-brightness">'+esc(b)+'</small>':'')+'</span>';
  }).join('');
  let main=starGroups.main.map(st=>{let t='';for(const [key,cls] of [['shengian','sihua'],['zihua','zihua']])if(showFour&&(key!=='zihua'||(mode==='feixing'&&document.getElementById('chk-self-arrows').checked))&&p[key][st]){let q=p[key][st];t+='<span class="'+cls+'-'+q.type+'" title="'+esc(st+(key==='zihua'?' 自化':' 生年化')+q.val.slice(-1))+'">'+(key==='zihua'?'↺'+esc(q.val.slice(-1)):esc(q.val))+'</span>'}let bright=showBright?p.star_brightness?.[st]:null;return '<div class="star-col"><span>'+esc(st)+'</span>'+(bright?'<small class="star-brightness" title="公开资料亮度等级（尚未与文墨天机逐项核对）">'+esc(bright)+'</small>':'')+t+'</div>'}).join('');
- el.innerHTML='<div class="p-top-left">'+minor+'</div><div class="p-right-main">'+main+'</div><div class="layer-names"><div class="layer-annual">'+esc(annualLayerEnabled?shortLayerName(annualZhi,item.zhi,'流'):'')+'</div><div class="layer-decade">'+esc(decadeLayerEnabled?shortLayerName(decade?.zhi,item.zhi,'大'):'')+'</div></div><div class="p-month-indicator" title="流年月份落宫（斗君试算，待校准）">'+esc(annualLayerEnabled?monthLabelsForBranch(selectedAnnualYear,item.zhi):'')+'</div><div class="p-bottom-left-column">'+(p.shen?'<div class="tag-month-box">身宫</div>':'')+'</div><div class="p-bottom-center-column"><div class="p-daxian-range-slot">'+esc(p.decade)+'</div><div class="p-benming-name">'+esc(p.name)+'</div></div><div class="p-bottom-right">'+esc(p.gan_zhi)+'</div>';
+ el.innerHTML='<div class="p-top-left">'+minor+'</div><div class="p-right-main">'+main+'</div><div class="layer-names"><div class="layer-annual">'+esc(annualLayerEnabled?shortLayerName(annualZhi,item.zhi,'流'):'')+'</div><div class="layer-decade">'+esc(decadeLayerEnabled?shortLayerName(decade?.zhi,item.zhi,'大'):'')+'</div></div><div class="p-month-indicator" title="流年月份落宫（斗君试算，待校准）">'+esc(annualLayerEnabled?monthLabelsForBranch(selectedAnnualYear,item.zhi):'')+'</div><div class="p-bottom-left-column">'+(p.shen?'<div class="tag-month-box">身宫</div>':'')+'</div><div class="p-bottom-center-column"><div class="p-daxian-range-slot">'+esc(p.decade)+'</div><div class="p-benming-name">'+esc(p.name)+'</div></div><div class="p-bottom-right" aria-label="'+esc(p.gan_zhi||'')+'"><span class="palace-stem">'+esc((p.gan_zhi||'').slice(0,1))+'</span><span class="palace-branch">'+esc((p.gan_zhi||'').slice(1,2))+'</span></div>';
  el.onclick=()=>{if(mode==='feixing')activeFlyPalace=activeFlyPalace===p.name?null:p.name;selected=p.name;renderGrid()};box.appendChild(el)}
  const brightStatus=chart.brightness_reference||{};const brightnessToggle=document.getElementById('sanhe-show-brightness');const verifiedCount=Number(brightStatus.verified_entries||0);if(brightnessToggle){if(verifiedCount>0&&brightnessToggle.disabled)brightnessToggle.checked=true;brightnessToggle.disabled=verifiedCount===0;if(verifiedCount===0)brightnessToggle.checked=false;brightnessToggle.parentElement.title=verifiedCount===0?'当前没有已核验的亮度等级；完成校准后此开关自动启用':('已录入公开亮度资料 '+verifiedCount+' 项；尚未与文墨天机逐项核对，可切换显示');brightnessToggle.parentElement.style.opacity=verifiedCount===0?'0.65':'1';brightnessToggle.parentElement.lastChild.textContent=verifiedCount===0?' 庙旺利陷（待校准）':' 庙旺利陷·公开表（'+verifiedCount+'项）';}const auditEl=document.getElementById('sanhe-audit-info');if(auditEl)auditEl.textContent='自动展示：十四主星、六吉、六煞、禄存、常用辅杂曜、博士/长生/岁前/将前十二神及补充杂曜（共108项）。'+'已排六吉六煞各6颗（仅核对存在数量）；'+(brightStatus.message||'庙旺利陷尚未核验')+'。公开亮度表仅作参考，未与文墨天机逐项核对；新增40项含未经逐宫核对的试算规则，尚未与文墨天机逐项核对。';
  let center=document.createElement('div');center.className='palace-box center-box';center.style.gridRow='2 / 4';center.style.gridColumn='2 / 4';center.innerHTML='<div class="center-mode-title" style="font-weight:bold;color:#b45309;font-size:calc(.88rem + 4px)">🌟 星轨智盘 · '+esc(mode==='sanhe'?'三合派':'飞星派')+'</div><div class="center-birth-details" style="text-align:left;line-height:1.65;font-size:calc(.85rem + 4px)"><div><b>姓名：</b>'+esc(chart.name)+'　<b>性别：</b>'+esc(chart.gender)+'</div><div><b>阳历：</b>'+esc(chart.solar)+'</div><div><b>农历：</b>'+esc(chart.lunar)+'</div><div><b>干支：</b>'+esc(chart.year_gan_zhi)+'　<b>生肖：</b>'+esc(chart.animal)+'</div><div><b>五行局：</b>'+esc(chart.bureau)+'　<b>命宫：</b>'+esc(chart.ming_gong)+'　<b>身宫：</b>'+esc(chart.shen_gong)+'</div></div><div class="time-btn-group"><button class="time-btn" onclick="adjustTime(&apos;day_up&apos;)" title="公历日期加一天，自动重新计算农历">日 ↑</button><button class="time-btn" onclick="adjustTime(&apos;hour_up&apos;)">时 ↑</button><button class="time-btn" onclick="adjustTime(&apos;hour_down&apos;)">时 ↓</button><button class="time-btn" onclick="adjustTime(&apos;day_down&apos;)">日 ↓</button></div>';box.appendChild(center);renderTimeline();invalidateOutdatedAnalysis();renderFullReport();if(chartFitActive)requestAnimationFrame(resizeChartFit);
@@ -1121,7 +1138,7 @@ function printableZiweiChart(layer,monthNumber){
    '<div class="report-ziwei-stars">'+main.map(st=>'<b>'+esc(st)+'</b>').join(' ')+
    '<span>'+esc(other.join('、'))+'</span></div>'+
    (sihua?'<div class="report-ziwei-sihua">'+esc(sihua)+'</div>':'')+
-   '<div class="report-ziwei-bottom"><b>'+esc(layered)+'</b><span class="report-ganzhi-stack">'+ganZhiStack(p)+'</span></div></div>';
+   '<div class="report-ziwei-bottom"><b>'+esc(layered)+'</b><span>'+esc(item.zhi)+' · '+esc(p.gan_zhi||'')+'</span></div></div>';
  }
  const center='<div class="report-ziwei-center" style="grid-row:2 / 4;grid-column:2 / 4"><b>星轨智盘 · '+esc(mode==='sanhe'?'三合派':'飞星派')+'</b>'+
  '<p>'+esc(chart.name||'')+' · '+esc(chart.gender||'')+'</p><p>阳历 '+esc(chart.solar||'')+'</p><p>农历 '+esc(chart.lunar||'')+'</p>'+
