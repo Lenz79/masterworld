@@ -1082,45 +1082,78 @@ function classifyReverseWater(f){
  return hasSameYear?'逆水'+hua:null;
 }
 function drawFlyArrows(box, selectedName){
+ // 宫内短箭头：只在发出宫绘制，不跨越中央资料区或其他宫格。
  const overlay=document.createElementNS('http://www.w3.org/2000/svg','svg');
- overlay.setAttribute('class','fly-overlay');overlay.setAttribute('aria-label','宫干四化飞入飞出方向图');
- const cellW=245,cellH=198,gap=4,fullW=4*cellW+3*gap,fullH=4*cellH+3*gap;
- overlay.setAttribute('viewBox',`0 0 ${fullW} ${fullH}`);overlay.setAttribute('preserveAspectRatio','none');
- const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');overlay.appendChild(defs);
+ overlay.setAttribute('class','fly-overlay');
+ overlay.setAttribute('aria-label','宫干四化宫内短箭头（逆水为双箭头）');
+ const rect=box.getBoundingClientRect();
+ const width=box.offsetWidth||rect.width,height=box.offsetHeight||rect.height;
+ overlay.setAttribute('viewBox',`0 0 ${width} ${height}`);
+ overlay.setAttribute('preserveAspectRatio','none');
+ const ns='http://www.w3.org/2000/svg';
+ const defs=document.createElementNS(ns,'defs');overlay.appendChild(defs);
  const colors={'化禄':'#16a34a','化权':'#2563eb','化科':'#ca8a04','化忌':'#dc2626'};
- for(const [key,color] of Object.entries(colors)){
-  const marker=document.createElementNS('http://www.w3.org/2000/svg','marker');marker.setAttribute('id','fly-'+key);marker.setAttribute('markerWidth','8');marker.setAttribute('markerHeight','8');marker.setAttribute('refX','7');marker.setAttribute('refY','4');marker.setAttribute('orient','auto');
-  const tri=document.createElementNS('http://www.w3.org/2000/svg','path');tri.setAttribute('d','M0 0 L8 4 L0 8 Z');tri.setAttribute('fill',color);marker.appendChild(tri);defs.appendChild(marker);
+ const uid='fly-short-'+Math.random().toString(36).slice(2);
+ for(const [hua,color] of Object.entries(colors)){
+  const marker=document.createElementNS(ns,'marker');
+  for(const [k,v] of Object.entries({id:uid+'-'+hua,markerWidth:6,markerHeight:6,refX:5,refY:3,orient:'auto-start-reverse',markerUnits:'strokeWidth'}))marker.setAttribute(k,v);
+  const tri=document.createElementNS(ns,'path');tri.setAttribute('d','M0 0 L6 3 L0 6 Z');tri.setAttribute('fill',color);marker.appendChild(tri);defs.appendChild(marker);
  }
- const positions={};for(const x of gridMapping)positions[x.zhi]={x:x.c*(cellW+gap)+cellW/2,y:x.r*(cellH+gap)+cellH/2};
- const dir=document.getElementById('fly-direction').value;
+ const svgEl=(tag,attrs)=>{const el=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))el.setAttribute(k,String(v));overlay.appendChild(el);return el};
+ const branch='子丑寅卯辰巳午未申酉戌亥';
+ const opposite=f=>branch.includes(f.from)&&branch.includes(f.to)&&((branch.indexOf(f.from)-branch.indexOf(f.to)+12)%12===6);
+ const dir=document.getElementById('fly-direction')?.value||'out';
  const oppositeOnly=document.getElementById('chk-opposite-only')?.checked;
- const branches='子丑寅卯辰巳午未申酉戌亥';
- const isOpposite=f=>branches.includes(f.from)&&branches.includes(f.to)&&((branches.indexOf(f.from)-branches.indexOf(f.to)+12)%12===6);
+ const cells={};
+ for(const item of gridMapping){
+  const el=Array.from(box.children).find(e=>e.classList?.contains('palace-box')&&!e.classList.contains('center-box')&&Number(e.style.gridRow)===item.r+1&&Number(e.style.gridColumn)===item.c+1);
+  if(el){const r=el.getBoundingClientRect();cells[item.zhi]={x:r.left-rect.left,y:r.top-rect.top,w:r.width,h:r.height};}
+  else {const w=width/4,h=height/4;cells[item.zhi]={x:item.c*w,y:item.r*h,w,h};}
+ }
  const edges=(chart.flying_transformations||[]).filter(f=>{
-   if(f.self_transform)return false; // 自化固定显示在各宫内，不绘制跨宫 SVG 回环
-   if(oppositeOnly&&!isOpposite(f))return false;
-
-   // 射出及逆水属于本命固定关系，无需先点击发出宫；普通飞化仍按选中宫筛选。
-   if(isOpposite(f))return true;
-   return !!selectedName&&(((dir==='out'||dir==='both')&&f.from_palace===selectedName)||((dir==='in'||dir==='both')&&f.to_palace===selectedName));
+  if(f.self_transform)return false;
+  if(oppositeOnly&&!opposite(f))return false;
+  if(opposite(f))return true;
+  return !!selectedName&&(((dir==='out'||dir==='both')&&f.from_palace===selectedName)||((dir==='in'||dir==='both')&&f.to_palace===selectedName));
  });
- const svgEl=(tag,attrs)=>{const e=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v] of Object.entries(attrs))e.setAttribute(k,String(v));overlay.appendChild(e);return e};
- edges.forEach((f,i)=>{
-  const a=positions[f.from],b=positions[f.to],color=colors[f.transformation]||'#64748b';if(!a||!b)return;
-  {
-   const vx=b.x-a.x,vy=b.y-a.y,length=Math.hypot(vx,vy)||1;
-   const sx=a.x+vx/length*39,sy=a.y+vy/length*39,tx=b.x-vx/length*44,ty=b.y-vy/length*44;
-   const perpX=-vy/length,perpY=vx/length,offset=((i%5)-2)*10;
-   const mx=(sx+tx)/2+perpX*offset,my=(sy+ty)/2+perpY*offset;
-   svgEl('path',{d:`M${sx} ${sy} Q${mx} ${my} ${tx} ${ty}`,stroke:color,'stroke-width':2,fill:'none',opacity:.85,'marker-end':`url(#fly-${f.transformation})`});
-   const shoot=isOpposite(f);
-   const reverse=shoot?classifyReverseWater(f):null;
-   if(reverse){const path=overlay.lastElementChild;path.setAttribute('marker-start',`url(#fly-${f.transformation})`);path.setAttribute('stroke-width','3.5');path.setAttribute('opacity','1');}
-   const labelX=shoot?a.x:mx, labelY=shoot?(a.y-58-(i%3)*17):(my-7);
-   const t=svgEl('text',{x:labelX,y:labelY,'text-anchor':'middle',fill:color,'font-size':shoot?15:13,'font-weight':shoot?'bold':'normal'});t.textContent=reverse|| (shoot?'射出'+f.transformation.slice(-1):f.transformation.slice(-1));
-  }
- });
+ const groups={};for(const f of edges)(groups[f.from]??=[]).push(f);
+ for(const [source,items] of Object.entries(groups)){
+  const cell=cells[source];if(!cell)continue;
+  items.forEach((f,i)=>{
+   const target=cells[f.to];if(!target)return;
+   const color=colors[f.transformation]||'#64748b';
+   const reverse=opposite(f)?classifyReverseWater(f):null;
+   // 箭尾贴发出宫边框，箭头在宫外；四隅宫从正角顶点发出。
+   const corners={巳:[1,1],申:[0,1],寅:[1,0],亥:[0,0]};
+   const anchor=corners[source];
+   const dx=(target.x+target.w/2)-(cell.x+cell.w/2);
+   const dy=(target.y+target.h/2)-(cell.y+cell.h/2);
+   let tailX,tailY,ux,uy;
+   if(anchor){
+    tailX=cell.x+(anchor[0]?cell.w:0);
+    tailY=cell.y+(anchor[1]?cell.h:0);
+    ux=anchor[0]?Math.SQRT1_2:-Math.SQRT1_2;
+    uy=anchor[1]?Math.SQRT1_2:-Math.SQRT1_2;
+   }else{
+    const centerX=width/2,centerY=height/2;
+    const cx=cell.x+cell.w/2,cy=cell.y+cell.h/2;
+    if(Math.abs(centerX-cx)>Math.abs(centerY-cy)){
+     ux=centerX>cx?1:-1;uy=0;
+     tailX=ux>0?cell.x+cell.w:cell.x;tailY=cy;
+    }else{
+     ux=0;uy=centerY>cy?1:-1;
+     tailX=cx;tailY=uy>0?cell.y+cell.h:cell.y;
+    }
+   }
+   const offset=(i-(items.length-1)/2)*10;
+   if(!anchor){tailX+=-uy*offset;tailY+=ux*offset;}
+   const length=23;
+   const tipX=tailX+ux*length,tipY=tailY+uy*length;
+   const attrs={d:`M${tailX} ${tailY} L${tipX} ${tipY}`,stroke:color,'stroke-width':reverse?2.8:2.4,fill:'none','stroke-linecap':'round','marker-end':`url(#${uid}-${f.transformation})`};
+   if(reverse)attrs['marker-start']=`url(#${uid}-${f.transformation})`;
+   svgEl('path',attrs);
+  });
+ }
  box.appendChild(overlay);
 }
 // V8.24: 单一星曜分区入口，避免飞星六吉在主星过滤后丢失。

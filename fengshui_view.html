@@ -59,7 +59,14 @@
         .floorplan-file input { width:100%; max-width:100%; color:#e2e8f0; font-size:.8rem; }
         .floorplan-actions { display:flex; gap:8px; flex-wrap:wrap; }
         .floorplan-actions button { flex:0 0 auto; }
-        @media(max-width:600px) { .external-control-bar {flex-wrap:wrap;} .floorplan-control {flex-basis:100%;} }
+        @media(max-width:600px) {
+          .external-control-bar {flex-wrap:wrap;}
+          .floorplan-control {flex-basis:100%;}
+          /* 手机图层选择全部显示：不再被 details 的 overflow:hidden 裁掉 */
+          .layer-toolbar-content { flex-wrap:wrap; justify-content:flex-start; gap:10px 14px; padding:12px; }
+          .layer-item { flex:0 0 auto; font-size:.78rem; }
+          .layer-item input[type="checkbox"] { flex-shrink:0; }
+        }
         .measure-info { position: absolute; top: 10px; right: 10px; background: rgba(15, 23, 42, 0.9); border: 1px solid #38bdf8; padding: 5px 10px; border-radius: 5px; font-size: 0.72rem; color: #38bdf8; z-index: 30; display: none; font-weight: bold; }
 
         /* 报表样式 */
