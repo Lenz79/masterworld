@@ -16,27 +16,46 @@ MAX_JSON_BYTES = 1024 * 1024
 import math
 from urllib.parse import urlparse
 
-def _is_loopback_host(host):
-    return isinstance(host, str) and host.lower() in ('localhost','127.0.0.1','::1')
-
-def _origin_allowed(origin, host_header=None):
-    if not origin: return True
+def _parse_authority(value):
+    """Safely parse an HTTP Host authority (host with optional port)."""
+    if not isinstance(value, str) or not value or any(ch in value for ch in ',@/\\\r\n \t'):
+        return None
     try:
-        parsed = urlparse(origin)
-        if parsed.scheme not in ('http','https') or not _is_loopback_host(parsed.hostname): return False
-        if parsed.username or parsed.password or parsed.path not in ('','/') or parsed.query or parsed.fragment: return False
-        if host_header:
-            host_port = urlparse('http://' + host_header).port
-            return parsed.port == host_port
-        return True
-    except (ValueError, TypeError): return False
+        parsed = urlparse('http://' + value)
+        if not parsed.hostname or parsed.username or parsed.password or parsed.path or parsed.query or parsed.fragment:
+            return None
+        return parsed.hostname.lower().rstrip('.'), parsed.port
+    except (ValueError, TypeError):
+        return None
+
 
 def _host_allowed(host):
-    if not isinstance(host,str) or not host or ',' in host or '@' in host: return False
+    authority = _parse_authority(host)
+    if authority is None:
+        return False
+    hostname, _ = authority
+    if hostname in ('localhost', '127.0.0.1', '::1'):
+        return True
+    if hostname.endswith('.onrender.com') and hostname != 'onrender.com':
+        return True
+    custom = os.environ.get('PUBLIC_HOSTNAME', '').strip().lower().rstrip('.')
+    return bool(custom and hostname == custom)
+
+
+def _origin_allowed(origin, host_header=None):
+    if not origin:
+        return True
     try:
-        parsed = urlparse('http://' + host)
-        return _is_loopback_host(parsed.hostname) and (parsed.port is None or 1 <= parsed.port <= 65535)
-    except (ValueError,TypeError): return False
+        parsed = urlparse(origin)
+        if parsed.scheme not in ('http', 'https') or parsed.username or parsed.password:
+            return False
+        if parsed.path not in ('', '/') or parsed.query or parsed.fragment:
+            return False
+        origin_authority = _parse_authority(parsed.netloc)
+        host_authority = _parse_authority(host_header)
+        return bool(origin_authority and host_authority and origin_authority == host_authority and _host_allowed(host_header))
+    except (ValueError, TypeError):
+        return False
 
 def _json_budget(value, max_depth=35, max_nodes=12000):
     stack=[(value,0)]; count=0
