@@ -152,6 +152,8 @@
             .dayun-table td { border: 1px solid #cbd5e1 !important; color: #000 !important; }
         }
     </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="xinggui_session.js"></script>
 </head>
 <body>
 
@@ -524,21 +526,23 @@
     let globalDayunList = [];
     let globalReportData = null;
 
-    window.addEventListener('DOMContentLoaded', () => {
-        const savedProfile = localStorage.getItem('metaphysics_common_profile');
-        if (savedProfile) {
-            try {
-                const p = JSON.parse(savedProfile);
-                if (p.name && document.getElementById('input-name')) document.getElementById('input-name').value = p.name;
-                if (p.gender && document.getElementById('input-gender')) document.getElementById('input-gender').value = p.gender;
-                if (p.year && document.getElementById('input-year')) document.getElementById('input-year').value = p.year;
-                if (p.month && document.getElementById('input-month')) document.getElementById('input-month').value = p.month;
-                if (p.day && document.getElementById('input-day')) document.getElementById('input-day').value = p.day;
-                if (p.hour && document.getElementById('input-hour')) document.getElementById('input-hour').value = p.hour;
-            } catch (e) {
-                console.error("加载本地通用档案失败", e);
+    window.addEventListener('DOMContentLoaded', async () => {
+        try { await XingguiSession.ready; } catch(e) { alert('登录服务不可用：'+e.message); location.replace('index.html'); return; }
+        if (!XingguiSession.requireLogin()) return;
+        try {
+            const currentUser = XingguiSession.account()?.id;
+            const account = XingguiSession.account() ? {profile:XingguiSession.profile()} : null;
+            const p = XingguiSession.profile();
+            if (!p) return;
+            for (const key of ['name','gender','year','month','day','hour']) {
+                const el = document.getElementById('input-' + key);
+                if (el && p[key] !== undefined && p[key] !== null) el.value = p[key];
             }
-        }
+            // Registered and logged-in users should land on their own chart, not re-enter birth details.
+            if (currentUser && account?.profile && p.name && p.year && p.month && p.day && p.hour !== '') {
+                calculateAndSaveBazi();
+            }
+        } catch (e) { console.warn('读取账号生辰档案失败', e); }
     });
 
     function switchTab(tabId, el) {

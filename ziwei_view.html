@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, ">
     <title>AI 智能玄学 SaaS 平台 - 紫微斗数全盘联动排盘系统</title>
     <style>
         * { box-sizing: border-box; }
@@ -561,7 +561,24 @@ body.chart-fit-active .chart-mode-bar{position:sticky;top:0;z-index:100}
 .report-branch-link:hover{background:#dbeafe}
 .report-ziwei-palace.report-evidence-focus,.report-palace.report-evidence-focus{outline:3px solid #d97706;outline-offset:-3px;background:#fffbeb!important}
 @media print{.report-branch-link{color:inherit;border:0;padding:0}.report-ziwei-palace.report-evidence-focus,.report-palace.report-evidence-focus{outline:2px solid #b45309}}
+
+/* Mobile: default fit entire twelve-palace chart into viewport; optional full-size pan. */
+.mobile-chart-controls{display:none}
+@media(max-width:760px){
+ .container{width:100%;max-width:100%;padding:2px}
+ .home-bar{gap:5px;padding:5px}
+ .home-bar .title-text{font-size:12px;min-width:0}
+ .mobile-chart-controls{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:5px 0;padding:8px;border-radius:7px;background:#eff6ff;color:#1e40af;font-weight:700;font-size:13px}
+ .mobile-chart-controls button{border:1px solid #2563eb;border-radius:6px;background:white;color:#1d4ed8;padding:7px;font-weight:700}
+ #chart-workspace{display:block;overflow:hidden;width:100%;max-width:100%;margin:0;padding:0}
+ #chart-panel{width:1040px!important;min-width:1040px;max-width:none!important;zoom:var(--mobile-chart-zoom,.35);margin:0!important}
+ body.mobile-chart-reading #chart-workspace{overflow-x:auto;overflow-y:visible;touch-action:pan-x pan-y;overscroll-behavior-x:contain}
+ body.mobile-chart-reading #chart-panel{zoom:1}
+ body.chart-fit-active #chart-panel{min-width:0}
+}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="xinggui_session.js"></script>
 </head>
 <body>
 
@@ -592,6 +609,7 @@ body.chart-fit-active .chart-mode-bar{position:sticky;top:0;z-index:100}
     </details>
 
     <!-- 盘面十二宫格画布区 -->
+    <div class="mobile-chart-controls" id="mobile-chart-controls"><span>手机命盘</span><button type="button" id="mobile-chart-toggle" onclick="toggleMobileChartReading()">放大阅读（可左右滑动）</button></div>
     <div class="workspace" id="chart-workspace">
         <div class="pan-container" id="chart-panel">
             <div class="chart-mode-bar" id="chart-mode-bar" role="group" aria-label="排盘模式与显示尺寸">
@@ -673,9 +691,21 @@ body.chart-fit-active .chart-mode-bar{position:sticky;top:0;z-index:100}
 const gridMapping=[{r:0,c:0,zhi:'巳'},{r:0,c:1,zhi:'午'},{r:0,c:2,zhi:'未'},{r:0,c:3,zhi:'申'},{r:1,c:0,zhi:'辰'},{r:1,c:3,zhi:'酉'},{r:2,c:0,zhi:'卯'},{r:2,c:3,zhi:'戌'},{r:3,c:0,zhi:'寅'},{r:3,c:1,zhi:'丑'},{r:3,c:2,zhi:'子'},{r:3,c:3,zhi:'亥'}];
 let chart=null, selected='命宫', activeFlyPalace=null, chartLayer='combined', selectedDecadeZhi=null, selectedAnnualYear=2026, selectedLunarMonth=1, decadeLayerEnabled=true, annualLayerEnabled=true;
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function loadDatabaseProfile(){let p={};try{p=JSON.parse(localStorage.getItem('metaphysics_common_profile')||'{}')}catch(e){};
- for(const k of ['name','gender','year','month','day','hour']){let el=document.getElementById('birth-'+k);if(el&&p[k]!==undefined)el.value=p[k]}
- document.getElementById('user-info-tag').textContent='档案：'+(p.name||'新命盘');}
+function loadDatabaseProfile(){
+ const p=XingguiSession.profile();
+ if(!p){XingguiSession.requireLogin();return;}
+ for(const k of ['name','gender','year','month','day','hour']){
+  const el=document.getElementById('birth-'+k);
+  if(el&&p[k]!==undefined&&p[k]!==null)el.value=p[k];
+ }
+ if(p.hour!==undefined){const hour=Number(p.hour);
+  if(Number.isInteger(hour)&&hour>23&&hour<=2359){
+   document.getElementById('birth-hour').value=Math.floor(hour/100);
+   document.getElementById('birth-minute').value=hour%100;
+  }
+ }
+ document.getElementById('user-info-tag').textContent='档案：'+(p.name||'新命盘');
+}
 let calculationSequence=0;
 function adjustTime(type){
  // Always shift the Gregorian date returned by the last successful chart.
@@ -811,7 +841,7 @@ function renderTimeline(){
 function switchMode(mode){advancedAnalysisCache=null;const a=document.getElementById('advanced-analysis-result');if(a)a.innerHTML='';const radio=document.querySelector('input[name="view-mode"][value="'+mode+'"]');if(radio)radio.checked=true;activeFlyPalace=null;document.querySelectorAll('.chart-mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));document.getElementById('pan-title-desc').textContent=mode==='sanhe'?'🏛️ 三合派：点击宫位查看三方四正':'🌀 飞星派：十四主星及红色辅煞星（含六吉）；点击宫位显示／隐藏飞化箭头';renderGrid()}
 async function calculate(){const seq=++calculationSequence;let msg=document.getElementById('ziwei-status');msg.textContent='正在计算命盘…';
  let payload;
- try{normalizeBirthTime();payload={};for(const k of ['name','gender','year','month','day','hour','minute','calendar'])payload[k]=val(k);const res=await fetch('/api/ziwei/calculate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const data=await res.json();if(seq!==calculationSequence)return;if(!res.ok||data.status==='error')throw Error(data.message||'计算失败');chart=data;msg.textContent='排盘成功 · '+data.methodology;selected='命宫';activeFlyPalace=null;selectedDecadeZhi=null;decadeLayerEnabled=true;annualLayerEnabled=true;refreshDecadeSelector();renderGrid();}
+ try{normalizeBirthTime();payload={};for(const k of ['name','gender','year','month','day','hour','minute','calendar'])payload[k]=val(k);const res=await fetch('/api/ziwei/calculate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const data=await res.json();if(seq!==calculationSequence)return;if(!res.ok||data.status==='error')throw Error(data.message||'计算失败');chart=data;msg.textContent='排盘成功 · '+data.methodology;selected='命宫';activeFlyPalace=null;selectedDecadeZhi=null;decadeLayerEnabled=true;annualLayerEnabled=true;refreshDecadeSelector();renderGrid();syncMobileChartLayout();}
  catch(e){if(seq!==calculationSequence)return;chart=null;document.getElementById('ziwei-grid-container').innerHTML='';msg.textContent='⚠️ '+e.message+(e instanceof TypeError?'。请确认已运行 python server.py 并通过 http://127.0.0.1:8000/ziwei_view.html 访问。':'');if(e.message.includes('历法库'))msg.innerHTML+=' <a href="/api/ziwei/diagnostics" target="_blank">查看依赖诊断</a>';}}
 function drawFlyArrows(box, selectedName){
  const overlay=document.createElementNS('http://www.w3.org/2000/svg','svg');
@@ -1181,6 +1211,24 @@ async function runAdvancedAnalysis(){
 
 function printFullReport(){invalidateOutdatedAnalysis();if(!chart){alert('请先排盘');return;}if(!['print-chart','print-natal','print-decade','print-annual','print-month','print-advanced'].some(reportEnabled)){alert('请至少选择一个报告部分');return;}renderFullReport();document.body.dataset.ziweiPrintReady='true';window.print();}
 
+
+let mobileChartReading=false;
+function syncMobileChartLayout(){
+ const panel=document.getElementById('chart-panel');
+ if(!panel || chartFitActive)return;
+ const mobile=window.matchMedia('(max-width:760px)').matches;
+ if(!mobile){panel.style.removeProperty('--mobile-chart-zoom');return;}
+ const available=Math.max(250,document.getElementById('chart-workspace').clientWidth-2);
+ panel.style.setProperty('--mobile-chart-zoom',String(Math.min(1,available/1040)));
+}
+function toggleMobileChartReading(){
+ mobileChartReading=!mobileChartReading;
+ document.body.classList.toggle('mobile-chart-reading',mobileChartReading);
+ document.getElementById('mobile-chart-toggle').textContent=mobileChartReading?'缩小显示完整命盘':'放大阅读（可左右滑动）';
+ syncMobileChartLayout();
+}
+window.addEventListener('resize',syncMobileChartLayout);
+
 let chartFitActive=false;
 function resizeChartFit(){
  if(!chartFitActive)return;
@@ -1205,12 +1253,12 @@ function toggleChartFit(force){
  if(!chartFitActive&&panel){panel.style.zoom='';panel.style.width='';}
  const button=document.getElementById('fit-chart-button');
  if(button)button.textContent=chartFitActive?'↩ 返回正常页面':'⛶ 一屏显示';
- if(chartFitActive)resizeChartFit();
+ if(chartFitActive)resizeChartFit();else syncMobileChartLayout();
 }
 window.addEventListener('resize',resizeChartFit);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&chartFitActive)toggleChartFit(false)});
 
-document.addEventListener('DOMContentLoaded',()=>{document.querySelector('input[name="view-mode"][value="sanhe"]').checked=true;loadDatabaseProfile();for(const id of ['chk-sihua','chk-sanfang','chk-fly-arrows','chk-self-arrows','fly-direction','sanhe-show-lucky','sanhe-show-sha','sanhe-show-other','sanhe-show-brightness'])document.getElementById(id).addEventListener('change',renderGrid);calculate()});
+document.addEventListener('DOMContentLoaded',async()=>{try{await XingguiSession.ready}catch(e){alert('登录服务不可用：'+e.message);location.replace('index.html');return}if(!XingguiSession.requireLogin())return;document.querySelector('input[name="view-mode"][value="sanhe"]').checked=true;loadDatabaseProfile();for(const id of ['chk-sihua','chk-sanfang','chk-fly-arrows','chk-self-arrows','fly-direction','sanhe-show-lucky','sanhe-show-sha','sanhe-show-other','sanhe-show-brightness'])document.getElementById(id).addEventListener('change',renderGrid);calculate();syncMobileChartLayout()});
 </script>
 
 </body>

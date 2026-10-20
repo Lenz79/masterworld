@@ -104,6 +104,8 @@
             .palace-card { flex: 1 1 100%; margin-bottom: 6px; }
         }
     </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="xinggui_session.js"></script>
 </head>
 <body>
 
@@ -284,14 +286,12 @@
         return pailongList[relIndex % pailongList.length] || '吉龙';
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const profileStr = localStorage.getItem('metaphysics_common_profile');
-        if (profileStr) {
-            try {
-                const p = JSON.parse(profileStr);
-                document.getElementById('user-info-tag').innerText = `${p.name}`;
-            } catch(e) {}
-        }
+    document.addEventListener('DOMContentLoaded', async () => {
+        try { await XingguiSession.ready; } catch(e) { alert('登录服务不可用：'+e.message); location.replace('index.html'); return; }
+        if (!XingguiSession.requireLogin()) return;
+        const p=XingguiSession.profile();
+        const tag=document.getElementById('user-info-tag');
+        if(tag)tag.textContent=p?.name||'当前账号';
 
         document.getElementById('luopan-opacity').value = 10;
         document.getElementById('opacity-val').innerText = 10;

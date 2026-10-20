@@ -79,6 +79,8 @@
             .form-group.full-width { grid-column: span 1; }
         }
     </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="xinggui_session.js"></script>
 </head>
 <body>
 
@@ -247,7 +249,7 @@
 </div>
 
 <script>
-    window.addEventListener('DOMContentLoaded', checkLoginState);
+    window.addEventListener('DOMContentLoaded', async()=>{try{await XingguiSession.ready;checkLoginState()}catch(e){alert('认证配置错误：'+e.message)}});
 
     let tempSignupEmail = "";
     let tempSignupPwd = "";
@@ -260,150 +262,57 @@
         document.getElementById(`form-${tab}`).classList.add('active');
     }
 
-    // 注册第一步：验证邮箱与密码
-    function proceedToProfileSetup() {
-        const email = document.getElementById('su-email').value.trim();
-        const pwd = document.getElementById('su-pwd').value.trim();
-
-        if (!email || !pwd) {
-            alert("⚠️ 请输入您的 Google 邮箱和登录密码！");
-            return;
-        }
-
-        // 检查数据库是否已存在该账号
-        if (localStorage.getItem(`saas_user_${email}`)) {
-            alert("❌ 该邮箱已被注册，请直接前往“账号登录”！");
-            return;
-        }
-
-        tempSignupEmail = email;
-        tempSignupPwd = pwd;
-
-        // 隐藏登录注册卡片，展开空白生辰档案填写表单
-        document.getElementById('auth-box').style.display = 'none';
-        document.getElementById('profile-card-box').style.display = 'block';
-        document.getElementById('reg-account-display').value = email;
-
-        // 清空表单
-        document.getElementById('reg-name').value = "";
-        document.getElementById('reg-gender').value = "";
-        document.getElementById('reg-year').value = "";
-        document.getElementById('reg-month').value = "";
-        document.getElementById('reg-day').value = "";
-        document.getElementById('reg-hour').value = "";
+    async function proceedToProfileSetup(){
+      const email=document.getElementById('su-email').value.trim();
+      const pwd=document.getElementById('su-pwd').value;
+      if(!email||pwd.length<8){alert('请输入邮箱和至少8位密码');return}
+      try{
+        await XingguiSession.ready;
+        const result=await XingguiSession.signup(email,pwd);
+        tempSignupEmail=email;tempSignupPwd='';
+        if(!result.session){alert('注册请求已提交，请先打开邮箱验证链接，然后返回此页登录。登录后再填写出生档案。');return}
+        showProfileEditor(email);
+      }catch(e){alert('注册失败：'+e.message)}
+    }
+    function showProfileEditor(email){
+      document.getElementById('auth-box').style.display='none';
+      document.getElementById('user-status-box').style.display='none';
+      document.getElementById('profile-card-box').style.display='block';
+      document.getElementById('reg-account-display').value=email||'';
+    }
+    async function saveUserDatabaseAndEnter(){
+      const p={name:document.getElementById('reg-name').value.trim(),gender:document.getElementById('reg-gender').value,
+      year:document.getElementById('reg-year').value,month:document.getElementById('reg-month').value,
+      day:document.getElementById('reg-day').value,hour:document.getElementById('reg-hour').value,minute:0,calendar:'solar'};
+      const dt=new Date(Number(p.year),Number(p.month)-1,Number(p.day));
+      if(!p.name||!p.gender||!Number.isInteger(Number(p.hour))||Number(p.hour)<0||Number(p.hour)>2359||dt.getFullYear()!=Number(p.year)||dt.getMonth()!=Number(p.month)-1||dt.getDate()!=Number(p.day)){alert('请填写有效的出生资料');return}
+      try{await XingguiSession.saveProfile(p);alert('个人档案已安全保存');checkLoginState()}catch(e){alert('保存失败：'+e.message)}
+    }
+    async function handleLogin(){
+      const email=document.getElementById('li-email').value.trim();
+      const pwd=document.getElementById('li-pwd').value;
+      try{await XingguiSession.ready;const a=await XingguiSession.login(email,pwd);
+        if(!a?.profile){showProfileEditor(email);return}checkLoginState()
+      }catch(e){alert('登录失败：'+e.message)}
+    }
+    function checkLoginState(){
+      const a=XingguiSession.account();
+      const auth=document.getElementById('auth-box'),editor=document.getElementById('profile-card-box'),status=document.getElementById('user-status-box');
+      if(!a){auth.style.display='block';editor.style.display='none';status.style.display='none';return}
+      if(!a.profile){showProfileEditor(a.id);return}
+      auth.style.display='none';editor.style.display='none';status.style.display='block';
+      const p=a.profile;
+      document.getElementById('display-auth-user').textContent=(p.name||'用户')+' ('+(p.email||'')+')';
+      document.getElementById('display-user-bazi').textContent=`${p.year}年${p.month}月${p.day}日 ${p.hour}时 (${p.gender})`;
+    }
+    async function handleLogOut(){try{await XingguiSession.logout();checkLoginState()}catch(e){alert(e.message)}}
+    async function openModule(target){
+      try{await XingguiSession.ready}catch(e){alert('登录服务不可用：'+e.message);return}
+      if(!XingguiSession.account()){alert('请先登录');return}
+      if(target.endsWith('.html')){location.href=target;return}
+      alert('该模块正在开发中：'+target);
     }
 
-    // 注册第二步：保存完整账号、密码与生辰档案到模拟数据库
-    function saveUserDatabaseAndEnter() {
-        const profile = {
-            email: tempSignupEmail,
-            name: document.getElementById('reg-name').value.trim(),
-            gender: document.getElementById('reg-gender').value,
-            year: document.getElementById('reg-year').value.trim(),
-            month: document.getElementById('reg-month').value.trim(),
-            day: document.getElementById('reg-day').value.trim(),
-            hour: document.getElementById('reg-hour').value.trim()
-        };
-
-        if (!profile.name || !profile.gender || !profile.year || !profile.month || !profile.day || profile.hour === "") {
-            alert("⚠️ 请完整填写生辰八字所需的全部资料！");
-            return;
-        }
-
-        // 将密码和个人档案一并存入模拟数据库
-        const dbRecord = {
-            password: tempSignupPwd,
-            profile: profile
-        };
-
-        localStorage.setItem(`saas_user_${tempSignupEmail}`, JSON.stringify(dbRecord));
-        localStorage.setItem('current_saas_user', tempSignupEmail);
-        localStorage.setItem('metaphysics_common_profile', JSON.stringify(profile));
-
-        alert("🎉 注册成功！已成功将您的账号与生辰档案存入数据库。");
-        checkLoginState();
-    }
-
-    // 登录验证逻辑
-    function handleLogin() {
-        const email = document.getElementById('li-email').value.trim();
-        const pwd = document.getElementById('li-pwd').value.trim();
-
-        if (!email || !pwd) {
-            alert("⚠️ 请输入邮箱和登录密码！");
-            return;
-        }
-
-        const recordStr = localStorage.getItem(`saas_user_${email}`);
-        if (!recordStr) {
-            alert("❌ 该账号不存在，请先进行“账号注册 (Sign Up)”！");
-            return;
-        }
-
-        const record = JSON.parse(recordStr);
-        if (record.password !== pwd) {
-            alert("❌ 密码错误，请核对后重试！");
-            return;
-        }
-
-        // 登录成功，设置当前会话
-        localStorage.setItem('current_saas_user', email);
-        localStorage.setItem('metaphysics_common_profile', JSON.stringify(record.profile));
-
-        alert(`🔑 登录成功！欢迎回来，${record.profile.name}`);
-        checkLoginState();
-    }
-
-    // 检查当前登录状态
-    function checkLoginState() {
-        const currentUser = localStorage.getItem('current_saas_user');
-        const authBox = document.getElementById('auth-box');
-        const profileCardBox = document.getElementById('profile-card-box');
-        const userStatusBox = document.getElementById('user-status-box');
-
-        if (currentUser) {
-            const recordStr = localStorage.getItem(`saas_user_${currentUser}`);
-            if (recordStr) {
-                const record = JSON.parse(recordStr);
-                const p = record.profile;
-
-                authBox.style.display = 'none';
-                profileCardBox.style.display = 'none';
-                userStatusBox.style.display = 'block';
-
-                document.getElementById('display-auth-user').innerText = `${p.name} (${p.email})`;
-                document.getElementById('display-user-bazi').innerText = `${p.year}年${p.month}月${p.day}日 ${p.hour}时 (${p.gender})`;
-                return;
-            }
-        }
-
-        authBox.style.display = 'block';
-        profileCardBox.style.display = 'none';
-        userStatusBox.style.display = 'none';
-    }
-
-    // 退出登录
-    function handleLogOut() {
-        localStorage.removeItem('current_saas_user');
-        alert("👋 已安全退出登录。");
-        checkLoginState();
-    }
-
-    // 术数模块拦截检查
-    function openModule(target) {
-        const currentUser = localStorage.getItem('current_saas_user');
-        if (!currentUser) {
-            alert("⚠️ 请先登录您的账号！");
-            return;
-        }
-
-        if (target.endsWith('.html')) {
-            location.href = target;
-        } else {
-            const profile = JSON.parse(localStorage.getItem('metaphysics_common_profile') || '{}');
-            alert(`🚀 已成功调用 [${profile.name || '当前账号'}] 的通用生辰档案！\n\n【${target.toUpperCase()}】专业推演模块正在加紧研发中，敬请期待！`);
-        }
-    }
 </script>
 
 </body>
