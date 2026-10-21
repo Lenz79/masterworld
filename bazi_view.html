@@ -152,6 +152,8 @@
             .dayun-table td { border: 1px solid #cbd5e1 !important; color: #000 !important; }
         }
     </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="xinggui_session.js"></script>
 </head>
 <body>
 
@@ -173,7 +175,8 @@
             </div>
             <button class="btn-submit" onclick="calculateAndSaveBazi()">🚀 生成专业排盘与详批报告</button>
             <div style="text-align: center; margin-top: 15px;">
-                <button class="btn-home" onclick="openRecordsModal()" style="background: #0f172a; color: #f59e0b; border: 1px solid #f59e0b;">📁 查看云端历史档案库</button>
+                <button class="btn-home" onclick="baziOpenSharedCustomers()" style="background: #0f172a; color: #f59e0b; border: 1px solid #f59e0b;">📂 读取档案</button>
+                <button class="btn-home" type="button" onclick="SharedCustomers.showForm(null);document.getElementById('shared-customer-modal').hidden=false;document.getElementById('shared-customer-modal').style.display='flex';document.getElementById('shared-customer-list').hidden=true">➕ 添加用户</button>
                 <a href="index.html" class="btn-home" style="display:inline-block; margin-left:10px; background:#1e293b; color:#38bdf8; border:1px solid #38bdf8; text-decoration:none;">🏠 返回综合导航首页</a>
             </div>
         </div>
@@ -508,7 +511,7 @@
     </div>
 </div>
 
-<div id="records-modal" class="modal-overlay">
+<div id="records-modal" class="modal-overlay" hidden>
     <div class="modal-content">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 8px;">
             <h3 style="color: #f59e0b; margin: 0; font-size: 1.1rem;">📁 云端历史测算档案库</h3>
@@ -520,8 +523,6 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="xinggui_session.js"></script>
 <script>
     let globalDayunList = [];
     let globalReportData = null;
@@ -556,19 +557,6 @@
         document.getElementById('page-input').classList.add('active');
     }
 
-    // 仅供需要云端记录的接口附加现有 Supabase 登录令牌。
-    async function baziAuthHeaders() {
-        const headers = {};
-        try {
-            if (window.XingguiSession) {
-                await window.XingguiSession.ready;
-                const token = await window.XingguiSession.accessToken();
-                if (token) headers['Authorization'] = 'Bearer ' + token;
-            }
-        } catch (err) { console.warn('云端登录暂不可用:', err); }
-        return headers;
-    }
-
     async function calculateAndSaveBazi() {
         const name = document.getElementById('input-name').value.trim();
         const year = document.getElementById('input-year').value.trim();
@@ -593,7 +581,7 @@
         try {
             const res = await fetch('/api/calculate', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', ...(await baziAuthHeaders()) },
+                headers: await baziAuthHeaders(),
                 body: JSON.stringify(payload)
             });
 
@@ -613,31 +601,56 @@
         }
     }
 
-    async function openRecordsModal() {
-        document.getElementById('records-modal').style.display = 'flex';
-        const container = document.getElementById('records-list-container');
-        container.innerHTML = `<div style="color: #64748b; text-align: center; padding: 20px;">正在加载历史档案...</div>`;
-        try {
-            const res = await fetch('/api/records', { headers: await baziAuthHeaders() });
-            const result = await res.json();
-            if (res.status === 401) {
-                container.textContent = '请先登录后查看自己的云端历史档案';
-            } else if (result.status === 'success' && result.data.length > 0) {
-                container.innerHTML = result.data.map(rec => `
-                    <div class="record-item" onclick="alert('已选中档案: ${rec.user_name} (${rec.birth_hour})'); closeRecordsModal();">
-                        <div>
-                            <strong style="color: #f8fafc; font-size: 0.95rem;">${rec.user_name}</strong> (${rec.gender})
-                            <div style="color: #94a3b8; font-size: 0.78rem; margin-top: 2px;">出生时间: ${rec.birth_hour}</div>
-                        </div>
-                        <div style="color: #38bdf8; font-size: 0.8rem; font-weight: bold;">查看 ➡️</div>
-                    </div>
-                `).join('');
-            } else {
-                container.innerHTML = `<div style="color: #94a3b8; text-align: center; padding: 20px;">暂无云端历史测算档案</div>`;
-            }
-        } catch (err) {
-            container.innerHTML = `<div style="color: #f43f5e; text-align: center; padding: 20px;">加载历史档案失败</div>`;
+    async function baziAuthHeaders(){
+        const client=await XingguiSession.ready;
+        const {data:{session}}=await client.auth.getSession();
+        if(!session?.access_token)throw Error('请先登录');
+        return {'Authorization':'Bearer '+session.access_token,'Content-Type':'application/json'};
+    }
+    function baziOpenSharedCustomers(){return SharedCustomers.open(r=>{
+      for(const k of ['name','gender','year','month','day'])document.getElementById('input-'+k).value=r[k];
+      document.getElementById('input-hour').value=Number(r.hour)*100+Number(r.minute||0);
+      goToInputPage();
+    });}
+    document.addEventListener('DOMContentLoaded',async()=>{try{await XingguiSession.ready;const p=XingguiSession.profile();if(p){for(const k of ['name','gender','year','month','day'])if(p[k]!=null)document.getElementById('input-'+k).value=p[k];if(p.hour!=null){const h=Number(p.hour);document.getElementById('input-hour').value=h>23?h:h*100+Number(p.minute||0)}}}catch(e){console.warn('个人出生档案未加载',e)}});
+    function baziFillProfile(){
+        const p=XingguiSession.profile();if(!p){alert('请先绑定个人出生档案');return}
+        for(const k of ['name','gender','year','month','day','hour']){
+            const el=document.getElementById('input-'+k);if(el&&p[k]!=null)el.value=p[k];
         }
+        goToInputPage();
+    }
+    async function baziManageRecord(id,action,oldName){
+        if(action==='delete'&&!confirm('确定永久删除此客户档案？'))return;
+        let name=oldName;
+        if(action==='rename'){name=prompt('输入客户新姓名',oldName);if(name===null)return}
+        try{const response=await fetch('/api/records/manage',{method:'POST',headers:await baziAuthHeaders(),body:JSON.stringify({kind:'bazi',id,action,name})});const data=await response.json();if(!response.ok||data.status!=='success')throw Error(data.message||'操作失败');await openRecordsModal()}
+        catch(e){alert(e.message)}
+    }
+    async function baziOpenRecord(id){
+        try{const response=await fetch('/api/records/detail?id='+encodeURIComponent(id),{headers:await baziAuthHeaders()});const data=await response.json();if(!response.ok||data.status!=='success')throw Error(data.message||'读取失败');
+            const r=data.data;globalReportData=r;renderMasterDashboard(r,r.wang_du||'');
+            closeRecordsModal();document.getElementById('page-input').classList.remove('active');document.getElementById('page-dashboard').classList.add('active');
+            switchTab('tab-info',document.querySelector('.nav-tab'));
+        }catch(e){alert('无法打开档案：'+e.message)}
+    }
+    async function openRecordsModal() {
+        document.getElementById('records-modal').style.display='flex';
+        const container=document.getElementById('records-list-container');container.textContent='正在加载历史档案…';
+        try{
+            const res=await fetch('/api/records',{headers:await baziAuthHeaders()});const result=await res.json();
+            if(!res.ok||result.status!=='success')throw Error(result.message||'查询失败');
+            container.replaceChildren();
+            const heading=document.createElement('div');heading.textContent='📁 客户八字历史档案';heading.style.cssText='color:#f59e0b;font-weight:bold;margin-bottom:8px';container.append(heading);
+            if(!result.data?.length){const empty=document.createElement('div');empty.textContent='暂无客户测算记录';empty.style.color='#94a3b8';container.append(empty);return}
+            for(const r of result.data){
+                const row=document.createElement('div');row.className='record-item';row.style.cursor='default';
+                const info=document.createElement('div');info.style.color='#f8fafc';info.textContent=`${r.user_name}（${r.gender}） 出生：${r.birth_hour}`;row.append(info);
+                const buttons=document.createElement('div');buttons.style.cssText='display:flex;gap:6px;flex-wrap:wrap';
+                for(const [text,fn] of [['查看',()=>baziOpenRecord(r.id)],['改名',()=>baziManageRecord(r.id,'rename',r.user_name)],['删除',()=>baziManageRecord(r.id,'delete',r.user_name)]]){const b=document.createElement('button');b.textContent=text;b.onclick=fn;buttons.append(b)}
+                row.append(buttons);container.append(row);
+            }
+        }catch(e){container.textContent='加载失败：'+e.message}
     }
 
     function closeRecordsModal() {
@@ -960,6 +973,45 @@
         document.getElementById('detail-sub-page').style.display = 'none';
         switchTab('tab-liunian');
     }
+</script>
+
+
+<!-- 全平台客户档案弹窗：仅用户主动点击「读取档案」时显示 -->
+<div id="shared-customer-modal" hidden style="position:fixed;inset:0;z-index:100000;background:#000b;align-items:center;justify-content:center;padding:16px">
+ <div style="background:#1e293b;color:#f8fafc;border:1px solid #475569;border-radius:14px;padding:22px;width:min(740px,95vw);max-height:85vh;overflow:auto">
+  <div style="display:flex;justify-content:space-between;align-items:center"><strong style="color:#f59e0b">📂 全平台客户档案</strong><button type="button" onclick="SharedCustomers.close()">✕</button></div>
+  <div id="shared-customer-list" style="padding:12px 0"></div>
+  <form id="shared-customer-form" hidden style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding-top:12px">
+   <label>姓名 <input name="name" required maxlength="100" style="width:100%"></label>
+   <label>性别 <select name="gender"><option value="男">男</option><option value="女">女</option></select></label>
+   <label>历法 <select name="calendar"><option value="solar">公历</option><option value="lunar">农历</option></select></label>
+   <label>出生年 <input name="year" type="number" min="1900" max="2200" required style="width:100%"></label>
+   <label>月 <input name="month" type="number" min="1" max="12" required style="width:100%"></label>
+   <label>日 <input name="day" type="number" min="1" max="31" required style="width:100%"></label>
+   <label>时 (0–23) <input name="hour" type="number" min="0" max="23" required style="width:100%"></label>
+   <label>分 (0–59) <input name="minute" type="number" min="0" max="59" required style="width:100%"></label>
+   <div style="grid-column:1/-1;display:flex;gap:8px"><button type="submit">保存资料</button><button type="button" onclick="SharedCustomers.cancelEdit()">取消</button></div>
+  </form>
+  <div id="shared-customer-error" role="status" style="color:#fda4af"></div>
+ </div>
+</div>
+<script>
+const SharedCustomers=(()=>{
+ let rows=[],editId=null,applyBirth=null;
+ const el=id=>document.getElementById(id), modal=()=>el('shared-customer-modal'), form=()=>el('shared-customer-form');
+ async function headers(){const c=await XingguiSession.ready;const {data:{session}}=await c.auth.getSession();if(!session?.access_token)throw Error('请先登录');return {'Authorization':'Bearer '+session.access_token,'Content-Type':'application/json'};}
+ async function api(path,body){const options={headers:await headers()};if(body){options.method='POST';options.body=JSON.stringify(body)}const r=await fetch(path,options);const d=await r.json();if(!r.ok||d.status!=='success')throw Error(d.message||'客户档案接口不可用');return d;}
+ function error(s){el('shared-customer-error').textContent=s||'';}
+ function close(){modal().hidden=true;modal().style.display='none';form().hidden=true;error('');}
+ function cancelEdit(){form().hidden=true;editId=null;error('');}
+ function showForm(row){editId=row?.id||null;form().hidden=false;el('shared-customer-list').hidden=!!row;for(const key of ['name','gender','calendar','year','month','day','hour','minute'])form().elements[key].value=row?.[key]??({name:'',gender:'男',calendar:'solar',year:'',month:'',day:'',hour:12,minute:0}[key]);error('');}
+ async function open(apply){applyBirth=apply;modal().hidden=false;modal().style.display='flex';cancelEdit();el('shared-customer-list').hidden=false;await refresh();}
+ async function refresh(){const box=el('shared-customer-list');box.replaceChildren();error('');try{rows=(await api('/api/customers')).data||[];if(!rows.length){box.textContent='暂无客户档案';return}for(const r of rows){const item=document.createElement('div');item.style.cssText='display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid #475569';const label=document.createElement('span');label.style.flex='1';label.textContent=`${r.name}（${r.gender}） ${r.year}-${r.month}-${r.day} ${String(r.hour).padStart(2,'0')}:${String(r.minute).padStart(2,'0')}`;item.append(label);const actions=[['读取',()=>{applyBirth(r);close()}],['改名',()=>rename(r)],['更新',()=>showForm(r)],['删除',()=>remove(r)]];for(const [name,fn] of actions){const b=document.createElement('button');b.type='button';b.textContent=name;b.onclick=fn;item.append(b)}box.append(item)}}catch(e){error('暂时无法读取客户档案，请检查登录状态及接口。');console.warn('客户档案读取失败',e)}}
+ async function rename(r){const name=prompt('客户新姓名',r.name);if(name===null)return;if(!name.trim())return error('姓名不能为空');try{await api('/api/customers/manage',{id:r.id,action:'rename',name:name.trim()});await refresh()}catch(e){error(e.message)}}
+ async function remove(r){if(!confirm(`确定删除客户「${r.name}」？此操作无法撤销。`))return;try{await api('/api/customers/manage',{id:r.id,action:'delete'});await refresh()}catch(e){error(e.message)}}
+ form().addEventListener('submit',async e=>{e.preventDefault();const p={};for(const k of ['name','gender','calendar','year','month','day','hour','minute'])p[k]=form().elements[k].value;if(!p.name.trim())return error('姓名不能为空');for(const k of ['year','month','day','hour','minute'])p[k]=Number(p[k]);try{await api(editId?'/api/customers/manage':'/api/customers/save',editId?{...p,id:editId,action:'update'}:p);cancelEdit();el('shared-customer-list').hidden=false;await refresh()}catch(err){error(err.message)}});
+ return {open,close,cancelEdit,showForm,refresh};
+})();
 </script>
 
 </body>

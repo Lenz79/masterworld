@@ -82,6 +82,31 @@ def _require_int(value, label, low, high):
 def _valid_decade_zhi(value):
     return value is None or (isinstance(value,str) and len(value)==1 and value in '子丑寅卯辰巳午未申酉戌亥')
 
+
+def _customer_from_bazi(record):
+    """Normalize a saved Bazi calculation into reusable solar birth fields."""
+    import re
+    stamp=str(record.get('birth_hour') or '')
+    match=re.fullmatch(r'\s*(\d{4})-(\d{1,2})-(\d{1,2})\s+(\d{1,2}):(\d{2})\s*',stamp)
+    if not match:return None
+    y,mo,d,h,mi=map(int,match.groups())
+    from datetime import datetime
+    datetime(y,mo,d,h,mi)
+    name=str(record.get('user_name') or '').strip()
+    gender=record.get('gender')
+    if not name or gender not in ('男','女'):return None
+    return dict(name=name[:100],gender=gender,calendar='solar',year=y,month=mo,day=d,hour=h,minute=mi)
+
+def _upsert_customer(db,user_id,fields):
+    """Deduplicate exact birth identity within this owner, without merging same-name people."""
+    key={k:fields[k] for k in ('name','gender','calendar','year','month','day','hour','minute')}
+    q=db.table('customer_profiles').select('id') .eq('user_id',user_id)
+    for k,v in key.items():q=q.eq(k,v)
+    existing=q.limit(1).execute().data or []
+    if existing:return existing[0]['id']
+    result=db.table('customer_profiles').insert({**key,'user_id':user_id}).execute()
+    return result.data[0]['id'] if result.data else None
+
 try:
     from supabase import create_client, Client
 except ImportError:
@@ -207,6 +232,43 @@ class MainGatewayHandler(SimpleHTTPRequestHandler):
             self._send_json({'status':'ok','service':'xinggui-gateway','database_configured':bool(supabase),
                              'production_ready':False,'gateway_audit_version':'8.101',
                              'message':'服务在线；完整审计与上线验收尚未完成'})
+        elif urlsplit(self.path).path == '/api/customers':
+            user_id,token=self._authenticated_session()
+            if not user_id:self._send_json({'status':'error','message':'请先登录'},401);return
+            try:
+                rows=(self._user_db(token).table('customer_profiles').select('id,name,gender,calendar,year,month,day,hour,minute,created_at').eq('user_id',user_id).order('created_at',desc=True).limit(200).execute()).data or []
+                self._send_json({'status':'success','data':rows})
+            except Exception as err:
+                print('统一客户档案读取失败:',err,flush=True)
+                self._send_json({'status':'error','message':'统一客户档案读取失败，请先执行新版 SQL'},503)
+        elif urlsplit(self.path).path == '/api/ziwei/records':
+            user_id, token = self._authenticated_session()
+            if not user_id:
+                self._send_json({'status':'error','message':'请先登录'},401); return
+            try:
+                res=(self._user_db(token).table('ziwei_records').select('id,name,gender,year,month,day,hour,minute,calendar,created_at').eq('user_id',user_id).order('created_at',desc=True).limit(100).execute())
+                self._send_json({'status':'success','data':res.data or []})
+            except Exception as err:
+                print('紫微档案查询失败:',err,flush=True)
+                self._send_json({'status':'error','message':'紫微档案读取失败，请先执行附带 SQL'},503)
+        elif urlsplit(self.path).path == '/api/records/detail':
+            from urllib.parse import parse_qs
+            from uuid import UUID
+            user_id,token=self._authenticated_session()
+            if not user_id:
+                self._send_json({'status':'error','message':'请先登录'},401);return
+            try:
+                params=parse_qs(urlsplit(self.path).query)
+                record_id=str(UUID(params.get('id',[''])[0]))
+                res=(self._user_db(token).table('bazi_records').select('*').eq('user_id',user_id).eq('id',record_id).limit(1).execute())
+                if not res.data:
+                    self._send_json({'status':'error','message':'记录不存在'},404);return
+                self._send_json({'status':'success','data':res.data[0]})
+            except (ValueError,IndexError):
+                self._send_json({'status':'error','message':'无效记录编号'},400)
+            except Exception as err:
+                print('八字档案读取失败:',err,flush=True)
+                self._send_json({'status':'error','message':'档案读取失败'},503)
         elif urlsplit(self.path).path == '/api/records':
             user_id, token = self._authenticated_session()
             if not user_id:
@@ -261,6 +323,12 @@ class MainGatewayHandler(SimpleHTTPRequestHandler):
                     try:
                         user_db = self._user_db(token)
                         user_db.table("bazi_records").insert({**record, 'user_id': user_id}).execute()
+                        # Only after the Bazi record is saved, register its reusable birth identity.
+                        try:
+                            fields=_customer_from_bazi(record)
+                            if fields:_upsert_customer(user_db,user_id,fields)
+                        except Exception as profile_err:
+                            print('⚠️ 统一客户索引保存失败（八字报告已保存）:',profile_err,flush=True)
                     except Exception as db_err:
                         print("⚠️ Supabase 插入失败（请确认 user_id 字段与 RLS）:", db_err, flush=True)
 
@@ -317,6 +385,96 @@ class MainGatewayHandler(SimpleHTTPRequestHandler):
                 traceback.print_exc()
                 self._send_json({'status':'error','message':'分析引擎暂不可用'}, 500)
 
+        elif self.path == '/api/customers/save':
+            user_id,token=self._authenticated_session()
+            if not user_id:self._send_json({'status':'error','message':'请先登录'},401);return
+            try:
+                p=self._parse_json_body()
+                if not isinstance(p.get('name'),str) or not p['name'].strip() or len(p['name'].strip())>100:raise ValueError('客户姓名必须为1至100字')
+                if p.get('gender') not in ('男','女') or p.get('calendar') not in ('solar','lunar'):raise ValueError('性别或历法无效')
+                for k,lo,hi in [('year',1900,2200),('month',1,12),('day',1,31),('hour',0,23),('minute',0,59)]:_require_int(p.get(k),k,lo,hi)
+                if p['calendar']=='solar':
+                    from datetime import datetime
+                    datetime(p['year'],p['month'],p['day'],p['hour'],p['minute'])
+                fields={k:(p[k].strip() if k=='name' else p[k]) for k in ('name','gender','calendar','year','month','day','hour','minute')}
+                cid=_upsert_customer(self._user_db(token),user_id,fields)
+                self._send_json({'status':'success','id':cid})
+            except (ValueError,TypeError) as err:self._send_json({'status':'error','message':str(err)},400)
+            except Exception as err:
+                print('统一客户保存失败:',err,flush=True)
+                self._send_json({'status':'error','message':'保存失败，请确认统一客户表和 RLS'},503)
+        elif self.path == '/api/customers/manage':
+            from uuid import UUID
+            user_id,token=self._authenticated_session()
+            if not user_id:self._send_json({'status':'error','message':'请先登录'},401);return
+            try:
+                p=self._parse_json_body();cid=str(UUID(p.get('id','')));action=p.get('action')
+                if action not in ('rename','delete','update'):raise ValueError('不支持的操作')
+                db=self._user_db(token);q=db.table('customer_profiles')
+                if action=='rename':
+                    name=p.get('name')
+                    if not isinstance(name,str) or not 1<=len(name.strip())<=100:raise ValueError('客户姓名必须为1至100字')
+                    result=q.update({'name':name.strip()}).eq('user_id',user_id).eq('id',cid).execute()
+                elif action=='update':
+                    if not isinstance(p.get('name'),str) or not 1<=len(p['name'].strip())<=100:raise ValueError('客户姓名必须为1至100字')
+                    if p.get('gender') not in ('男','女') or p.get('calendar') not in ('solar','lunar'):raise ValueError('性别或历法无效')
+                    for k,lo,hi in [('year',1900,2200),('month',1,12),('day',1,31),('hour',0,23),('minute',0,59)]:_require_int(p.get(k),k,lo,hi)
+                    if p['calendar']=='solar':
+                        from datetime import datetime
+                        datetime(p['year'],p['month'],p['day'],p['hour'],p['minute'])
+                    fields={k:(p[k].strip() if k=='name' else p[k]) for k in ('name','gender','calendar','year','month','day','hour','minute')}
+                    result=q.update(fields).eq('user_id',user_id).eq('id',cid).execute()
+                else:result=q.delete().eq('user_id',user_id).eq('id',cid).execute()
+                if not result.data:self._send_json({'status':'error','message':'记录不存在或无权操作'},404);return
+                self._send_json({'status':'success'})
+            except (ValueError,TypeError) as err:self._send_json({'status':'error','message':str(err)},400)
+            except Exception as err:
+                print('统一客户档案操作失败:',err,flush=True)
+                self._send_json({'status':'error','message':'档案操作失败'},503)
+        elif self.path == '/api/ziwei/records/save':
+            user_id,token=self._authenticated_session()
+            if not user_id:
+                self._send_json({'status':'error','message':'请先登录'},401);return
+            try:
+                p=self._parse_json_body()
+                if not isinstance(p.get('name'),str) or not p['name'].strip() or len(p['name'])>100: raise ValueError('姓名无效')
+                if p.get('gender') not in ('男','女') or p.get('calendar') not in ('solar','lunar'): raise ValueError('性别或历法无效')
+                for k,lo,hi in [('year',1900,2200),('month',1,12),('day',1,31),('hour',0,23),('minute',0,59)]: _require_int(p.get(k),k,lo,hi)
+                fields={k:p[k] for k in ('name','gender','calendar','year','month','day','hour','minute')}
+                fields['user_id']=user_id
+                db=self._user_db(token)
+                _upsert_customer(db,user_id,{k:fields[k] for k in ('name','gender','calendar','year','month','day','hour','minute')})
+                res=db.table('ziwei_records').insert(fields).execute()
+                self._send_json({'status':'success','data':res.data or []})
+            except (ValueError,TypeError) as err: self._send_json({'status':'error','message':str(err)},400)
+            except Exception as err:
+                print('紫微档案保存失败:',err,flush=True)
+                self._send_json({'status':'error','message':'保存失败，请检查紫微档案表与 RLS'},503)
+        elif self.path == '/api/records/manage':
+            from uuid import UUID
+            user_id,token=self._authenticated_session()
+            if not user_id:
+                self._send_json({'status':'error','message':'请先登录'},401);return
+            try:
+                p=self._parse_json_body()
+                kind=p.get('kind');action=p.get('action')
+                if kind not in ('bazi','ziwei') or action not in ('delete','rename'): raise ValueError('不支持的档案操作')
+                record_id=str(UUID(p.get('id','')))
+                table='bazi_records' if kind=='bazi' else 'ziwei_records'
+                q=self._user_db(token).table(table)
+                if action=='delete':
+                    result=q.delete().eq('user_id',user_id).eq('id',record_id).execute()
+                else:
+                    name=p.get('name')
+                    if not isinstance(name,str) or not name.strip() or len(name)>100: raise ValueError('姓名必须为1至100字')
+                    result=q.update({'user_name' if kind=='bazi' else 'name':name.strip()}).eq('user_id',user_id).eq('id',record_id).execute()
+                if not result.data:
+                    self._send_json({'status':'error','message':'记录不存在或无权操作'},404);return
+                self._send_json({'status':'success'})
+            except (ValueError,TypeError) as err:self._send_json({'status':'error','message':str(err)},400)
+            except Exception as err:
+                print('档案操作失败:',err,flush=True)
+                self._send_json({'status':'error','message':'档案操作失败'},503)
         elif self.path == '/api/ziwei/calculate':
             try:
                 req_data = self._parse_json_body()
