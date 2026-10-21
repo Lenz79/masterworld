@@ -1,0 +1,80 @@
+--- 上传原版/server.py
++++ 修正/server.py
+@@ -110,7 +110,7 @@
+ # 2. Supabase 数据库连接配置
+ # ---------------------------------------------------------------------------
+ URL = os.environ.get("SUPABASE_URL", "")
+-KEY = os.environ.get("SUPABASE_KEY", "")
++KEY = os.environ.get("SUPABASE_PUBLISHABLE_KEY", "") or os.environ.get("SUPABASE_KEY", "")
+ 
+ try:
+     supabase: Client = create_client(URL, KEY) if create_client and URL and KEY else None
+@@ -139,6 +139,35 @@
+             return str(user.id) if user and getattr(user, 'id', None) else None
+         except Exception:
+             return None
++
++    def _authenticated_session(self):
++        """Return (verified_user_id, token), or (None, None)."""
++        authorization = self.headers.get('Authorization', '')
++        if not authorization.startswith('Bearer ') or not supabase:
++            return None, None
++        token = authorization[7:].strip()
++        if not token or len(token) > 8192 or any(ch.isspace() for ch in token):
++            return None, None
++        try:
++            response = supabase.auth.get_user(token)
++            user = getattr(response, 'user', None)
++            if user and getattr(user, 'id', None):
++                return str(user.id), token
++        except Exception:
++            pass
++        return None, None
++
++    def _user_db(self, access_token):
++        """Create an isolated PostgREST client using this user's verified JWT.
++
++        The publishable key alone is anonymous and must not be used to
++        read/write authenticated rows under RLS.
++        """
++        if not supabase or not create_client or not access_token:
++            return None
++        client = create_client(URL, KEY)
++        client.postgrest.auth(access_token)
++        return client
+ 
+     def _is_public_asset(self):
+         path = urlsplit(self.path).path
+@@ -179,7 +208,7 @@
+                              'production_ready':False,'gateway_audit_version':'8.101',
+                              'message':'服务在线；完整审计与上线验收尚未完成'})
+         elif urlsplit(self.path).path == '/api/records':
+-            user_id = self._authenticated_user_id()
++            user_id, token = self._authenticated_session()
+             if not user_id:
+                 self._send_json({'status':'error','message':'请先登录'}, 401)
+                 return
+@@ -188,7 +217,8 @@
+                 return
+             try:
+                 # Explicit owner filter even when the configured server key bypasses RLS.
+-                res = (supabase.table('bazi_records')
++                user_db = self._user_db(token)
++                res = (user_db.table('bazi_records')
+                        .select('id, user_name, gender, birth_hour, created_at')
+                        .eq('user_id', user_id)
+                        .order('created_at', desc=True).limit(20).execute())
+@@ -226,10 +256,11 @@
+ 
+                 # Only persist records belonging to a verified signed-in user.
+                 # Unauthenticated calculations remain available; no anonymous records are stored.
+-                user_id = self._authenticated_user_id()
++                user_id, token = self._authenticated_session()
+                 if supabase and user_id:
+                     try:
+-                        supabase.table("bazi_records").insert({**record, 'user_id': user_id}).execute()
++                        user_db = self._user_db(token)
++                        user_db.table("bazi_records").insert({**record, 'user_id': user_id}).execute()
+                     except Exception as db_err:
+                         print("⚠️ Supabase 插入失败（请确认 user_id 字段与 RLS）:", db_err, flush=True)
+ 

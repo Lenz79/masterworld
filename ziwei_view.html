@@ -798,6 +798,66 @@ body.chart-fit-active .chart-mode-bar{position:sticky;top:0;z-index:100}
   font-size:20px !important;
 }
 
+
+/* 三合盘专项微调：隐藏宫内灰色滚动条，保留触控/滚轮滚动能力。
+   辅星、煞星及杂曜由 19px 缩至 15px（两个 2px 字级），十四主星维持 20px。
+   仅作用于三合盘，不影响飞星派、连线、排盘引擎及其他功能。 */
+.palace-box.layer-sanhe:not(.center-box) .p-top-left,
+.palace-box.layer-sanhe:not(.center-box) .p-right-main {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+.palace-box.layer-sanhe:not(.center-box) .p-top-left::-webkit-scrollbar,
+.palace-box.layer-sanhe:not(.center-box) .p-right-main::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+.palace-box.layer-sanhe:not(.center-box) .p-top-left,
+.palace-box.layer-sanhe:not(.center-box) .p-top-left > span {
+  font-size: 15px !important;
+}
+
+
+/* 三合盘专用：辅杂曜按阅读顺序从左到右排列，满行后换至下一行。
+   只覆盖三合盘左上辅杂曜区；十四主星、飞星盘及其他布局保持不变。 */
+.palace-box.layer-sanhe:not(.center-box) .p-top-left {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  justify-content: flex-start !important;
+  align-content: flex-start !important;
+  align-items: flex-start !important;
+  gap: 3px 5px !important;
+  font-size: 13px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+.palace-box.layer-sanhe:not(.center-box) .p-top-left::-webkit-scrollbar {
+  display: none !important;
+}
+.palace-box.layer-sanhe:not(.center-box) .p-top-left > span {
+  display: inline-block !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  max-width: 100% !important;
+  height: auto !important;
+  font-size: 13px !important;
+  line-height: 1.2 !important;
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  white-space: nowrap !important;
+  letter-spacing: 0 !important;
+}
+
+
+/* 三合盘专用：移除主星与辅杂曜区域之间的浅灰色竖向虚线；不影响飞星盘。 */
+.palace-box.layer-sanhe:not(.center-box) .p-right-main {
+    border-left: none !important;
+}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="xinggui_session.js"></script>

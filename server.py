@@ -110,7 +110,7 @@ except ImportError:
 # 2. Supabase 数据库连接配置
 # ---------------------------------------------------------------------------
 URL = os.environ.get("SUPABASE_URL", "")
-KEY = os.environ.get("SUPABASE_KEY", "")
+KEY = os.environ.get("SUPABASE_PUBLISHABLE_KEY", "") or os.environ.get("SUPABASE_KEY", "")
 
 try:
     supabase: Client = create_client(URL, KEY) if create_client and URL and KEY else None
@@ -124,6 +124,50 @@ except Exception:
 class MainGatewayHandler(SimpleHTTPRequestHandler):
     """Serve only allowlisted web assets; source, tests and private files stay inaccessible."""
     PUBLIC_ASSETS = {'/', '/index.html', '/ziwei_view.html', '/bazi_view.html', '/fengshui_view.html', '/xinggui_session.js'}
+
+    def _authenticated_user_id(self):
+        """Verify the Supabase access token server-side; never trust a client user_id."""
+        authorization = self.headers.get('Authorization', '')
+        if not authorization.startswith('Bearer ') or not supabase:
+            return None
+        token = authorization[7:].strip()
+        if not token or len(token) > 8192 or any(ch.isspace() for ch in token):
+            return None
+        try:
+            response = supabase.auth.get_user(token)
+            user = getattr(response, 'user', None)
+            return str(user.id) if user and getattr(user, 'id', None) else None
+        except Exception:
+            return None
+
+    def _authenticated_session(self):
+        """Return (verified_user_id, token), or (None, None)."""
+        authorization = self.headers.get('Authorization', '')
+        if not authorization.startswith('Bearer ') or not supabase:
+            return None, None
+        token = authorization[7:].strip()
+        if not token or len(token) > 8192 or any(ch.isspace() for ch in token):
+            return None, None
+        try:
+            response = supabase.auth.get_user(token)
+            user = getattr(response, 'user', None)
+            if user and getattr(user, 'id', None):
+                return str(user.id), token
+        except Exception:
+            pass
+        return None, None
+
+    def _user_db(self, access_token):
+        """Create an isolated PostgREST client using this user's verified JWT.
+
+        The publishable key alone is anonymous and must not be used to
+        read/write authenticated rows under RLS.
+        """
+        if not supabase or not create_client or not access_token:
+            return None
+        client = create_client(URL, KEY)
+        client.postgrest.auth(access_token)
+        return client
 
     def _is_public_asset(self):
         path = urlsplit(self.path).path
@@ -161,19 +205,27 @@ class MainGatewayHandler(SimpleHTTPRequestHandler):
                 'message':'排盘必要模块已就绪，可重新排盘' if ready else '排盘必要模块不完整，请检查 lunar_python 与 brightness_reference.py'})
         elif urlsplit(self.path).path == '/api/health':
             self._send_json({'status':'ok','service':'xinggui-gateway','database_configured':bool(supabase),
-                             'production_ready':True,'gateway_audit_version':'8.101'})
+                             'production_ready':False,'gateway_audit_version':'8.101',
+                             'message':'服务在线；完整审计与上线验收尚未完成'})
         elif urlsplit(self.path).path == '/api/records':
+            user_id, token = self._authenticated_session()
+            if not user_id:
+                self._send_json({'status':'error','message':'请先登录'}, 401)
+                return
+            if not supabase:
+                self._send_json({'status':'error','message':'数据库暂不可用'}, 503)
+                return
             try:
-                records = []
-                if supabase:
-                    res = supabase.table("bazi_records").select(
-                        "id, user_name, gender, birth_hour, created_at"
-                    ).order("created_at", desc=True).limit(20).execute()
-                    records = res.data if hasattr(res, 'data') else []
-                
-                self._send_json({"status": "success", "data": records})
+                # Explicit owner filter even when the configured server key bypasses RLS.
+                user_db = self._user_db(token)
+                res = (user_db.table('bazi_records')
+                       .select('id, user_name, gender, birth_hour, created_at')
+                       .eq('user_id', user_id)
+                       .order('created_at', desc=True).limit(20).execute())
+                self._send_json({'status':'success','data':res.data or []})
             except Exception as err:
-                self._send_json({"status": "error", "message": "服务暂不可用"}, 500)
+                print('⚠️ 八字记录查询失败（请确认 user_id 字段与 RLS）:', err, flush=True)
+                self._send_json({'status':'error','message':'记录查询暂不可用'}, 503)
         else:
             # 默认静态文件服务 (如 html, css, js)
             if not self._is_public_asset():
@@ -202,12 +254,15 @@ class MainGatewayHandler(SimpleHTTPRequestHandler):
                 req_data = self._parse_json_body()
                 record = BaziEngine.calculate(req_data)
 
-                # 将计算记录保存至 Supabase
-                if supabase:
+                # Only persist records belonging to a verified signed-in user.
+                # Unauthenticated calculations remain available; no anonymous records are stored.
+                user_id, token = self._authenticated_session()
+                if supabase and user_id:
                     try:
-                        supabase.table("bazi_records").insert(record).execute()
+                        user_db = self._user_db(token)
+                        user_db.table("bazi_records").insert({**record, 'user_id': user_id}).execute()
                     except Exception as db_err:
-                        print("⚠️ Supabase 插入失败:", db_err, flush=True)
+                        print("⚠️ Supabase 插入失败（请确认 user_id 字段与 RLS）:", db_err, flush=True)
 
                 self._send_json({
                     "status": "success",
@@ -399,7 +454,7 @@ class MainGatewayHandler(SimpleHTTPRequestHandler):
             return
         self.send_response(200)
         self.send_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
         self.end_headers()
 
 

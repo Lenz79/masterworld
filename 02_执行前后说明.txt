@@ -1,0 +1,28 @@
+星轨智盘 · 数据库安全精准修复（UTF-8）
+
+确认依据：
+1. Render 仅看到 SUPABASE_PUBLISHABLE_KEY 和 SUPABASE_URL。
+2. 上传 server.py 读取 SUPABASE_KEY，而不是 SUPABASE_PUBLISHABLE_KEY。
+3. Supabase bazi_records 定义缺少 user_id。
+4. bazi_records 的 Allow public access：ALL / public / USING true / WITH CHECK true。
+
+本包内容：
+- server.py：基于本次上传的最新版本，增加环境变量匹配，并为每次数据库操作使用验证过的用户 JWT。其余计算路由保持不变。
+- 01_数据库安全修复.sql：增加 user_id、删除开放政策、创建四项用户隔离政策；保留全部现有数据。
+- server.py.diff：精确差异。
+
+安全执行顺序（建议在维护窗口）：
+1. 在 Supabase 备份 bazi_records（包含全部9条现有记录），确认可恢复。
+2. 本地先备份 server.py。确保安装的 supabase-py 支持 client.postgrest.auth(token)；此包未进行线上集成测试。
+3. 在 Supabase SQL Editor 执行 01_数据库安全修复.sql。它会收紧访问权限，未登录用户将无法直接读写该表。
+4. 用本包 server.py 替换 Local 同名文件，再启动 Local 服务（不要直接部署生产）。
+5. 测试匿名计算（不保存）、登录用户计算保存、本人记录读取、另一账号不可见。
+6. 验证 SQL 最后两条只读查询结果；确认再部署 Render。
+
+特别注意：
+- 旧记录 user_id 为 NULL，不会自动出现在用户历史记录中；数据未删除，后续核实归属再迁移。
+- 目前没有验证其他未知数据库政策或 GRANT，正式上线前需查看 pg_policies 查询结果。
+- 使用 publishable key 的数据库请求必须带登录用户 JWT；本包用独立客户端设置 postgrest.auth(token)。
+- 如果 Render 有额外 Secret Files 或 Environment Groups，需另外确认；截图仅证明当前页面所示变量。
+- 不修改 profiles、八字引擎、紫微引擎、三合盘、飞星盘、网页布局。
+- 不要向任何人提供 Supabase 密钥或登录 token。

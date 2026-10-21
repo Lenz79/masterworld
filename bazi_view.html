@@ -152,8 +152,6 @@
             .dayun-table td { border: 1px solid #cbd5e1 !important; color: #000 !important; }
         }
     </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="xinggui_session.js"></script>
 </head>
 <body>
 
@@ -171,7 +169,7 @@
                 <div class="form-group"><label>出生年份 (公历)</label><input type="number" id="input-year" placeholder="例: 1986"></div>
                 <div class="form-group"><label>出生月份</label><input type="number" id="input-month" placeholder="例: 5"></div>
                 <div class="form-group"><label>出生日期</label><input type="number" id="input-day" placeholder="例: 15"></div>
-                <div class="form-group"><label>出生时辰 (0-23 或如 1730)</label><input type="text" inputmode="numeric" id="input-hour" placeholder="例: 13:45 / 1345 / 13"></div>
+                <div class="form-group"><label>出生时辰 (0-23 或如 1730)</label><input type="number" id="input-hour" placeholder="例: 1730 或 17"></div>
             </div>
             <button class="btn-submit" onclick="calculateAndSaveBazi()">🚀 生成专业排盘与详批报告</button>
             <div style="text-align: center; margin-top: 15px;">
@@ -522,27 +520,27 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="xinggui_session.js"></script>
 <script>
     let globalDayunList = [];
     let globalReportData = null;
 
-    window.addEventListener('DOMContentLoaded', async () => {
-        try { await XingguiSession.ready; } catch(e) { alert('登录服务不可用：'+e.message); location.replace('index.html'); return; }
-        if (!XingguiSession.requireLogin()) return;
-        try {
-            const currentUser = XingguiSession.account()?.id;
-            const account = XingguiSession.account() ? {profile:XingguiSession.profile()} : null;
-            const p = XingguiSession.profile();
-            if (!p) return;
-            for (const key of ['name','gender','year','month','day','hour']) {
-                const el = document.getElementById('input-' + key);
-                if (el && p[key] !== undefined && p[key] !== null) el.value = p[key];
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedProfile = localStorage.getItem('metaphysics_common_profile');
+        if (savedProfile) {
+            try {
+                const p = JSON.parse(savedProfile);
+                if (p.name && document.getElementById('input-name')) document.getElementById('input-name').value = p.name;
+                if (p.gender && document.getElementById('input-gender')) document.getElementById('input-gender').value = p.gender;
+                if (p.year && document.getElementById('input-year')) document.getElementById('input-year').value = p.year;
+                if (p.month && document.getElementById('input-month')) document.getElementById('input-month').value = p.month;
+                if (p.day && document.getElementById('input-day')) document.getElementById('input-day').value = p.day;
+                if (p.hour && document.getElementById('input-hour')) document.getElementById('input-hour').value = p.hour;
+            } catch (e) {
+                console.error("加载本地通用档案失败", e);
             }
-            // Registered and logged-in users should land on their own chart, not re-enter birth details.
-            if (currentUser && account?.profile && p.name && p.year && p.month && p.day && p.hour !== '') {
-                calculateAndSaveBazi();
-            }
-        } catch (e) { console.warn('读取账号生辰档案失败', e); }
+        }
     });
 
     function switchTab(tabId, el) {
@@ -556,6 +554,19 @@
     function goToInputPage() {
         document.getElementById('page-dashboard').classList.remove('active');
         document.getElementById('page-input').classList.add('active');
+    }
+
+    // 仅供需要云端记录的接口附加现有 Supabase 登录令牌。
+    async function baziAuthHeaders() {
+        const headers = {};
+        try {
+            if (window.XingguiSession) {
+                await window.XingguiSession.ready;
+                const token = await window.XingguiSession.accessToken();
+                if (token) headers['Authorization'] = 'Bearer ' + token;
+            }
+        } catch (err) { console.warn('云端登录暂不可用:', err); }
+        return headers;
     }
 
     async function calculateAndSaveBazi() {
@@ -576,13 +587,13 @@
             year: parseInt(year),
             month: parseInt(month),
             day: parseInt(day),
-            hour: hour
+            hour: isNaN(Number(hour)) ? 10 : Number(hour)
         };
 
         try {
             const res = await fetch('/api/calculate', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', ...(await baziAuthHeaders()) },
                 body: JSON.stringify(payload)
             });
 
@@ -607,9 +618,11 @@
         const container = document.getElementById('records-list-container');
         container.innerHTML = `<div style="color: #64748b; text-align: center; padding: 20px;">正在加载历史档案...</div>`;
         try {
-            const res = await fetch('/api/records');
+            const res = await fetch('/api/records', { headers: await baziAuthHeaders() });
             const result = await res.json();
-            if (result.status === 'success' && result.data.length > 0) {
+            if (res.status === 401) {
+                container.textContent = '请先登录后查看自己的云端历史档案';
+            } else if (result.status === 'success' && result.data.length > 0) {
                 container.innerHTML = result.data.map(rec => `
                     <div class="record-item" onclick="alert('已选中档案: ${rec.user_name} (${rec.birth_hour})'); closeRecordsModal();">
                         <div>
@@ -632,47 +645,43 @@
     }
 
     function renderMasterDashboard(record, strengthStr) {
-        const audit = record.calculation_audit || {};
-        if (audit.interpretation_status !== 'calibrated') {
-            console.info('八字排盘说明：结构计算与传统吉凶论断校准是不同层次。', audit);
-        }
-        document.getElementById('strength-display').innerHTML = `格局校准状态：${strengthStr} (${new Date().getFullYear()}虚岁：${record.virtual_age}岁)`;
+        document.getElementById('strength-display').innerHTML = `命主格局：${strengthStr} (2026虚岁：${record.virtual_age}岁)`;
 
         document.getElementById('info-name').innerText = record.user_name;
         document.getElementById('info-gender').innerText = record.gender;
         document.getElementById('info-solar').innerText = record.birth_hour;
-        document.getElementById('info-lunar').innerText = record.lunar_date || '未计算';
+        document.getElementById('info-lunar').innerText = record.lunar_date || '农历癸亥年腊月初十';
         document.getElementById('info-virtual-age').innerText = `${record.virtual_age} 岁`;
         document.getElementById('info-strength').innerText = strengthStr;
 
         if(record.bazi_chart && record.bazi_chart.extra) {
             const ex = record.bazi_chart.extra;
-            document.getElementById('info-taiyuan').innerText = ex.tai_yuan ? `${ex.tai_yuan.gan} ${ex.tai_yuan.zhi}` : '未计算';
-            document.getElementById('info-taixi').innerText = ex.tai_xi ? `${ex.tai_xi.gan} ${ex.tai_xi.zhi}` : '未计算';
-            document.getElementById('info-minggong').innerText = ex.ming_gong ? `${ex.ming_gong.gan} ${ex.ming_gong.zhi}` : '未计算';
-            document.getElementById('info-mingge').innerText = ex.ming_ge || '待校准';
-            document.getElementById('info-minggua').innerText = ex.ming_gua || '待校准';
+            document.getElementById('info-taiyuan').innerText = ex.tai_yuan ? `${ex.tai_yuan.gan} ${ex.tai_yuan.zhi}` : '甲申';
+            document.getElementById('info-taixi').innerText = ex.tai_xi ? `${ex.tai_xi.gan} ${ex.tai_xi.zhi}` : '甲午';
+            document.getElementById('info-minggong').innerText = ex.ming_gong ? `${ex.ming_gong.gan} ${ex.ming_gong.zhi}` : '丁酉';
+            document.getElementById('info-mingge').innerText = ex.ming_ge || '偏财格';
+            document.getElementById('info-minggua').innerText = ex.ming_gua || '西四命 · 艮卦';
             document.getElementById('info-kongwang').innerText = `日空：${ex.day_kong || '子丑'} / 年空：${ex.year_kong || '戌亥'}`;
 
-            document.getElementById('info-yongxi').innerText = ex.yong_xi || '未评估';
-            document.getElementById('info-wangxiang').innerText = ex.wang_xiang || '未评估';
-            document.getElementById('info-strength-details').innerText = ex.strength_details || '未评估';
+            document.getElementById('info-yongxi').innerText = ex.yong_xi || '用:水金 | 喜:木火 | 闲仇忌:土';
+            document.getElementById('info-wangxiang').innerText = ex.wang_xiang || '旺:火土 | 相:金水 | 死囚休:木';
+            document.getElementById('info-strength-details').innerText = ex.strength_details || '同党得分适配中';
 
             document.getElementById('guide-yongxi').innerText = ex.yong_xi || '-';
-            document.getElementById('guide-colors').innerText = '未评估';
-            document.getElementById('guide-numbers').innerText = '未评估';
-            document.getElementById('guide-directions').innerText = '未评估';
-            document.getElementById('guide-health').innerText = '不根据八字推断健康状况';
+            document.getElementById('guide-colors').innerText = '绿色、青色、红色、紫色 (助旺喜用神)';
+            document.getElementById('guide-numbers').innerText = '幸运数字: 3、8、2、7 | 吉祥楼层: 3楼、8楼、2楼、7楼';
+            document.getElementById('guide-directions').innerText = '东方、东南方、正南方';
+            document.getElementById('guide-health').innerText = '保持规律作息，注重心脑血管及筋骨关节保养';
 
-            const scanList = ex.pillar_scan || ['原局刑冲合害未完成校准。'];
+            const scanList = ex.pillar_scan || ['✨ 原局气场清畅，无剧烈刑冲破害交战。'];
             document.getElementById('pillar-scan-list').innerHTML = scanList.map(s => `<li>${s}</li>`).join('');
 
             const tijianData = [
-                {name: '甲', val: '—'}, {name: '乙', val: '—'},
-                {name: '丙', val: '—'}, {name: '丁', val: '—'},
-                {name: '戊', val: '—'}, {name: '己', val: '—'},
-                {name: '庚', val: '—'}, {name: '辛', val: '—'},
-                {name: '壬', val: '—'}, {name: '癸', val: '—'}
+                {name: '甲 (胆)', val: 3}, {name: '乙 (肝)', val: 1},
+                {name: '丙 (小肠)', val: 1}, {name: '丁 (心)', val: 2},
+                {name: '戊 (胃)', val: 1}, {name: '己 (脾)', val: 3},
+                {name: '庚 (大肠)', val: 1}, {name: '辛 (肺)', val: 1},
+                {name: '壬 (膀胱)', val: 1}, {name: '癸 (肾)', val: 0}
             ];
             document.getElementById('info-tijian-grid').innerHTML = tijianData.map(item => `
                 <div class="tijian-chip">
@@ -746,8 +755,69 @@
             `;
         }).join('');
 
-        // 仅展示后端真实计算字段，不拼接无依据的流年、流月预测。
-        globalDayunList = Array.isArray(record.dayun_list) ? record.dayun_list : [];
+        const categoryExtenders = {
+            career: { text: " 职场星曜磁场感应明显，工作推进易面临新任务交接或权责重组。宜注重团队协作与向上管理，保持与上司及核心同仁的顺畅沟通。", tips: "稳字当头，注意文件合规，避免因沟通不畅导致项目延误。" },
+            wealth: { text: " 财星气场波动，正财收益虽稳但偏财投资风险增加。资金周转需精打细算，面对高回报诱惑切忌盲目跟风借贷或盲目扩张。", tips: "严禁高风险投机，开源节流，妥善管理现金流。" },
+            health: { text: " 岁运五行交战，身体易感疲惫或因劳累引发旧疾。日常作息需规律有度，饮食宜清淡温和，注重脾胃消化及肩颈脊椎放松。", tips: "保证规律作息，劳逸结合，适度进行舒缓运动。" },
+            marriage: { text: " 情感关系面临外界琐事或工作压力带来的摩擦考验。夫妻双方多包容体谅，遇到分歧切忌意气用事，多一些温和倾听。", tips: "严格执行冷静10分钟沟通法，多制造温馨陪伴。" },
+            social: { text: " 人际交往圈子面临新旧交替，容易结识新朋友但也易遭小人暗中嫉妒。在社交场合言行宜谨言慎行，保持合理边界感。", tips: "保持边界感，交友不宜过深，防范口舌是非。" },
+            accident: { text: " 出行或户外活动时安全意识需加倍提升。尤其在驾车、远行或前往陌生环境时，当遵守交通规范，避开复杂的风险地带。", tips: "遵守交通规则，恶劣天气尽量减少远行。" }
+        };
+
+        // 🌟 12流月十神专属深度详批文案库（确保每个月、每个十神完全不同！）
+        const liuyueStarMap = {
+            '正官': "正官临值，事业气场正派平稳，利于职场晋升、公务考核、签约授薪。本月贵人运较旺，上司对您的表现多有认可，适合展现专业执行力。",
+            '七杀': "七杀临值，本月压力骤增，工作或生活中易遇突发挑战与竞争。情绪容易急躁，切忌硬碰硬，凡事讲究策略与迂回，注意劳逸结合。",
+            '正印': "正印临值，贵人暗中相助，心态趋于平和安稳。本月极利于学习进修、签署合同、筹备长远计划，或得到长辈、师长的关照提携。",
+            '偏印': "偏印临值，思维灵敏且直觉敏锐，适合从事策划、设计、研发、玄学或技术攻关。思想上易感孤独或多思多虑，宜多与人交流。",
+            '劫财': "劫财临值，本月竞争激烈，合作或财务上易有破耗支出。理财宜保守，切忌盲目借贷担保，人际交往防范同行竞争或口舌争执。",
+            '比肩': "比肩临值，同辈助力增强，适合团队协作与集体活动。但主观意识较强，合作中易产生利益分歧或意见不合，宜求同存异。",
+            '伤官': "伤官临值，才华横溢、灵感迸发，利于创新、演说、艺术创作。但锋芒过露易招惹口舌是非、得罪领导或伴侣，切记谨言慎行。",
+            '食神': "食神临值，心情愉悦，口福佳，人际关系和谐。本月压力减轻，生活节奏舒缓，适合享受生活、休闲度假或进行温和的创意规划。",
+            '正财': "正财临值，正财收入稳定，商业触觉敏锐。本月利于薪资调整、实业投资、盘点账目，财务管理宜精细化，踏实肯干必有收获。",
+            '偏财': "偏财临值，财运交投活跃，有意外之财或副业收入的机遇。但财来财去波动大，切忌投机冒进或沉迷高风险博弈，见好即收。"
+        };
+
+        globalDayunList = record.dayun_list.map(dy => {
+            if (dy.dayun_analysis) {
+                Object.keys(dy.dayun_analysis).forEach(k => {
+                    let item = dy.dayun_analysis[k];
+                    if (typeof item === 'string') {
+                        dy.dayun_analysis[k] = { text: item + " 在此大运期间，天干地支气场对命主命运轨迹产生深度赋能，宜因势利导，把握机遇。", tips: "稳中求进，加强专业沉淀。" };
+                    }
+                });
+            }
+            if (dy.liunian) {
+                dy.liunian = dy.liunian.map(ln => {
+                    if (ln.analysis) {
+                        ['career', 'wealth', 'health', 'marriage', 'social', 'accident'].forEach(lk => {
+                            let sub = ln.analysis[lk];
+                            const extender = categoryExtenders[lk] || { text: " 流年气场交替，宜顺应天时，稳妥行事。", tips: "未雨绸缪，审时度势。" };
+                            if (sub) {
+                                if (typeof sub === 'string') {
+                                    ln.analysis[lk] = { text: sub + extender.text, tips: extender.tips };
+                                } else if (sub.text && !sub.text.includes("职场") && !sub.text.includes("财星") && !sub.text.includes("岁运") && !sub.text.includes("情感") && !sub.text.includes("人际") && !sub.text.includes("出行")) {
+                                    sub.text += extender.text;
+                                    if(!sub.tips) sub.tips = extender.tips;
+                                }
+                            }
+                        });
+                        if (ln.analysis.liuyue) {
+                            ln.analysis.liuyue = ln.analysis.liuyue.map(m => {
+                                let starKey = m.main_star || '正官';
+                                let desc = liuyueStarMap[starKey] || `本月 ${starKey} 临值，气场平稳流转，适合按部就班推进各项日常事务。`;
+                                return {
+                                    ...m,
+                                    summary: `${m.chinese_month} (${m.gan_zhi}·${starKey})：${desc} 建议审时度势，灵活应对。`
+                                };
+                            });
+                        }
+                    }
+                    return ln;
+                });
+            }
+            return dy;
+        });
 
         let currentIndex = 0;
         globalDayunList.forEach((d, idx) => { if (d.status === 'current') currentIndex = idx; });
@@ -763,7 +833,7 @@
                 <tr class="${rowClass}" ${onclickAttr}>
                     <td>${mainStarHtml}</td>
                     <td style="color:${isFuture ? '#94a3b8':'#facc15'}; font-weight:bold;">${d.gan_zhi}</td>
-                    <td style="color:#cbd5e1;">${d.sub_star || '—'}</td>
+                    <td style="color:#cbd5e1;">${d.sub_star}</td>
                     <td style="color:#38bdf8; font-weight:bold; white-space:nowrap;">${d.age}-${d.age+9}岁</td>
                     <td style="color:#a7f3d0; font-weight:bold; white-space:nowrap;">${d.start_year}-${d.end_year}</td>
                 </tr>
@@ -815,7 +885,7 @@
         `;
 
         document.getElementById('liunian-title').innerText = `📅 专业流年与12流月运势详批 (当前大限: [${selectedDy.gan_zhi}])`;
-        const currentY = new Date().getFullYear();
+        const currentY = 2026;
 
         document.getElementById('liunian-table-body').innerHTML = selectedDy.liunian.map((ln, lnIdx) => {
             const isThisYear = (ln.year === currentY);

@@ -236,7 +236,7 @@ class ZiweiEngine(ZiWeiEngine):
         lu=lu_map[self.birth_gan];put('禄存',lu);put('擎羊',lu+1);put('陀罗',lu-1)
         put('地空',11-hi);put('地劫',11+hi)
         year_zhi=self.lunar.getYearZhi(); group=DI_ZHI.index(year_zhi)%4
-        fire_start={0:2,1:1,2:3,3:9}[group];bell_start={0:10,1:10,2:10,3:10}[group]
+        fire_start={0:2,1:3,2:1,3:9}[group];bell_start={0:10,1:10,2:3,3:10}[group]
         put('火星',fire_start+hi);put('铃星',bell_start+hi)
         # V8.8：四颗常见杂曜的传统安星规则（独立列出，待文墨同设置样盘核验）
         # 红鸾：子年起卯，逆数年支；天喜与红鸾对冲。
@@ -367,7 +367,7 @@ class ZiweiEngine(ZiWeiEngine):
             palace_index=(ming-zidx)%12
             name=PALACE_ORDER[palace_index]
             all_stars=stars[zhi]
-            main=[s for s in all_stars if s in MAJOR_STARS or s in SIX_LUCKY_STARS]
+            main=[s for s in all_stars if s in MAJOR_STARS]
             minor=[s for s in all_stars if s not in main]
             sheng={s:{'val':key[-1], 'type':FOUR_KEYS[key]} for key,s in birth_four.items() if s in all_stars}
             self_map=BIRTH_FOUR_TRANSFORMATIONS[gan_by_zhi[zhi]]

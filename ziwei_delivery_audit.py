@@ -115,7 +115,7 @@ def audit_chart(chart):
         checks["chart_size"]=False
     # V8.121: 审计不宣称格局或事件成立
     try:
-        checks["interpretation_guard"]=bool(True)
+        checks["interpretation_guard"]=bool(chart.get('pattern_concluded') is not True and chart.get('event_concluded') is not True)
     except (TypeError,ValueError,KeyError,AttributeError):
         checks["interpretation_guard"]=False
     failed=[key for key,ok in checks.items() if not ok]

@@ -1,0 +1,1696 @@
+{
+    "status": "success",
+    "name": "Kenny Yip",
+    "gender": "男",
+    "solar": "1988-01-20 16:45",
+    "lunar": "1987年12月2日 申时（16:45）",
+    "birth_lunar_month": 12,
+    "birth_hour_branch": "申",
+    "birth_shichen": "申时",
+    "birth_time_label": "申时（16:45）",
+    "year_gan_zhi": "丁卯",
+    "animal": "兔",
+    "bureau": "火六局",
+    "bureau_number": 6,
+    "ming_gong": "巳",
+    "shen_gong": "酉",
+    "birth_four": {
+        "化禄": "太阴",
+        "化权": "天同",
+        "化科": "天机",
+        "化忌": "巨门"
+    },
+    "ganMap": {
+        "子": "壬子",
+        "丑": "癸丑",
+        "寅": "壬寅",
+        "卯": "癸卯",
+        "辰": "甲辰",
+        "巳": "乙巳",
+        "午": "丙午",
+        "未": "丁未",
+        "申": "戊申",
+        "酉": "己酉",
+        "戌": "庚戌",
+        "亥": "辛亥"
+    },
+    "palaces": {
+        "子": {
+            "name": "疾厄宫",
+            "mainStars": [
+                "贪狼",
+                "文曲"
+            ],
+            "minorStars": [
+                "红鸾",
+                "天姚",
+                "天寿",
+                "飞廉",
+                "冠带",
+                "岁前·天德",
+                "将前·咸池",
+                "月德",
+                "天使",
+                "天贵"
+            ],
+            "shengian": {},
+            "zihua": {},
+            "age": "",
+            "year": "",
+            "centerText": "",
+            "tagMonth": "",
+            "tagLiunian": "",
+            "decade": "56-65",
+            "gan": "壬",
+            "gan_zhi": "壬子",
+            "shen": false,
+            "san_fang_si_zheng": [
+                "子",
+                "辰",
+                "午",
+                "申"
+            ],
+            "star_brightness": {
+                "贪狼": "旺"
+            },
+            "brightness_status": "公开亮度资料已录入168项，尚未与标准命盘逐项校准。"
+        },
+        "丑": {
+            "name": "财帛宫",
+            "mainStars": [
+                "天同",
+                "巨门"
+            ],
+            "minorStars": [
+                "寡宿",
+                "奏书",
+                "沐浴",
+                "岁前·吊客",
+                "将前·月煞",
+                "阴煞"
+            ],
+            "shengian": {
+                "天同": {
+                    "val": "权",
+                    "type": "quan"
+                },
+                "巨门": {
+                    "val": "忌",
+                    "type": "ji"
+                }
+            },
+            "zihua": {
+                "巨门": {
+                    "val": "◆权",
+                    "type": "quan"
+                }
+            },
+            "age": "",
+            "year": "",
+            "centerText": "",
+            "tagMonth": "",
+            "tagLiunian": "",
+            "decade": "46-55",
+            "gan": "癸",
+            "gan_zhi": "癸丑",
+            "shen": false,
+            "san_fang_si_zheng": [
+                "丑",
+                "巳",
+                "未",
+                "酉"
+            ],
+            "star_brightness": {
+                "天同": "不",
+                "巨门": "不"
+            },
+            "brightness_status": "公开亮度资料已录入168项，尚未与标准命盘逐项校准。"
+        },
+        "寅": {
+            "name": "子女宫",
+            "mainStars": [
+                "武曲",
+                "天相",
+                "文昌"
+            ],
+            "minorStars": [
+                "台辅",
+                "将军",
+                "长生",
+                "岁前·病符",
+                "将前·亡神",
+                "破碎",
+                "恩光"
+            ],
+            "shengian": {},
+            "zihua": {
+                "武曲": {
+                    "val": "◆忌",
+                    "type": "ji"
+                }
+            },
+            "age": "",
+            "year": "",
+            "centerText": "",
+            "tagMonth": "",
+            "tagLiunian": "",
+            "decade": "36-45",
+            "gan": "壬",
+            "gan_zhi": "壬寅",
+            "shen": false,
+            "san_fang_si_zheng": [
+                "寅",
+                "午",
+                "申",
+                "戌"
+            ],
+            "star_brightness": {
+                "武曲": "得",
+                "天相": "庙"
+            },
+            "brightness_status": "公开亮度资料已录入168项，尚未与标准命盘逐项校准。"
+        },
+        "卯": {
+            "name": "夫妻宫",
+            "mainStars": [
+                "太阳",
+                "天梁",
+                "左辅"
+            ],
+            "minorStars": [
+                "地空",
+                "小耗",
+                "养",
+                "天哭",
+                "岁前·岁建",
+                "将前·将星"
+            ],
+            "shengian": {},
+            "zihua": {},
+            "age": "",
+            "year": "",
+            "centerText": "",
+            "tagMonth": "",
+            "tagLiunian": "",
+            "decade": "26-35",
+            "gan": "癸",
+            "gan_zhi": "癸卯",
+            "shen": false,
+            "san_fang_si_zheng": [
+                "卯",
+                "未",
+                "酉",
+                "亥"
+            ],
+            "star_brightness": {
+                "太阳": "庙",
+                "天梁": "庙"
+            },
+            "brightness_status": "公开亮度资料已录入168项，尚未与标准命盘逐项校准。"
+        },
+        "辰": {
+            "name": "兄弟宫",
+            "mainStars": [
+                "七杀"
+            ],
+            "minorStars": [
+                "三台",
+                "青龙",
+                "胎",
+                "岁前·晦气",
+                "将前·攀鞍",
+                "天空",
+                "天巫"
+            ],
+            "shengian": {},
+            "zihua": {},
+            "age": "",
+            "year": "",
+            "centerText": "",
+            "tagMonth": "",
+            "tagLiunian": "",
+            "decade": "16-25",
+            "gan": "甲",
+            "gan_zhi": "甲辰",
+            "shen": false,
+            "san_fang_si_zheng": [
+                "辰",
+                "申",
+                "戌",
+                "子"
+            ],
+            "star_brightness": {
+                "七杀": "庙"
+            },
+            "brightness_status": "公开亮度资料已录入168项，尚未与标准命盘逐项校准。"
+        },
+        "巳": {
+            "name": "命宫",
+            "mainStars": [
+                "天机"
+            ],
+            "minorStars": [
+                "陀罗",
+                "火星",
+                "天马",
+                "孤辰",
+                "力士",
+                "绝",
+                "岁前·丧门",
+                "将前·岁驿",
+                "天官"
+            ],
+            "shengian": {
+                "天机": {
+                    "val": "科",
+                    "type": "ke"
+                }
+            },
+            "zihua": {
+                "天机": {
+                    "val": "◆禄",
+                    "type": "lu"
+                }
+            },
+            "age": "",
+            "year": "",
+            "centerText": "",
+            "tagMonth": "",
+            "tagLiunian": "",
+            "decade": "6-15",
+            "gan": "乙",
+            "gan_zhi": "乙巳",
+            "shen": false,
+            "san_fang_si_zheng": [
+                "巳",
+                "酉",
+                "亥",
+                "丑"
+            ],
+            "star_brightness": {
+                "天机": "平"
+            },
+            "brightness_status": "公开亮度资料已录入168项，尚未与标准命盘逐项校准。"
+        },
+        "午": {
+            "name": "父母宫",
+            "mainStars": [
+                "紫微"
+            ],
+            "minorStars": [
+                "禄存",
+                "铃星",
+                "天喜",
+                "博士",
+                "墓",
+                "岁前·贯索",
+                "将前·息神"
+            ],
+            "shengian": {},
+            "zihua": {},
+            "age": "",
+            "year": "",
+            "centerText": "",
+            "tagMonth": "",
+            "tagLiunian": "",
+            "decade": "116-125",
+            "gan": "丙",
+            "gan_zhi": "丙午",
+            "shen": false,
+            "san_fang_si_zheng": [
+                "午",
+                "戌",
+                "子",
+                "寅"
+            ],
+            "star_brightness": {
+                "紫微": "庙"
+            },
+            "brightness_status": "公开亮度资料已录入168项，尚未与标准命盘逐项校准。"
+        },
+        "未": {
+            "name": "福德宫",
+            "mainStars": [],
+            "minorStars": [
+                "擎羊",
+                "地劫",
+                "龙池",
+                "凤阁",
+                "官府",
+                "死",
+                "岁前·官符",
+                "将前·华盖",
+                "解神",
+                "天福"
+            ],
+            "shengian": {},
+            "zihua": {},
+            "age": "",
+            "year": "",
+            "centerText": "",
+            "tagMonth": "",
+            "tagLiunian": "",
+            "decade": "106-115",
+            "gan": "丁",
+            "gan_zhi": "丁未",
+            "shen": false,
+            "san_fang_si_zheng": [
+                "未",
+                "亥",
+                "丑",
+                "卯"
+            ],
+            "star_brightness": {},
+            "brightness_status": "公开亮度资料已录入168项，尚未与标准命盘逐项校准。"
+        },
+        "申": {
+            "name": "田宅宫",
+            "mainStars": [
+                "破军"
+            ],
+            "minorStars": [
+                "天刑",
+                "天才",
+                "伏兵",
+                "病",
+                "岁前·小耗",
+                "将前·劫煞",
+                "天厨"
+            ],
+            "shengian": {},
+            "zihua": {},
+            "age": "",
+            "year": "",
+            "centerText": "",
+            "tagMonth": "",
+            "tagLiunian": "",
+            "decade": "96-105",
+            "gan": "戊",
+            "gan_zhi": "戊申",
+            "shen": false,
+            "san_fang_si_zheng": [
+                "申",
+                "子",
+                "寅",
+                "辰"
+            ],
+            "star_brightness": {
+                "破军": "得"
+            },
+            "brightness_status": "公开亮度资料已录入168项，尚未与标准命盘逐项校准。"
+        },
+        "酉": {
+            "name": "事业宫",
+            "mainStars": [
+                "天钺"
+            ],
+            "minorStars": [
+                "大耗",
+                "衰",
+                "天虚",
+                "岁前·岁破",
+                "将前·灾煞",
+                "天月"
+            ],
+            "shengian": {},
+            "zihua": {},
+            "age": "",
+            "year": "",
+            "centerText": "",
+            "tagMonth": "",
+            "tagLiunian": "",
+            "decade": "86-95",
+            "gan": "己",
+            "gan_zhi": "己酉",
+            "shen": true,
+            "san_fang_si_zheng": [
+                "酉",
+                "丑",
+                "卯",
+                "巳"
+            ],
+            "star_brightness": {},
+            "brightness_status": "公开亮度资料已录入168项，尚未与标准命盘逐项校准。"
+        },
+        "戌": {
+            "name": "交友宫",
+            "mainStars": [
+                "廉贞",
+                "天府"
+            ],
+            "minorStars": [
+                "八座",
+                "封诰",
+                "病符",
+                "帝旺",
+                "岁前·龙德",
+                "将前·天煞",
+                "天伤",
+                "截空"
+            ],
+            "shengian": {},
+            "zihua": {},
+            "age": "",
+            "year": "",
+            "centerText": "",
+            "tagMonth": "",
+            "tagLiunian": "",
+            "decade": "76-85",
+            "gan": "庚",
+            "gan_zhi": "庚戌",
+            "shen": false,
+            "san_fang_si_zheng": [
+                "戌",
+                "寅",
+                "辰",
+                "午"
+            ],
+            "star_brightness": {
+                "廉贞": "利",
+                "天府": "庙"
+            },
+            "brightness_status": "公开亮度资料已录入168项，尚未与标准命盘逐项校准。"
+        },
+        "亥": {
+            "name": "迁移宫",
+            "mainStars": [
+                "太阴",
+                "右弼",
+                "天魁"
+            ],
+            "minorStars": [
+                "喜神",
+                "临官",
+                "岁前·白虎",
+                "将前·指背",
+                "旬空"
+            ],
+            "shengian": {
+                "太阴": {
+                    "val": "禄",
+                    "type": "lu"
+                }
+            },
+            "zihua": {},
+            "age": "",
+            "year": "",
+            "centerText": "",
+            "tagMonth": "",
+            "tagLiunian": "",
+            "decade": "66-75",
+            "gan": "辛",
+            "gan_zhi": "辛亥",
+            "shen": false,
+            "san_fang_si_zheng": [
+                "亥",
+                "卯",
+                "巳",
+                "未"
+            ],
+            "star_brightness": {
+                "太阴": "庙"
+            },
+            "brightness_status": "公开亮度资料已录入168项，尚未与标准命盘逐项校准。"
+        }
+    },
+    "flying_transformations": [
+        {
+            "from": "子",
+            "from_palace": "疾厄宫",
+            "to": "卯",
+            "to_palace": "夫妻宫",
+            "star": "天梁",
+            "transformation": "化禄",
+            "self_transform": false
+        },
+        {
+            "from": "子",
+            "from_palace": "疾厄宫",
+            "to": "午",
+            "to_palace": "父母宫",
+            "star": "紫微",
+            "transformation": "化权",
+            "self_transform": false
+        },
+        {
+            "from": "子",
+            "from_palace": "疾厄宫",
+            "to": "卯",
+            "to_palace": "夫妻宫",
+            "star": "左辅",
+            "transformation": "化科",
+            "self_transform": false
+        },
+        {
+            "from": "子",
+            "from_palace": "疾厄宫",
+            "to": "寅",
+            "to_palace": "子女宫",
+            "star": "武曲",
+            "transformation": "化忌",
+            "self_transform": false
+        },
+        {
+            "from": "丑",
+            "from_palace": "财帛宫",
+            "to": "申",
+            "to_palace": "田宅宫",
+            "star": "破军",
+            "transformation": "化禄",
+            "self_transform": false
+        },
+        {
+            "from": "丑",
+            "from_palace": "财帛宫",
+            "to": "丑",
+            "to_palace": "财帛宫",
+            "star": "巨门",
+            "transformation": "化权",
+            "self_transform": true
+        },
+        {
+            "from": "丑",
+            "from_palace": "财帛宫",
+            "to": "亥",
+            "to_palace": "迁移宫",
+            "star": "太阴",
+            "transformation": "化科",
+            "self_transform": false
+        },
+        {
+            "from": "丑",
+            "from_palace": "财帛宫",
+            "to": "子",
+            "to_palace": "疾厄宫",
+            "star": "贪狼",
+            "transformation": "化忌",
+            "self_transform": false
+        },
+        {
+            "from": "寅",
+            "from_palace": "子女宫",
+            "to": "卯",
+            "to_palace": "夫妻宫",
+            "star": "天梁",
+            "transformation": "化禄",
+            "self_transform": false
+        },
+        {
+            "from": "寅",
+            "from_palace": "子女宫",
+            "to": "午",
+            "to_palace": "父母宫",
+            "star": "紫微",
+            "transformation": "化权",
+            "self_transform": false
+        },
+        {
+            "from": "寅",
+            "from_palace": "子女宫",
+            "to": "卯",
+            "to_palace": "夫妻宫",
+            "star": "左辅",
+            "transformation": "化科",
+            "self_transform": false
+        },
+        {
+            "from": "寅",
+            "from_palace": "子女宫",
+            "to": "寅",
+            "to_palace": "子女宫",
+            "star": "武曲",
+            "transformation": "化忌",
+            "self_transform": true
+        },
+        {
+            "from": "卯",
+            "from_palace": "夫妻宫",
+            "to": "申",
+            "to_palace": "田宅宫",
+            "star": "破军",
+            "transformation": "化禄",
+            "self_transform": false
+        },
+        {
+            "from": "卯",
+            "from_palace": "夫妻宫",
+            "to": "丑",
+            "to_palace": "财帛宫",
+            "star": "巨门",
+            "transformation": "化权",
+            "self_transform": false
+        },
+        {
+            "from": "卯",
+            "from_palace": "夫妻宫",
+            "to": "亥",
+            "to_palace": "迁移宫",
+            "star": "太阴",
+            "transformation": "化科",
+            "self_transform": false
+        },
+        {
+            "from": "卯",
+            "from_palace": "夫妻宫",
+            "to": "子",
+            "to_palace": "疾厄宫",
+            "star": "贪狼",
+            "transformation": "化忌",
+            "self_transform": false
+        },
+        {
+            "from": "辰",
+            "from_palace": "兄弟宫",
+            "to": "戌",
+            "to_palace": "交友宫",
+            "star": "廉贞",
+            "transformation": "化禄",
+            "self_transform": false
+        },
+        {
+            "from": "辰",
+            "from_palace": "兄弟宫",
+            "to": "申",
+            "to_palace": "田宅宫",
+            "star": "破军",
+            "transformation": "化权",
+            "self_transform": false
+        },
+        {
+            "from": "辰",
+            "from_palace": "兄弟宫",
+            "to": "寅",
+            "to_palace": "子女宫",
+            "star": "武曲",
+            "transformation": "化科",
+            "self_transform": false
+        },
+        {
+            "from": "辰",
+            "from_palace": "兄弟宫",
+            "to": "卯",
+            "to_palace": "夫妻宫",
+            "star": "太阳",
+            "transformation": "化忌",
+            "self_transform": false
+        },
+        {
+            "from": "巳",
+            "from_palace": "命宫",
+            "to": "巳",
+            "to_palace": "命宫",
+            "star": "天机",
+            "transformation": "化禄",
+            "self_transform": true
+        },
+        {
+            "from": "巳",
+            "from_palace": "命宫",
+            "to": "卯",
+            "to_palace": "夫妻宫",
+            "star": "天梁",
+            "transformation": "化权",
+            "self_transform": false
+        },
+        {
+            "from": "巳",
+            "from_palace": "命宫",
+            "to": "午",
+            "to_palace": "父母宫",
+            "star": "紫微",
+            "transformation": "化科",
+            "self_transform": false
+        },
+        {
+            "from": "巳",
+            "from_palace": "命宫",
+            "to": "亥",
+            "to_palace": "迁移宫",
+            "star": "太阴",
+            "transformation": "化忌",
+            "self_transform": false
+        },
+        {
+            "from": "午",
+            "from_palace": "父母宫",
+            "to": "丑",
+            "to_palace": "财帛宫",
+            "star": "天同",
+            "transformation": "化禄",
+            "self_transform": false
+        },
+        {
+            "from": "午",
+            "from_palace": "父母宫",
+            "to": "巳",
+            "to_palace": "命宫",
+            "star": "天机",
+            "transformation": "化权",
+            "self_transform": false
+        },
+        {
+            "from": "午",
+            "from_palace": "父母宫",
+            "to": "寅",
+            "to_palace": "子女宫",
+            "star": "文昌",
+            "transformation": "化科",
+            "self_transform": false
+        },
+        {
+            "from": "午",
+            "from_palace": "父母宫",
+            "to": "戌",
+            "to_palace": "交友宫",
+            "star": "廉贞",
+            "transformation": "化忌",
+            "self_transform": false
+        },
+        {
+            "from": "未",
+            "from_palace": "福德宫",
+            "to": "亥",
+            "to_palace": "迁移宫",
+            "star": "太阴",
+            "transformation": "化禄",
+            "self_transform": false
+        },
+        {
+            "from": "未",
+            "from_palace": "福德宫",
+            "to": "丑",
+            "to_palace": "财帛宫",
+            "star": "天同",
+            "transformation": "化权",
+            "self_transform": false
+        },
+        {
+            "from": "未",
+            "from_palace": "福德宫",
+            "to": "巳",
+            "to_palace": "命宫",
+            "star": "天机",
+            "transformation": "化科",
+            "self_transform": false
+        },
+        {
+            "from": "未",
+            "from_palace": "福德宫",
+            "to": "丑",
+            "to_palace": "财帛宫",
+            "star": "巨门",
+            "transformation": "化忌",
+            "self_transform": false
+        },
+        {
+            "from": "申",
+            "from_palace": "田宅宫",
+            "to": "子",
+            "to_palace": "疾厄宫",
+            "star": "贪狼",
+            "transformation": "化禄",
+            "self_transform": false
+        },
+        {
+            "from": "申",
+            "from_palace": "田宅宫",
+            "to": "亥",
+            "to_palace": "迁移宫",
+            "star": "太阴",
+            "transformation": "化权",
+            "self_transform": false
+        },
+        {
+            "from": "申",
+            "from_palace": "田宅宫",
+            "to": "亥",
+            "to_palace": "迁移宫",
+            "star": "右弼",
+            "transformation": "化科",
+            "self_transform": false
+        },
+        {
+            "from": "申",
+            "from_palace": "田宅宫",
+            "to": "巳",
+            "to_palace": "命宫",
+            "star": "天机",
+            "transformation": "化忌",
+            "self_transform": false
+        },
+        {
+            "from": "酉",
+            "from_palace": "事业宫",
+            "to": "寅",
+            "to_palace": "子女宫",
+            "star": "武曲",
+            "transformation": "化禄",
+            "self_transform": false
+        },
+        {
+            "from": "酉",
+            "from_palace": "事业宫",
+            "to": "子",
+            "to_palace": "疾厄宫",
+            "star": "贪狼",
+            "transformation": "化权",
+            "self_transform": false
+        },
+        {
+            "from": "酉",
+            "from_palace": "事业宫",
+            "to": "卯",
+            "to_palace": "夫妻宫",
+            "star": "天梁",
+            "transformation": "化科",
+            "self_transform": false
+        },
+        {
+            "from": "酉",
+            "from_palace": "事业宫",
+            "to": "子",
+            "to_palace": "疾厄宫",
+            "star": "文曲",
+            "transformation": "化忌",
+            "self_transform": false
+        },
+        {
+            "from": "戌",
+            "from_palace": "交友宫",
+            "to": "卯",
+            "to_palace": "夫妻宫",
+            "star": "太阳",
+            "transformation": "化禄",
+            "self_transform": false
+        },
+        {
+            "from": "戌",
+            "from_palace": "交友宫",
+            "to": "寅",
+            "to_palace": "子女宫",
+            "star": "武曲",
+            "transformation": "化权",
+            "self_transform": false
+        },
+        {
+            "from": "戌",
+            "from_palace": "交友宫",
+            "to": "亥",
+            "to_palace": "迁移宫",
+            "star": "太阴",
+            "transformation": "化科",
+            "self_transform": false
+        },
+        {
+            "from": "戌",
+            "from_palace": "交友宫",
+            "to": "丑",
+            "to_palace": "财帛宫",
+            "star": "天同",
+            "transformation": "化忌",
+            "self_transform": false
+        },
+        {
+            "from": "亥",
+            "from_palace": "迁移宫",
+            "to": "丑",
+            "to_palace": "财帛宫",
+            "star": "巨门",
+            "transformation": "化禄",
+            "self_transform": false
+        },
+        {
+            "from": "亥",
+            "from_palace": "迁移宫",
+            "to": "卯",
+            "to_palace": "夫妻宫",
+            "star": "太阳",
+            "transformation": "化权",
+            "self_transform": false
+        },
+        {
+            "from": "亥",
+            "from_palace": "迁移宫",
+            "to": "子",
+            "to_palace": "疾厄宫",
+            "star": "文曲",
+            "transformation": "化科",
+            "self_transform": false
+        },
+        {
+            "from": "亥",
+            "from_palace": "迁移宫",
+            "to": "寅",
+            "to_palace": "子女宫",
+            "star": "文昌",
+            "transformation": "化忌",
+            "self_transform": false
+        }
+    ],
+    "decade_charts": [
+        {
+            "zhi": "子",
+            "palace": "疾厄宫",
+            "range": "56-65",
+            "gan": "壬",
+            "four": {
+                "化禄": "天梁",
+                "化权": "紫微",
+                "化科": "左辅",
+                "化忌": "武曲"
+            },
+            "flying_transformations": [
+                {
+                    "from": "子",
+                    "from_palace": "疾厄宫",
+                    "to": "卯",
+                    "to_palace": "夫妻宫",
+                    "star": "天梁",
+                    "transformation": "化禄",
+                    "self_transform": false
+                },
+                {
+                    "from": "子",
+                    "from_palace": "疾厄宫",
+                    "to": "午",
+                    "to_palace": "父母宫",
+                    "star": "紫微",
+                    "transformation": "化权",
+                    "self_transform": false
+                },
+                {
+                    "from": "子",
+                    "from_palace": "疾厄宫",
+                    "to": "卯",
+                    "to_palace": "夫妻宫",
+                    "star": "左辅",
+                    "transformation": "化科",
+                    "self_transform": false
+                },
+                {
+                    "from": "子",
+                    "from_palace": "疾厄宫",
+                    "to": "寅",
+                    "to_palace": "子女宫",
+                    "star": "武曲",
+                    "transformation": "化忌",
+                    "self_transform": false
+                }
+            ]
+        },
+        {
+            "zhi": "丑",
+            "palace": "财帛宫",
+            "range": "46-55",
+            "gan": "癸",
+            "four": {
+                "化禄": "破军",
+                "化权": "巨门",
+                "化科": "太阴",
+                "化忌": "贪狼"
+            },
+            "flying_transformations": [
+                {
+                    "from": "丑",
+                    "from_palace": "财帛宫",
+                    "to": "申",
+                    "to_palace": "田宅宫",
+                    "star": "破军",
+                    "transformation": "化禄",
+                    "self_transform": false
+                },
+                {
+                    "from": "丑",
+                    "from_palace": "财帛宫",
+                    "to": "丑",
+                    "to_palace": "财帛宫",
+                    "star": "巨门",
+                    "transformation": "化权",
+                    "self_transform": true
+                },
+                {
+                    "from": "丑",
+                    "from_palace": "财帛宫",
+                    "to": "亥",
+                    "to_palace": "迁移宫",
+                    "star": "太阴",
+                    "transformation": "化科",
+                    "self_transform": false
+                },
+                {
+                    "from": "丑",
+                    "from_palace": "财帛宫",
+                    "to": "子",
+                    "to_palace": "疾厄宫",
+                    "star": "贪狼",
+                    "transformation": "化忌",
+                    "self_transform": false
+                }
+            ]
+        },
+        {
+            "zhi": "寅",
+            "palace": "子女宫",
+            "range": "36-45",
+            "gan": "壬",
+            "four": {
+                "化禄": "天梁",
+                "化权": "紫微",
+                "化科": "左辅",
+                "化忌": "武曲"
+            },
+            "flying_transformations": [
+                {
+                    "from": "寅",
+                    "from_palace": "子女宫",
+                    "to": "卯",
+                    "to_palace": "夫妻宫",
+                    "star": "天梁",
+                    "transformation": "化禄",
+                    "self_transform": false
+                },
+                {
+                    "from": "寅",
+                    "from_palace": "子女宫",
+                    "to": "午",
+                    "to_palace": "父母宫",
+                    "star": "紫微",
+                    "transformation": "化权",
+                    "self_transform": false
+                },
+                {
+                    "from": "寅",
+                    "from_palace": "子女宫",
+                    "to": "卯",
+                    "to_palace": "夫妻宫",
+                    "star": "左辅",
+                    "transformation": "化科",
+                    "self_transform": false
+                },
+                {
+                    "from": "寅",
+                    "from_palace": "子女宫",
+                    "to": "寅",
+                    "to_palace": "子女宫",
+                    "star": "武曲",
+                    "transformation": "化忌",
+                    "self_transform": true
+                }
+            ]
+        },
+        {
+            "zhi": "卯",
+            "palace": "夫妻宫",
+            "range": "26-35",
+            "gan": "癸",
+            "four": {
+                "化禄": "破军",
+                "化权": "巨门",
+                "化科": "太阴",
+                "化忌": "贪狼"
+            },
+            "flying_transformations": [
+                {
+                    "from": "卯",
+                    "from_palace": "夫妻宫",
+                    "to": "申",
+                    "to_palace": "田宅宫",
+                    "star": "破军",
+                    "transformation": "化禄",
+                    "self_transform": false
+                },
+                {
+                    "from": "卯",
+                    "from_palace": "夫妻宫",
+                    "to": "丑",
+                    "to_palace": "财帛宫",
+                    "star": "巨门",
+                    "transformation": "化权",
+                    "self_transform": false
+                },
+                {
+                    "from": "卯",
+                    "from_palace": "夫妻宫",
+                    "to": "亥",
+                    "to_palace": "迁移宫",
+                    "star": "太阴",
+                    "transformation": "化科",
+                    "self_transform": false
+                },
+                {
+                    "from": "卯",
+                    "from_palace": "夫妻宫",
+                    "to": "子",
+                    "to_palace": "疾厄宫",
+                    "star": "贪狼",
+                    "transformation": "化忌",
+                    "self_transform": false
+                }
+            ]
+        },
+        {
+            "zhi": "辰",
+            "palace": "兄弟宫",
+            "range": "16-25",
+            "gan": "甲",
+            "four": {
+                "化禄": "廉贞",
+                "化权": "破军",
+                "化科": "武曲",
+                "化忌": "太阳"
+            },
+            "flying_transformations": [
+                {
+                    "from": "辰",
+                    "from_palace": "兄弟宫",
+                    "to": "戌",
+                    "to_palace": "交友宫",
+                    "star": "廉贞",
+                    "transformation": "化禄",
+                    "self_transform": false
+                },
+                {
+                    "from": "辰",
+                    "from_palace": "兄弟宫",
+                    "to": "申",
+                    "to_palace": "田宅宫",
+                    "star": "破军",
+                    "transformation": "化权",
+                    "self_transform": false
+                },
+                {
+                    "from": "辰",
+                    "from_palace": "兄弟宫",
+                    "to": "寅",
+                    "to_palace": "子女宫",
+                    "star": "武曲",
+                    "transformation": "化科",
+                    "self_transform": false
+                },
+                {
+                    "from": "辰",
+                    "from_palace": "兄弟宫",
+                    "to": "卯",
+                    "to_palace": "夫妻宫",
+                    "star": "太阳",
+                    "transformation": "化忌",
+                    "self_transform": false
+                }
+            ]
+        },
+        {
+            "zhi": "巳",
+            "palace": "命宫",
+            "range": "6-15",
+            "gan": "乙",
+            "four": {
+                "化禄": "天机",
+                "化权": "天梁",
+                "化科": "紫微",
+                "化忌": "太阴"
+            },
+            "flying_transformations": [
+                {
+                    "from": "巳",
+                    "from_palace": "命宫",
+                    "to": "巳",
+                    "to_palace": "命宫",
+                    "star": "天机",
+                    "transformation": "化禄",
+                    "self_transform": true
+                },
+                {
+                    "from": "巳",
+                    "from_palace": "命宫",
+                    "to": "卯",
+                    "to_palace": "夫妻宫",
+                    "star": "天梁",
+                    "transformation": "化权",
+                    "self_transform": false
+                },
+                {
+                    "from": "巳",
+                    "from_palace": "命宫",
+                    "to": "午",
+                    "to_palace": "父母宫",
+                    "star": "紫微",
+                    "transformation": "化科",
+                    "self_transform": false
+                },
+                {
+                    "from": "巳",
+                    "from_palace": "命宫",
+                    "to": "亥",
+                    "to_palace": "迁移宫",
+                    "star": "太阴",
+                    "transformation": "化忌",
+                    "self_transform": false
+                }
+            ]
+        },
+        {
+            "zhi": "午",
+            "palace": "父母宫",
+            "range": "116-125",
+            "gan": "丙",
+            "four": {
+                "化禄": "天同",
+                "化权": "天机",
+                "化科": "文昌",
+                "化忌": "廉贞"
+            },
+            "flying_transformations": [
+                {
+                    "from": "午",
+                    "from_palace": "父母宫",
+                    "to": "丑",
+                    "to_palace": "财帛宫",
+                    "star": "天同",
+                    "transformation": "化禄",
+                    "self_transform": false
+                },
+                {
+                    "from": "午",
+                    "from_palace": "父母宫",
+                    "to": "巳",
+                    "to_palace": "命宫",
+                    "star": "天机",
+                    "transformation": "化权",
+                    "self_transform": false
+                },
+                {
+                    "from": "午",
+                    "from_palace": "父母宫",
+                    "to": "寅",
+                    "to_palace": "子女宫",
+                    "star": "文昌",
+                    "transformation": "化科",
+                    "self_transform": false
+                },
+                {
+                    "from": "午",
+                    "from_palace": "父母宫",
+                    "to": "戌",
+                    "to_palace": "交友宫",
+                    "star": "廉贞",
+                    "transformation": "化忌",
+                    "self_transform": false
+                }
+            ]
+        },
+        {
+            "zhi": "未",
+            "palace": "福德宫",
+            "range": "106-115",
+            "gan": "丁",
+            "four": {
+                "化禄": "太阴",
+                "化权": "天同",
+                "化科": "天机",
+                "化忌": "巨门"
+            },
+            "flying_transformations": [
+                {
+                    "from": "未",
+                    "from_palace": "福德宫",
+                    "to": "亥",
+                    "to_palace": "迁移宫",
+                    "star": "太阴",
+                    "transformation": "化禄",
+                    "self_transform": false
+                },
+                {
+                    "from": "未",
+                    "from_palace": "福德宫",
+                    "to": "丑",
+                    "to_palace": "财帛宫",
+                    "star": "天同",
+                    "transformation": "化权",
+                    "self_transform": false
+                },
+                {
+                    "from": "未",
+                    "from_palace": "福德宫",
+                    "to": "巳",
+                    "to_palace": "命宫",
+                    "star": "天机",
+                    "transformation": "化科",
+                    "self_transform": false
+                },
+                {
+                    "from": "未",
+                    "from_palace": "福德宫",
+                    "to": "丑",
+                    "to_palace": "财帛宫",
+                    "star": "巨门",
+                    "transformation": "化忌",
+                    "self_transform": false
+                }
+            ]
+        },
+        {
+            "zhi": "申",
+            "palace": "田宅宫",
+            "range": "96-105",
+            "gan": "戊",
+            "four": {
+                "化禄": "贪狼",
+                "化权": "太阴",
+                "化科": "右弼",
+                "化忌": "天机"
+            },
+            "flying_transformations": [
+                {
+                    "from": "申",
+                    "from_palace": "田宅宫",
+                    "to": "子",
+                    "to_palace": "疾厄宫",
+                    "star": "贪狼",
+                    "transformation": "化禄",
+                    "self_transform": false
+                },
+                {
+                    "from": "申",
+                    "from_palace": "田宅宫",
+                    "to": "亥",
+                    "to_palace": "迁移宫",
+                    "star": "太阴",
+                    "transformation": "化权",
+                    "self_transform": false
+                },
+                {
+                    "from": "申",
+                    "from_palace": "田宅宫",
+                    "to": "亥",
+                    "to_palace": "迁移宫",
+                    "star": "右弼",
+                    "transformation": "化科",
+                    "self_transform": false
+                },
+                {
+                    "from": "申",
+                    "from_palace": "田宅宫",
+                    "to": "巳",
+                    "to_palace": "命宫",
+                    "star": "天机",
+                    "transformation": "化忌",
+                    "self_transform": false
+                }
+            ]
+        },
+        {
+            "zhi": "酉",
+            "palace": "事业宫",
+            "range": "86-95",
+            "gan": "己",
+            "four": {
+                "化禄": "武曲",
+                "化权": "贪狼",
+                "化科": "天梁",
+                "化忌": "文曲"
+            },
+            "flying_transformations": [
+                {
+                    "from": "酉",
+                    "from_palace": "事业宫",
+                    "to": "寅",
+                    "to_palace": "子女宫",
+                    "star": "武曲",
+                    "transformation": "化禄",
+                    "self_transform": false
+                },
+                {
+                    "from": "酉",
+                    "from_palace": "事业宫",
+                    "to": "子",
+                    "to_palace": "疾厄宫",
+                    "star": "贪狼",
+                    "transformation": "化权",
+                    "self_transform": false
+                },
+                {
+                    "from": "酉",
+                    "from_palace": "事业宫",
+                    "to": "卯",
+                    "to_palace": "夫妻宫",
+                    "star": "天梁",
+                    "transformation": "化科",
+                    "self_transform": false
+                },
+                {
+                    "from": "酉",
+                    "from_palace": "事业宫",
+                    "to": "子",
+                    "to_palace": "疾厄宫",
+                    "star": "文曲",
+                    "transformation": "化忌",
+                    "self_transform": false
+                }
+            ]
+        },
+        {
+            "zhi": "戌",
+            "palace": "交友宫",
+            "range": "76-85",
+            "gan": "庚",
+            "four": {
+                "化禄": "太阳",
+                "化权": "武曲",
+                "化科": "太阴",
+                "化忌": "天同"
+            },
+            "flying_transformations": [
+                {
+                    "from": "戌",
+                    "from_palace": "交友宫",
+                    "to": "卯",
+                    "to_palace": "夫妻宫",
+                    "star": "太阳",
+                    "transformation": "化禄",
+                    "self_transform": false
+                },
+                {
+                    "from": "戌",
+                    "from_palace": "交友宫",
+                    "to": "寅",
+                    "to_palace": "子女宫",
+                    "star": "武曲",
+                    "transformation": "化权",
+                    "self_transform": false
+                },
+                {
+                    "from": "戌",
+                    "from_palace": "交友宫",
+                    "to": "亥",
+                    "to_palace": "迁移宫",
+                    "star": "太阴",
+                    "transformation": "化科",
+                    "self_transform": false
+                },
+                {
+                    "from": "戌",
+                    "from_palace": "交友宫",
+                    "to": "丑",
+                    "to_palace": "财帛宫",
+                    "star": "天同",
+                    "transformation": "化忌",
+                    "self_transform": false
+                }
+            ]
+        },
+        {
+            "zhi": "亥",
+            "palace": "迁移宫",
+            "range": "66-75",
+            "gan": "辛",
+            "four": {
+                "化禄": "巨门",
+                "化权": "太阳",
+                "化科": "文曲",
+                "化忌": "文昌"
+            },
+            "flying_transformations": [
+                {
+                    "from": "亥",
+                    "from_palace": "迁移宫",
+                    "to": "丑",
+                    "to_palace": "财帛宫",
+                    "star": "巨门",
+                    "transformation": "化禄",
+                    "self_transform": false
+                },
+                {
+                    "from": "亥",
+                    "from_palace": "迁移宫",
+                    "to": "卯",
+                    "to_palace": "夫妻宫",
+                    "star": "太阳",
+                    "transformation": "化权",
+                    "self_transform": false
+                },
+                {
+                    "from": "亥",
+                    "from_palace": "迁移宫",
+                    "to": "子",
+                    "to_palace": "疾厄宫",
+                    "star": "文曲",
+                    "transformation": "化科",
+                    "self_transform": false
+                },
+                {
+                    "from": "亥",
+                    "from_palace": "迁移宫",
+                    "to": "寅",
+                    "to_palace": "子女宫",
+                    "star": "文昌",
+                    "transformation": "化忌",
+                    "self_transform": false
+                }
+            ]
+        }
+    ],
+    "secondary_star_audit": {
+        "positions": {
+            "文昌": "寅",
+            "文曲": "子",
+            "左辅": "卯",
+            "右弼": "亥",
+            "天魁": "亥",
+            "天钺": "酉",
+            "擎羊": "未",
+            "陀罗": "巳",
+            "火星": "巳",
+            "铃星": "午",
+            "地空": "卯",
+            "地劫": "未"
+        },
+        "counts_valid": true,
+        "reference_case": "1988-08-24 17:45 男命，农历七月十三酉时",
+        "reference_status": "此指定样盘已按文墨天机截图人工核对十二星；其他命盘未验证"
+    },
+    "extra_star_audit": {
+        "positions": {
+            "红鸾": "子",
+            "天喜": "午",
+            "天刑": "申",
+            "天姚": "子"
+        },
+        "extended_positions": {
+            "天马": "巳",
+            "三台": "辰",
+            "八座": "戌",
+            "台辅": "寅",
+            "封诰": "戌",
+            "龙池": "未",
+            "凤阁": "未",
+            "天才": "申",
+            "天寿": "子",
+            "孤辰": "巳",
+            "寡宿": "丑"
+        },
+        "series_positions": {
+            "博士": "午",
+            "力士": "巳",
+            "青龙": "辰",
+            "小耗": "卯",
+            "将军": "寅",
+            "奏书": "丑",
+            "飞廉": "子",
+            "喜神": "亥",
+            "病符": "戌",
+            "大耗": "酉",
+            "伏兵": "申",
+            "官府": "未",
+            "长生": "寅",
+            "沐浴": "丑",
+            "冠带": "子",
+            "临官": "亥",
+            "帝旺": "戌",
+            "衰": "酉",
+            "病": "申",
+            "死": "未",
+            "墓": "午",
+            "绝": "巳",
+            "胎": "辰",
+            "养": "卯",
+            "天哭": "卯",
+            "天虚": "酉"
+        },
+        "cycle_positions": {
+            "岁前·岁建": "卯",
+            "岁前·晦气": "辰",
+            "岁前·丧门": "巳",
+            "岁前·贯索": "午",
+            "岁前·官符": "未",
+            "岁前·小耗": "申",
+            "岁前·岁破": "酉",
+            "岁前·龙德": "戌",
+            "岁前·白虎": "亥",
+            "岁前·天德": "子",
+            "岁前·吊客": "丑",
+            "岁前·病符": "寅",
+            "将前·将星": "卯",
+            "将前·攀鞍": "辰",
+            "将前·岁驿": "巳",
+            "将前·息神": "午",
+            "将前·华盖": "未",
+            "将前·劫煞": "申",
+            "将前·灾煞": "酉",
+            "将前·天煞": "戌",
+            "将前·指背": "亥",
+            "将前·咸池": "子",
+            "将前·月煞": "丑",
+            "将前·亡神": "寅"
+        },
+        "supplemental_positions": {
+            "天空": "辰",
+            "月德": "子",
+            "解神": "未",
+            "天巫": "辰",
+            "天月": "酉",
+            "阴煞": "丑",
+            "天伤": "戌",
+            "天使": "子",
+            "截空": "戌",
+            "旬空": "亥",
+            "天官": "巳",
+            "天福": "未",
+            "天厨": "申",
+            "破碎": "寅",
+            "天贵": "子",
+            "恩光": "寅"
+        },
+        "reference_validation": "新增40项仅完成公式实现及结构测试；部分安星规则需逐项核验",
+        "rules": {
+            "红鸾": "子年卯宫起，逆数年支",
+            "天喜": "红鸾对宫",
+            "天刑": "正月酉宫起，顺数生月",
+            "天姚": "正月丑宫起，顺数生月",
+            "博士十二神": "禄存宫起博士，阳男阴女顺、阴男阳女逆",
+            "长生十二神": "按五行局定长生起宫，阳男阴女顺、阴男阳女逆",
+            "天哭天虚": "子年午宫起，哭逆虚顺"
+        },
+        "status": "traditional_rules_provisional_not_reference_verified",
+        "total_charted_stars": 108,
+        "message": "常用安星口诀试算；不同流派、星曜层级及文墨天机设置尚未全面核对"
+    },
+    "brightness_reference": {
+        "verified_entries": 168,
+        "source_entries": 168,
+        "status": "public_source_not_independently_verified",
+        "message": "公开亮度资料已录入168项，尚未与标准命盘逐项校准。",
+        "coverage": 14
+    },
+    "verification": {
+        "reference": "文墨天机 1988-08-24 17:45、1988-10-29 05:45 男命截图",
+        "scope": "两张指定样盘的十四主星、命身宫、五行局；其他日期未全面验证",
+        "reverse_water_ji": "待规则核实，不自动判断",
+        "secondary_stars": "108项已排布且数量结构验证；新增40项未与文墨天机逐宫核对，部分规则暂为试算",
+        "four_transformations": "采用项目现有四化表，流派差异待核实"
+    },
+    "methodology": "V8.2 修正六十甲子纳音表后五组错位（庚戌至己未），校验火六局；庙旺利陷待标准表校准",
+    "warnings": [
+        "当前以民用日期（午夜00:00换日）计算，23:00至23:59子时的子初换日派别尚未实现。",
+        "仅针对两张指定样盘校验部分计算；108项中的新增40项尚未逐宫校准，部分安星规则为临时试算，不宜用于正式命理判断；逆水忌、真太阳时及四化流派仍待验证。"
+    ]
+}

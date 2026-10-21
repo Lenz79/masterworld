@@ -22,6 +22,6 @@ def load_brightness_audit():
             if branch not in rules.setdefault(star, {}):
                 rules[star][branch]=level
                 entries += 1
-    return rules, {'verified_entries': entries, 'source_entries': entries,
+    return rules, {'verified_entries': 0, 'source_entries': entries, 'unverified_entries': entries,
                    'status': 'public_source_not_independently_verified',
                    'message': f'公开亮度资料已录入{entries}项，尚未与标准命盘逐项校准。'}
