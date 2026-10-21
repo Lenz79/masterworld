@@ -40,7 +40,7 @@ async function loginWithGoogle(){
  await ready;
  if(!client)throw Error('Supabase 尚未初始化');
  const redirectTo=new URL('index.html',root.location.href).href;
- const {data,error}=await client.auth.signInWithOAuth({provider:'google',options:{redirectTo}});
+ const {data,error}=await client.auth.signInWithOAuth({provider:'google',options:{redirectTo,queryParams:{prompt:'select_account'}}});
  if(error)throw Error(error.message);
  return data;
 }
