@@ -1110,12 +1110,34 @@ function drawFlyArrows(box, selectedName){
   if(el){const r=el.getBoundingClientRect();cells[item.zhi]={x:r.left-rect.left,y:r.top-rect.top,w:r.width,h:r.height};}
   else {const w=width/4,h=height/4;cells[item.zhi]={x:item.c*w,y:item.r*h,w,h};}
  }
- const edges=(chart.flying_transformations||[]).filter(f=>{
-  if(f.self_transform)return false;
+ // 两种独立图层：点击宫位＝恢复跨宫长飞化线；射出／逆水＝固定短箭头。
+ const allEdges=(chart.flying_transformations||[]).filter(f=>!f.self_transform);
+ const ordinary=selectedName?allEdges.filter(f=>{
   if(oppositeOnly&&!opposite(f))return false;
-  if(opposite(f))return true;
-  return !!selectedName&&(((dir==='out'||dir==='both')&&f.from_palace===selectedName)||((dir==='in'||dir==='both')&&f.to_palace===selectedName));
+  return ((dir==='out'||dir==='both')&&f.from_palace===selectedName)||((dir==='in'||dir==='both')&&f.to_palace===selectedName);
+ }):[];
+ const special=allEdges.filter(f=>opposite(f));
+ // 普通飞化长线：从所点击宫位连到目标宫内对应星曜，保持原来的跨宫长度。
+ const starPoint=f=>{
+  const target=Array.from(box.children).find(e=>e.classList?.contains('palace-box')&&!e.classList.contains('center-box')&&Number(e.style.gridRow)===gridMapping.find(i=>i.zhi===f.to)?.r+1&&Number(e.style.gridColumn)===gridMapping.find(i=>i.zhi===f.to)?.c+1);
+  if(!target)return null;
+  const candidates=[...target.querySelectorAll('.star-col > span:first-child, .p-top-left > span')];
+  const match=candidates.find(e=>e.textContent.trim()===f.star);
+  if(!match)return null;
+  const r=match.getBoundingClientRect();return {x:r.left-rect.left+r.width/2,y:r.top-rect.top+r.height/2};
+ };
+ ordinary.forEach((f,i)=>{
+  const a=cells[f.from],b=cells[f.to];if(!a||!b)return;
+  const start={x:a.x+a.w/2,y:a.y+a.h/2};
+  const end=starPoint(f)||{x:b.x+b.w/2,y:b.y+b.h/2};
+  const vx=end.x-start.x,vy=end.y-start.y,len=Math.hypot(vx,vy)||1;
+  const sx=start.x+vx/len*39,sy=start.y+vy/len*39;
+  const tx=end.x-vx/len*12,ty=end.y-vy/len*12;
+  const px=-vy/len,py=vx/len,offset=((i%5)-2)*10;
+  const mx=(sx+tx)/2+px*offset,my=(sy+ty)/2+py*offset;
+  svgEl('path',{d:`M${sx} ${sy} Q${mx} ${my} ${tx} ${ty}`,stroke:colors[f.transformation]||'#64748b','stroke-width':2,fill:'none',opacity:.85,'marker-end':`url(#${uid}-${f.transformation})`});
  });
+ const edges=special;
  const groups={};for(const f of edges)(groups[f.from]??=[]).push(f);
  for(const [source,items] of Object.entries(groups)){
   const cell=cells[source];if(!cell)continue;
