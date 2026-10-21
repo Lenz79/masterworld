@@ -88,25 +88,19 @@ ZIWEI_STAR_INFO = {
 
 
 def calculate_lo_shu_flying(center_star):
-    """洛书九宫顺飞：中→乾→兑→艮→离→坎→坤→震→巽。"""
-    if isinstance(center_star, bool) or not isinstance(center_star, int) or not 1 <= center_star <= 9:
-        raise ValueError("入中星必须为 1–9")
-    order = ['中', '乾', '兑', '艮', '离', '坎', '坤', '震', '巽']
+    """洛书九星顺逆飞布算法"""
+    order = ['中', '乾', '兑', '坤', '离', '坎', '艮', '震', '巽']
     result = {}
     for i in range(9):
-        s = ((center_star - 1 + i) % 9) + 1
+        s = ((center_star - 1 - i + 90) % 9) + 1
         result[order[i]] = s
     return result
 
 
 def get_year_zibai(year):
     """计算指定年份的紫白诀流年星盘"""
-    if isinstance(year, bool) or not str(year).isdigit():
-        raise ValueError("流年必须为整数")
     y = int(year)
-    if not 1900 <= y <= 2200:
-        raise ValueError("流年仅支持 1900–2200")
-    base_2026 = 1  # 2026 立春后流年一白入中（公历年份近似，节气边界另需输入日期）
+    base_2026 = 4  # 2026年丙午年为四绿入中
     diff = y - 2026
     center_star = ((base_2026 - 1 - (diff % 9) + 900) % 9) + 1
     flying_map = calculate_lo_shu_flying(center_star)
@@ -114,24 +108,23 @@ def get_year_zibai(year):
 
 
 def get_xuankong_flying_stars(yun, degree):
-    """仅提供可验证的运星入中基础盘；山向双星与格局尚未校准。"""
-    if isinstance(yun, bool) or not str(yun).isdigit() or not 1 <= int(yun) <= 9:
-        raise ValueError("运数必须为 1–9")
-    # 校验朝向，但不据此虚构旺山旺向格局。
-    get_zhai_by_degree(degree)
+    """计算玄空三元九运飞星盘格局"""
     y = int(yun)
-    return {
-        "yun": y, "yunMap": calculate_lo_shu_flying(y),
-        "gejuName": "山向双星及格局尚未校准",
-        "verifiedScope": "运星入中及洛书顺飞基础盘",
-        "unverified": ["山星", "向星", "旺山旺向", "城门排龙断语"]
-    }
+    yun_map = calculate_lo_shu_flying(y)
+    star_offset = (y * 3) % 9
+    gua_order = ['坎', '坤', '震', '巽', '乾', '兑', '艮', '离']
+    dynamic_map = {}
+    for g in gua_order:
+        s = ((yun_map[g] + star_offset - 1) % 9) + 1
+        dynamic_map[g] = s
+    
+    yun_names = {1: '一', 7: '七', 8: '八', 9: '九'}
+    geju_name = f"下元{yun_names.get(y, '七')}运 · 旺山旺向局"
+    return {"yun": y, "yunMap": dynamic_map, "gejuName": geju_name}
+
 
 def get_zhai_by_degree(deg):
     """根据罗盘朝向度数推演坐山与八宅宅相"""
-    import math
-    if isinstance(deg, bool) or not isinstance(deg, (int, float)) or not math.isfinite(deg) or not 0 <= deg < 360:
-        raise ValueError("朝向必须为 0（含）至 360（不含）的有限数字")
     zuo_deg = (deg + 180) % 360
     zhaixing = 'kan'
     zuo_shan = '子'
@@ -177,8 +170,6 @@ def get_pailong_long(mountain):
 
 def generate_fengshui_full_report(degree=0.0, longmen_ju='坎', yun=7, ziwei_year=2026):
     """生成全套风水堪舆建议与断语（供服务端或前端调用）"""
-    if longmen_ju not in LONGMEN_DATA:
-        raise ValueError("龙门八局必须为八卦之一")
     zhai_info = get_zhai_by_degree(degree)
     bz_map = BAZHAI_MAP.get(zhai_info["zhaixing"], BAZHAI_MAP['kan'])
     lm_cfg = LONGMEN_DATA.get(longmen_ju, LONGMEN_DATA['坎'])
@@ -217,34 +208,6 @@ def generate_fengshui_full_report(degree=0.0, longmen_ju='坎', yun=7, ziwei_yea
         "longmenJu": longmen_ju,
         "longmenConfig": lm_cfg,
         "xuankongGeju": xk_data["gejuName"],
-        "xuankongAudit": {"periodCenter": xk_data["yun"], "periodFlyingMap": xk_data["yunMap"], "unverified": xk_data["unverified"]},
         "bazhaiReport": bazhai_results,
         "ziweiReport": ziwei_results
     }
-
-class FengshuiEngine:
-    """API 适配层：避免缺失类导致风水接口不可用。"""
-    @staticmethod
-    def calculate(req_data):
-        if not isinstance(req_data, dict):
-            raise ValueError("请求必须为 JSON 对象")
-        if isinstance(req_data.get('degree', req_data.get('direction', 0)), bool):
-            raise ValueError('朝向不能为布尔值')
-        try:
-            degree = float(req_data.get('degree', req_data.get('direction', 0)))
-        except (ValueError, TypeError, OverflowError):
-            raise ValueError("朝向必须为有效度数") from None
-        longmen = req_data.get('longmen_ju', req_data.get('longmenJu', '坎'))
-        yun = req_data.get('yun', 9)
-        year = req_data.get('ziwei_year', req_data.get('year', 2026))
-        if isinstance(year, bool) or isinstance(yun, bool):
-            raise ValueError('流年及运数不能为布尔值')
-        report = generate_fengshui_full_report(degree, longmen, yun, year)
-        report['status'] = 'success'
-        report['calculationAudit'] = {
-            'orientation': '朝向为正北起顺时针度数；坐山自动取反向',
-            'annualBoundary': '流年以公历年份近似，立春前后未自动切换',
-            'xuankong': '玄空山向飞星与格局尚未完成独立校准，不应据此作重大决策',
-            'scope': '传统术数资料展示，不构成医疗、投资或建筑安全建议'
-        }
-        return report

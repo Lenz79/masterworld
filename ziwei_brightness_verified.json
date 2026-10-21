@@ -1,0 +1,875 @@
+{
+  "status": "partial",
+  "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+  "notes": "十四主星168项根据公开亮度表录入；未验证与文墨天机一致；六吉六煞144项尚无统一可靠等级，保持空白。",
+  "stars": {
+    "紫微": {
+      "子": {
+        "level": "平",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "丑": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "寅": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "卯": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "辰": {
+        "level": "得",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "巳": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "午": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "未": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "申": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "酉": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "戌": {
+        "level": "得",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "亥": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      }
+    },
+    "天机": {
+      "子": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "丑": {
+        "level": "陷",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "寅": {
+        "level": "得",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "卯": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "辰": {
+        "level": "利",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "巳": {
+        "level": "平",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "午": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "未": {
+        "level": "陷",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "申": {
+        "level": "得",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "酉": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "戌": {
+        "level": "利",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "亥": {
+        "level": "平",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      }
+    },
+    "太阳": {
+      "子": {
+        "level": "陷",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "丑": {
+        "level": "不",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "寅": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "卯": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "辰": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "巳": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "午": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "未": {
+        "level": "得",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "申": {
+        "level": "得",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "酉": {
+        "level": "平",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "戌": {
+        "level": "不",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "亥": {
+        "level": "陷",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      }
+    },
+    "武曲": {
+      "子": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "丑": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "寅": {
+        "level": "得",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "卯": {
+        "level": "利",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "辰": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "巳": {
+        "level": "平",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "午": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "未": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "申": {
+        "level": "得",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "酉": {
+        "level": "利",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "戌": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "亥": {
+        "level": "平",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      }
+    },
+    "天同": {
+      "子": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "丑": {
+        "level": "不",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "寅": {
+        "level": "利",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "卯": {
+        "level": "平",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "辰": {
+        "level": "平",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "巳": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "午": {
+        "level": "陷",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "未": {
+        "level": "不",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "申": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "酉": {
+        "level": "平",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "戌": {
+        "level": "平",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "亥": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      }
+    },
+    "廉贞": {
+      "子": {
+        "level": "平",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "丑": {
+        "level": "利",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "寅": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "卯": {
+        "level": "平",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "辰": {
+        "level": "利",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "巳": {
+        "level": "陷",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "午": {
+        "level": "平",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "未": {
+        "level": "利",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "申": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "酉": {
+        "level": "平",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "戌": {
+        "level": "利",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "亥": {
+        "level": "陷",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      }
+    },
+    "天府": {
+      "子": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "丑": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "寅": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "卯": {
+        "level": "得",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "辰": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "巳": {
+        "level": "得",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "午": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "未": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "申": {
+        "level": "得",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "酉": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "戌": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "亥": {
+        "level": "得",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      }
+    },
+    "太阴": {
+      "子": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "丑": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "寅": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "卯": {
+        "level": "陷",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "辰": {
+        "level": "陷",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "巳": {
+        "level": "陷",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "午": {
+        "level": "不",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "未": {
+        "level": "不",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "申": {
+        "level": "利",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "酉": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "戌": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "亥": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      }
+    },
+    "贪狼": {
+      "子": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "丑": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "寅": {
+        "level": "平",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "卯": {
+        "level": "利",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "辰": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "巳": {
+        "level": "陷",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "午": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "未": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "申": {
+        "level": "平",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "酉": {
+        "level": "利",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "戌": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "亥": {
+        "level": "陷",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      }
+    },
+    "巨门": {
+      "子": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "丑": {
+        "level": "不",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "寅": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "卯": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "辰": {
+        "level": "陷",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "巳": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "午": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "未": {
+        "level": "不",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "申": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "酉": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "戌": {
+        "level": "陷",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "亥": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      }
+    },
+    "天相": {
+      "子": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "丑": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "寅": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "卯": {
+        "level": "陷",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "辰": {
+        "level": "得",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "巳": {
+        "level": "得",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "午": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "未": {
+        "level": "得",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "申": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "酉": {
+        "level": "陷",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "戌": {
+        "level": "得",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "亥": {
+        "level": "得",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      }
+    },
+    "天梁": {
+      "子": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "丑": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "寅": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "卯": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "辰": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "巳": {
+        "level": "陷",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "午": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "未": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "申": {
+        "level": "陷",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "酉": {
+        "level": "得",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "戌": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "亥": {
+        "level": "陷",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      }
+    },
+    "七杀": {
+      "子": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "丑": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "寅": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "卯": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "辰": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "巳": {
+        "level": "平",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "午": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "未": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "申": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "酉": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "戌": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "亥": {
+        "level": "平",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      }
+    },
+    "破军": {
+      "子": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "丑": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "寅": {
+        "level": "得",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "卯": {
+        "level": "陷",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "辰": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "巳": {
+        "level": "平",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "午": {
+        "level": "庙",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "未": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "申": {
+        "level": "得",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "酉": {
+        "level": "陷",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "戌": {
+        "level": "旺",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      },
+      "亥": {
+        "level": "平",
+        "source": "https://ziweihome.com/zh-hans/xingyao/miaowang （公开亮度表；未与文墨天机逐项核对）",
+        "checked_by": "公开资料转录及表格结构复核（非文墨天机认证）"
+      }
+    }
+  }
+}

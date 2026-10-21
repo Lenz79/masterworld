@@ -49,24 +49,6 @@
         #floorplan-img { width: 100%; height: 100%; object-fit: contain; position: absolute; top: 0; left: 0; cursor: grab; user-select: none; z-index: 1; display: none; transform-origin: center center; }
         #luopan-canvas { width: 100% !important; height: 100% !important; position: absolute; top: 0; left: 0; z-index: 10; pointer-events: none; opacity: 1 !important; }
 
-        .floorplan-toolbar { background:#1e293b; border:1px solid #334155; border-radius:10px; padding:12px; margin:8px 0 10px; display:flex; flex-wrap:wrap; align-items:end; gap:10px 16px; }
-        .floorplan-control { display:flex; align-items:center; gap:7px; min-width:190px; flex:1; }
-        .floorplan-control label { color:#38bdf8; font-weight:600; font-size:.8rem; white-space:nowrap; }
-        .floorplan-control input[type=range] { min-width:80px; flex:1; }
-        .floorplan-control output { min-width:48px; color:#facc15; font-size:.8rem; text-align:right; }
-        .floorplan-file { flex:1 1 250px; min-width:200px; }
-        .floorplan-file label { display:block; color:#38bdf8; font-size:.8rem; margin-bottom:5px; font-weight:600; }
-        .floorplan-file input { width:100%; max-width:100%; color:#e2e8f0; font-size:.8rem; }
-        .floorplan-actions { display:flex; gap:8px; flex-wrap:wrap; }
-        .floorplan-actions button { flex:0 0 auto; }
-        @media(max-width:600px) {
-          .external-control-bar {flex-wrap:wrap;}
-          .floorplan-control {flex-basis:100%;}
-          /* 手机图层选择全部显示：不再被 details 的 overflow:hidden 裁掉 */
-          .layer-toolbar-content { flex-wrap:wrap; justify-content:flex-start; gap:10px 14px; padding:12px; }
-          .layer-item { flex:0 0 auto; font-size:.78rem; }
-          .layer-item input[type="checkbox"] { flex-shrink:0; }
-        }
         .measure-info { position: absolute; top: 10px; right: 10px; background: rgba(15, 23, 42, 0.9); border: 1px solid #38bdf8; padding: 5px 10px; border-radius: 5px; font-size: 0.72rem; color: #38bdf8; z-index: 30; display: none; font-weight: bold; }
 
         /* 报表样式 */
@@ -103,29 +85,13 @@
 
         @media print {
             body { background: #fff; color: #000; }
-            .home-bar, details, .external-control-bar, .floorplan-toolbar, .btn-group-row, #btn-analyze-all { display: none !important; }
+            .home-bar, details, .external-control-bar, .btn-group-row, #btn-analyze-all { display: none !important; }
             .canvas-container { border: 2px solid #000; break-inside: avoid; background: #fff !important; }
             .analysis-section { background: #fff; color: #000; border: none; }
             .report-block { background: #f8fafc; border: 1px solid #cbd5e1; }
             .analysis-horizontal-scroll { flex-direction: column; overflow: visible; }
             .palace-card { flex: 1 1 100%; margin-bottom: 6px; }
         }
-    
-        /* 全平台客户档案：只增加客户上下文，不改变罗盘及风水计算 */
-        .fs-customer-panel { background:#1e293b; border:1px solid #475569; border-radius:9px; padding:12px; margin-bottom:9px; }
-        .fs-customer-panel h3 { margin:0 0 9px; color:#f59e0b; font-size:.88rem; }
-        .fs-customer-controls { display:flex; gap:7px; align-items:center; flex-wrap:wrap; }
-        .fs-customer-controls select { flex:1; min-width:190px; background:#0f172a; color:#e2e8f0; border:1px solid #475569; padding:8px; border-radius:6px; }
-        .fs-customer-controls button { background:#0284c7; color:white; border:0; border-radius:6px; padding:8px 11px; cursor:pointer; }
-        .fs-kua { margin-top:9px; padding:10px 12px; background:#0f172a; border:1px solid #38bdf8; border-radius:7px; color:#e2e8f0; font-size:.85rem; line-height:1.65; }
-        .fs-kua strong { color:#fbbf24; }
-        .fs-kua small { color:#94a3b8; display:block; }
-        .fs-customer-add-form { margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; align-items:end; }
-        .fs-customer-add-form[hidden], .fs-customer-controls select[hidden] { display:none; }
-        .fs-customer-add-form label { color:#cbd5e1; font-size:.78rem; }
-        .fs-customer-add-form input, .fs-customer-add-form select { display:block; width:110px; padding:7px; background:#0f172a; color:#fff; border:1px solid #64748b; border-radius:5px; }
-        .fs-customer-add-form button { padding:8px 12px; cursor:pointer; }
-        .fs-customer-info { color:#94a3b8; font-size:.76rem; margin:8px 0 0; line-height:1.5; }
     </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="xinggui_session.js"></script>
@@ -138,43 +104,6 @@
         <div class="title-text">🏠 阳宅风水多盘系统</div>
         <div class="user-tag" id="user-info-tag">加载中</div>
     </div>
-
-
-    <!-- 全平台统一客户档案：客户身份与房屋堪舆参数分别管理 -->
-    <section class="fs-customer-panel" aria-label="全平台客户档案">
-        <h3>📁 全平台客户档案 · 风水客户选择</h3>
-        <div class="fs-customer-controls">
-            <button type="button" id="fs-customer-refresh">📂 读取已存客户八字</button>
-            <button type="button" id="fs-customer-add">➕ 添加用户</button>
-            <select id="fs-customer-select" aria-label="选择已存客户" hidden><option value="">我的个人命盘</option></select>
-        </div>
-        <div id="fs-customer-manager" hidden class="fs-customer-add-form" style="margin-top:12px">
-            <strong>📂 已存客户档案</strong>
-            <div class="fs-customer-controls" style="margin-top:10px">
-                <select id="fs-manager-select" aria-label="已存客户名单"><option value="">请选择客户</option></select>
-                <button type="button" id="fs-manager-read">读取</button>
-                <button type="button" id="fs-manager-rename">改名</button>
-                <button type="button" id="fs-manager-edit">更新资料</button>
-                <button type="button" id="fs-manager-delete">删除</button>
-                <button type="button" id="fs-manager-close">关闭</button>
-            </div>
-            <p id="fs-manager-message" role="status" hidden></p>
-        </div>
-        <div id="fs-kua-result" class="fs-kua" role="status">正在读取我的命卦…</div>
-        <p id="fs-customer-info" class="fs-customer-info" role="status" hidden></p>
-        <form id="fs-add-customer-form" hidden class="fs-customer-add-form"><strong id="fs-customer-form-title">➕ 添加客户</strong>
-            <label>姓名 <input name="name" required maxlength="100" placeholder="新客户姓名"></label>
-            <label>性别 <select name="gender"><option>男</option><option>女</option></select></label>
-            <label>历法 <select name="calendar"><option value="solar">公历</option><option value="lunar">农历</option></select></label>
-            <label>年 <input name="year" type="number" min="1900" max="2200" required></label>
-            <label>月 <input name="month" type="number" min="1" max="12" required></label>
-            <label>日 <input name="day" type="number" min="1" max="31" required></label>
-            <label>时 <input name="hour" type="number" min="0" max="23" required value="12"></label>
-            <label>分 <input name="minute" type="number" min="0" max="59" required value="0"></label>
-            <button type="submit">保存客户</button><button type="button" id="fs-add-cancel">取消</button>
-            <p id="fs-add-error" role="alert" hidden></p>
-        </form>
-    </section>
 
     <!-- 图层勾选面板：拓宽后完美单行显示所有 7 个图层 -->
     <details open>
@@ -195,7 +124,12 @@
         <summary>📐 点击展开/收起 其他堪舆参数设置 (户型图 / 卦局 / 元运 / 年份)</summary>
         <div class="control-panel">
             <div class="control-group">
-                <label>1. 龙门八局（坐山卦局）</label>
+                <label>1. 上传户型图 (Floorplan)</label>
+                <input type="file" id="upload-floorplan" accept="image/*">
+            </div>
+
+            <div class="control-group">
+                <label>2. 龙门八局（坐山卦局）</label>
                 <select id="longmen-ju">
                     <option value="乾">乾局 (坐西北)</option>
                     <option value="坤">坤局 (坐西南)</option>
@@ -209,7 +143,7 @@
             </div>
 
             <div class="control-group">
-                <label>2. 选择玄空元运</label>
+                <label>3. 选择玄空元运</label>
                 <select id="xuankong-yun">
                     <option value="9">下元九运 (2024 - 2043年)</option>
                     <option value="8">下元八运 (2004 - 2023年)</option>
@@ -219,7 +153,7 @@
             </div>
 
             <div class="control-group">
-                <label>3. 紫白诀流年份</label>
+                <label>4. 紫白诀流年份</label>
                 <input type="number" id="ziwei-year" value="2026" min="1900" max="2100">
             </div>
 
@@ -229,28 +163,6 @@
             </div>
         </div>
     </details>
-
-    <!-- 户型图独立操作区：放在折叠参数面板之外，随时可操作 -->
-    <section class="floorplan-toolbar" aria-label="户型图调整与导出">
-        <div class="floorplan-file">
-            <label for="upload-floorplan">📂 上传户型图 (Floorplan)</label>
-            <input type="file" id="upload-floorplan" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp">
-        </div>
-        <div class="floorplan-control">
-            <label for="floorplan-scale">🔍 缩放</label>
-            <input id="floorplan-scale" type="range" min="20" max="500" step="1" value="100">
-            <output id="floorplan-scale-value" for="floorplan-scale">100%</output>
-        </div>
-        <div class="floorplan-control">
-            <label for="floorplan-rotation">🔄 旋转</label>
-            <input id="floorplan-rotation" type="range" min="0" max="360" step="1" value="0">
-            <output id="floorplan-rotation-value" for="floorplan-rotation">0°</output>
-        </div>
-        <div class="floorplan-actions">
-            <button class="btn-action btn-secondary" type="button" id="btn-floorplan-reset">↩️ 复位户型图</button>
-            <button class="btn-action btn-secondary" type="button" id="btn-export-overlay">🖼️ 单独导出罗盘＋户型图</button>
-        </div>
-    </section>
 
     <!-- 🧭 罗盘上方的外置控制栏：单行排列 -->
     <div class="external-control-bar">
@@ -280,7 +192,7 @@
         <div class="canvas-container" id="canvas-container">
             <div class="measure-info" id="measure-info">📏 测量中</div>
             <div style="color: #64748b; text-align: center; position: absolute; z-index: 2; font-size: 0.8rem;" id="canvas-placeholder">
-                📂 提示：使用上方独立工具栏上传户型图
+                📂 提示：在上方“其他堪舆参数设置”上传户型图
             </div>
             <img id="floorplan-img" src="" alt="">
             <canvas id="luopan-canvas" width="880" height="880"></canvas>
@@ -347,233 +259,23 @@
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
-        try { await XingguiSession.ready; } catch(e) { alert('登录服务不可用：'+e.message); location.replace('index.html'); return; }
-        if (!XingguiSession.requireLogin()) return;
-        const p=XingguiSession.profile();
-        const tag=document.getElementById('user-info-tag');
-        if(tag)tag.textContent=p?.name||'当前账号';
+        try { if (!await XingguiSession.verifyLogin()) { location.replace('index.html'); return; } }
+        catch(e) { console.error(e); location.replace('index.html'); return; }
+        const profileStr = localStorage.getItem('metaphysics_common_profile');
+        if (profileStr) {
+            try {
+                const p = JSON.parse(profileStr);
+                document.getElementById('user-info-tag').innerText = `${p.name}`;
+            } catch(e) {}
+        }
 
         document.getElementById('luopan-opacity').value = 10;
         document.getElementById('opacity-val').innerText = 10;
 
         initEventListeners();
-        initFengshuiCustomers();
         initCanvasInteraction();
         renderCanvasAndReport();
     });
-
-
-    // 与八字、紫微共用 /api/customers；不创建另一套风水客户资料。
-    let fsCustomerRows = [];
-    let fsEditingCustomerId = null;
-    async function fsCustomerHeaders() {
-        const sessionClient = await XingguiSession.ready;
-        const { data: { session }, error } = await sessionClient.auth.getSession();
-        if (error || !session?.access_token) throw new Error('登录已失效，请重新登录');
-        return { 'Authorization': 'Bearer ' + session.access_token, 'Content-Type': 'application/json' };
-    }
-    function fsSelectedCustomer() {
-        const id = document.getElementById('fs-customer-select').value;
-        return fsCustomerRows.find(r => r.id === id) || null;
-    }
-    // 传统八宅命卦：1900年代与2000年后的男女算法不同；五黄命卦须转换。
-    // 年界按立春，不直接等同农历春节。出生日期靠近立春时不自动推断。
-    function fsKuaFromBirth(birth) {
-        const year = Number(birth?.year);
-        const gender = String(birth?.gender || '').trim();
-        const calendar = String(birth?.calendar || 'solar').toLowerCase();
-        if (!Number.isInteger(year) || year < 1900 || year > 2099)
-            return {error:'命卦暂支持 1900–2099 年出生资料'};
-        if (!['男','女','male','female','M','F'].includes(gender))
-            return {error:'性别未明确，无法计算命卦'};
-        const male = ['男','male','M'].includes(gender);
-        const month = Number(birth?.month), day = Number(birth?.day);
-        // 公历 1 月、2 月初可能属于上一立春年；不猜测立春具体时刻。
-        if (calendar !== 'solar' && calendar !== 'gregorian' && calendar !== '公历')
-            return {error:'当前资料为农历，需先准确转换公历及立春年，暂不显示未经核实的命卦'};
-        if (!Number.isInteger(month) || !Number.isInteger(day) || month < 1 || month > 12 || day < 1 || day > 31)
-            return {error:'出生日期不完整，无法计算命卦'};
-        if (!Number.isInteger(birth?.solarYearForKua))
-            return {error:'正在校验立春交节时刻…'};
-        const effectiveYear = birth.solarYearForKua;
-        let digit = (effectiveYear % 100).toString().split('').reduce((sum, n) => sum + Number(n), 0);
-        while (digit > 9) digit = Math.floor(digit / 10) + digit % 10;
-        let kua = male ? (effectiveYear >= 2000 ? 9 : 10) - digit : (effectiveYear >= 2000 ? 6 : 5) + digit;
-        kua = ((kua - 1) % 9 + 9) % 9 + 1;
-        if (kua === 5) kua = male ? 2 : 8;
-        const palaces = {1:'坎',2:'坤',3:'震',4:'巽',6:'乾',7:'兑',8:'艮',9:'离'};
-        const east = [1,3,4,9].includes(kua);
-        return {kua, palace:palaces[kua], group:east?'东四命':'西四命',
-                auspicious:east?'坎、离、震、巽':'乾、坤、艮、兑'};
-    }
-    let fsKuaRequestId = 0;
-    async function fsShowKua() {
-        const requestId = ++fsKuaRequestId;
-        const r = fsSelectedCustomer();
-        const originalBirth = r || XingguiSession.profile();
-        let birth = originalBirth;
-        if (birth) {
-            const y = Number(birth.year), m = Number(birth.month), d = Number(birth.day);
-            const hh = Number(birth.hour ?? 0), mm = Number(birth.minute ?? 0);
-            const cal = String(birth.calendar || 'solar').toLowerCase();
-            if (['solar','gregorian','公历'].includes(cal) &&
-                Number.isInteger(y) && Number.isInteger(m) && Number.isInteger(d) &&
-                Number.isInteger(hh) && hh >= 0 && hh <= 23 &&
-                Number.isInteger(mm) && mm >= 0 && mm <= 59) {
-                try {
-                    const response = await fetch('/api/solar-terms/lichun?year=' + encodeURIComponent(y), {cache:'no-store'});
-                    const data = await response.json();
-                    if (!response.ok || data.status !== 'success') throw new Error(data.message || '节气数据不可用');
-                    // Both birth and solar-term are compared as UTC+8 civil clock times.
-                    // Do not silently assume a different birth timezone.
-                    const term = data.lichun_local_utc8;
-                    const birthStamp = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')} ${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:00`;
-                    birth = {...birth, solarYearForKua: birthStamp < term ? y-1 : y};
-                } catch (e) {
-                    birth = {...birth, solarTermError: e.message};
-                }
-            }
-        }
-        if (requestId !== fsKuaRequestId) return;
-        const el = document.getElementById('fs-kua-result');
-        if (!birth) { el.textContent = '暂无出生资料，请先登录并设置个人出生档案，或选择客户。'; return; }
-        const name = String(birth.name || (r ? '当前客户' : '我的个人命盘'));
-        const result = fsKuaFromBirth(birth);
-        if (birth?.solarTermError) result.error = '无法核实立春：' + birth.solarTermError;
-        el.replaceChildren();
-        const heading = document.createElement('strong');
-        heading.textContent = `${r ? '当前客户' : '我的个人命盘'}：${name} · ` +
-            (result.error ? '命卦待核实' : `${result.palace}卦（${result.kua}） · ${result.group}`);
-        el.append(heading);
-        const detail = document.createElement('small');
-        detail.textContent = result.error ? result.error :
-            `八宅命卦参考吉方所属：${result.auspicious}。命卦属于人的属性，与房屋宅卦分别判断；不会自动修改罗盘朝向。`;
-        el.append(detail);
-        const note = document.createElement('small');
-        note.textContent = '以东八区（UTC+8）立春交节为年界，节气数据来自服务器 lunar_python；出生地非东八区须先转换时区。';
-        el.append(note);
-    }
-    function fsShowCustomer() {
-        const r = fsSelectedCustomer();
-        document.getElementById('fs-customer-info').textContent = r
-            ? `当前风水客户：${r.name}（${r.gender}）；出生资料：${r.calendar === 'lunar' ? '农历' : '公历'} ${r.year}-${r.month}-${r.day} ${String(r.hour).padStart(2,'0')}:${String(r.minute).padStart(2,'0')}。罗盘和户型图仍按本页参数独立操作，未自动保存。`
-            : '未指定客户：上方显示登录账号的个人命卦。可选择八字或紫微保存的客户查看其命卦；风水朝向、户型图和元运不会被出生资料覆盖。';
-        document.getElementById('fs-customer-info').hidden=true;
-        fsShowKua();
-    }
-    function fsManagerMessage(message) {
-        const el=document.getElementById('fs-manager-message');
-        el.textContent=message || ''; el.hidden=!message;
-    }
-    async function fsLoadCustomers(preferredId) {
-        const select=document.getElementById('fs-customer-select');
-        const manager=document.getElementById('fs-manager-select');
-        const oldId=preferredId===undefined ? select.value : preferredId;
-        fsManagerMessage('');
-        try {
-            const response=await fetch('/api/customers',{headers:await fsCustomerHeaders()});
-            const result=await response.json().catch(()=>null);
-            if (!response.ok || result?.status!=='success' || !Array.isArray(result.data))
-                throw new Error(result?.message || '客户档案接口暂不可用');
-            fsCustomerRows=result.data;
-            select.replaceChildren(new Option('我的个人命盘',''));
-            manager.replaceChildren(new Option('请选择客户',''));
-            for (const r of fsCustomerRows) {
-                const title=`${r.name}（${r.gender}） · ${r.year}-${r.month}-${r.day}`;
-                select.add(new Option(title,r.id)); manager.add(new Option(title,r.id));
-            }
-            select.value=fsCustomerRows.some(r=>r.id===oldId) ? oldId : '';
-            manager.value=select.value;
-            select.hidden=true; // Customer selection is confined to the manager panel.
-            document.getElementById('fs-customer-manager').hidden=false;
-            if (!fsCustomerRows.length) fsManagerMessage('暂无已保存客户，可点击「添加用户」。');
-            fsShowCustomer();
-        } catch(err) {
-            // Explicit user action: show a friendly message only inside the opened manager.
-            document.getElementById('fs-customer-manager').hidden=false;
-            fsManagerMessage('客户档案暂时无法读取，请检查是否已登录及客户接口是否可用。');
-            console.warn('客户档案读取失败',err);
-        }
-    }
-    function fsManagerRow() {
-        const id=document.getElementById('fs-manager-select').value;
-        return fsCustomerRows.find(r=>r.id===id)||null;
-    }
-    function fsReadManagedCustomer() {
-        const row=fsManagerRow();
-        if (!row) {fsManagerMessage('请先选择客户。');return;}
-        document.getElementById('fs-customer-select').value=row.id;
-        document.getElementById('fs-customer-manager').hidden=true;
-        fsShowCustomer();
-    }
-    async function fsManageCustomer(action) {
-        const r=fsManagerRow();
-        if (!r) {fsManagerMessage('请先选择客户。');return;}
-        const body={action,id:r.id};
-        if (action==='rename') {
-            const name=prompt('客户新姓名',r.name);
-            if (name===null)return;
-            if (!name.trim()) {fsManagerMessage('姓名不能为空。');return;}
-            body.name=name.trim();
-        } else if (!confirm(`确定删除客户「${r.name}」？该客户将从八字、紫微及风水的共用名单移除。历史排盘报告不会自动删除。`))return;
-        try {
-            const response=await fetch('/api/customers/manage',{method:'POST',headers:await fsCustomerHeaders(),body:JSON.stringify(body)});
-            const result=await response.json().catch(()=>null);
-            if (!response.ok || result?.status!=='success')throw new Error(result?.message||'操作失败');
-            await fsLoadCustomers(action==='rename'?r.id:'');
-        } catch(err) {fsManagerMessage('操作失败：'+err.message);}
-    }
-    function fsOpenEditCustomer() {
-        const r=fsManagerRow();
-        if (!r) {fsManagerMessage('请先选择客户。');return;}
-        const form=document.getElementById('fs-add-customer-form');
-        for (const key of ['name','gender','calendar','year','month','day','hour','minute'])
-            form.elements.namedItem(key).value=r[key];
-        fsEditingCustomerId=r.id;
-        document.getElementById('fs-customer-form-title').textContent='✏️ 更新客户出生资料';
-        document.getElementById('fs-add-error').hidden=true;
-        form.hidden=false;
-    }
-    async function fsAddCustomer(event) {
-        event.preventDefault();
-        const form=event.currentTarget, errorEl=document.getElementById('fs-add-error');
-        errorEl.hidden=true;
-        const fd=new FormData(form);
-        const data={name:String(fd.get('name')||'').trim(),gender:fd.get('gender'),calendar:fd.get('calendar')};
-        for (const k of ['year','month','day','hour','minute'])data[k]=Number(fd.get(k));
-        if (!data.name || !form.reportValidity())return;
-        const editingId=fsEditingCustomerId;
-        const url=editingId?'/api/customers/manage':'/api/customers/save';
-        const payload=editingId?{...data,id:editingId,action:'update'}:data;
-        try {
-            const response=await fetch(url,{method:'POST',headers:await fsCustomerHeaders(),body:JSON.stringify(payload)});
-            const result=await response.json().catch(()=>null);
-            if (!response.ok || result?.status!=='success')throw new Error(result?.message||'保存失败');
-            fsEditingCustomerId=null;form.hidden=true;form.reset();
-            document.getElementById('fs-customer-form-title').textContent='➕ 添加客户';
-            await fsLoadCustomers(editingId || result.id || '');
-        } catch(err) {errorEl.textContent='保存失败：'+err.message;errorEl.hidden=false;}
-    }
-    function initFengshuiCustomers() {
-        document.getElementById('fs-customer-select').addEventListener('change',fsShowCustomer);
-        document.getElementById('fs-customer-refresh').addEventListener('click',()=>fsLoadCustomers());
-        document.getElementById('fs-manager-read').addEventListener('click',fsReadManagedCustomer);
-        document.getElementById('fs-manager-rename').addEventListener('click',()=>fsManageCustomer('rename'));
-        document.getElementById('fs-manager-edit').addEventListener('click',fsOpenEditCustomer);
-        document.getElementById('fs-manager-delete').addEventListener('click',()=>fsManageCustomer('delete'));
-        document.getElementById('fs-manager-close').addEventListener('click',()=>document.getElementById('fs-customer-manager').hidden=true);
-        document.getElementById('fs-customer-add').addEventListener('click',()=>{
-            fsEditingCustomerId=null;
-            const form=document.getElementById('fs-add-customer-form');form.reset();
-            document.getElementById('fs-customer-form-title').textContent='➕ 添加客户';
-            document.getElementById('fs-add-error').hidden=true;form.hidden=false;
-        });
-        document.getElementById('fs-add-cancel').addEventListener('click',()=>{
-            fsEditingCustomerId=null;document.getElementById('fs-add-customer-form').hidden=true;
-        });
-        document.getElementById('fs-add-customer-form').addEventListener('submit',fsAddCustomer);
-        fsShowKua(); // Do not load customers or show errors on page load.
-    }
 
     function initEventListeners() {
         document.querySelectorAll('input[type="checkbox"]').forEach(chk => {
@@ -596,21 +298,13 @@
         });
 
         document.getElementById('upload-floorplan').addEventListener('change', loadFloorplan);
-        document.getElementById('floorplan-scale').addEventListener('input', (e) => {
-            imgScale = Number(e.target.value) / 100;
-            updateFloorplanTransform();
-        });
-        document.getElementById('floorplan-rotation').addEventListener('input', (e) => {
-            imgRotation = Number(e.target.value);
-            updateFloorplanTransform();
-        });
-        document.getElementById('btn-floorplan-reset').addEventListener('click', resetFloorplanTransform);
-        document.getElementById('btn-export-overlay').addEventListener('click', exportCompassFloorplan);
         document.getElementById('btn-analyze-all').addEventListener('click', generateFullAnalysisReport);
 
         document.getElementById('btn-reset-view').addEventListener('click', () => {
             syncDegree(0);
-            resetFloorplanTransform();
+            const img = document.getElementById('floorplan-img');
+            img.style.transform = 'translate(0px, 0px) scale(1)';
+            imgPosX = 0; imgPosY = 0; imgScale = 1;
             measureStart = null;
             measureEnd = null;
             renderCanvasAndReport();
@@ -997,72 +691,15 @@
                 img.src = e.target.result;
                 img.style.display = 'block';
                 document.getElementById('canvas-placeholder').style.display = 'none';
-                resetFloorplanTransform();
+                img.style.transform = 'translate(0px, 0px) scale(1)';
+                imgPosX = 0; imgPosY = 0; imgScale = 1;
                 renderCanvasAndReport();
             }
             reader.readAsDataURL(file);
         }
     }
 
-    let imgPosX = 0, imgPosY = 0, imgScale = 1, imgRotation = 0;
-
-    function updateFloorplanTransform() {
-        const img = document.getElementById('floorplan-img');
-        img.style.transform = `translate(${imgPosX}px, ${imgPosY}px) rotate(${imgRotation}deg) scale(${imgScale})`;
-        document.getElementById('floorplan-scale').value = Math.round(imgScale * 100);
-        document.getElementById('floorplan-scale-value').textContent = `${Math.round(imgScale * 100)}%`;
-        document.getElementById('floorplan-rotation').value = imgRotation;
-        document.getElementById('floorplan-rotation-value').textContent = `${imgRotation}°`;
-    }
-
-    function resetFloorplanTransform() {
-        imgPosX = 0; imgPosY = 0; imgScale = 1; imgRotation = 0;
-        updateFloorplanTransform();
-    }
-
-    // 按屏幕可见的图层顺序合成 PNG：底色 -> 平移/旋转/缩放的户型图 -> 罗盘。
-    // 不包含工具栏、报告或按钮；输出正方形高分辨率图片。
-    function exportCompassFloorplan() {
-        const img = document.getElementById('floorplan-img');
-        if (!img.complete || !img.naturalWidth || img.style.display === 'none') {
-            alert('请先上传户型图，再导出罗盘叠加图片。');
-            return;
-        }
-        const compass = document.getElementById('luopan-canvas');
-        const area = document.getElementById('canvas-container');
-        const size = 1760;
-        const out = document.createElement('canvas');
-        out.width = size; out.height = size;
-        const ctx = out.getContext('2d');
-        ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, size, size);
-        const screenWidth = area.clientWidth;
-        const screenHeight = area.clientHeight;
-        const factorX = size / screenWidth, factorY = size / screenHeight;
-        // object-fit: contain 与 CSS 100%×100% 对齐；变换围绕图片容器中心。
-        const baseScale = Math.min(screenWidth / img.naturalWidth, screenHeight / img.naturalHeight);
-        const w = img.naturalWidth * baseScale;
-        const h = img.naturalHeight * baseScale;
-        ctx.save();
-        ctx.translate(size / 2 + imgPosX * factorX, size / 2 + imgPosY * factorY);
-        ctx.rotate(imgRotation * Math.PI / 180);
-        ctx.scale(imgScale * factorX, imgScale * factorY);
-        ctx.drawImage(img, -w / 2, -h / 2, w, h);
-        ctx.restore();
-        ctx.drawImage(compass, 0, 0, size, size);
-        try {
-            out.toBlob((blob) => {
-                if (!blob) { alert('图片导出失败，请重试。'); return; }
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `风水罗盘_户型叠加_${new Date().toISOString().slice(0,10)}.png`;
-                document.body.appendChild(link); link.click(); link.remove();
-                setTimeout(() => URL.revokeObjectURL(url), 1000);
-            }, 'image/png');
-        } catch (error) {
-            alert('图片导出失败，请检查上传的图片格式。');
-        }
-    }
+    let imgPosX = 0, imgPosY = 0, imgScale = 1;
     let isImgDragging = false, startX = 0, startY = 0;
     let initialTouchDist = 0, initialScale = 1;
 
@@ -1093,7 +730,7 @@
             } else if (isImgDragging) {
                 imgPosX = e.clientX - startX;
                 imgPosY = e.clientY - startY;
-                updateFloorplanTransform();
+                img.style.transform = `translate(${imgPosX}px, ${imgPosY}px) scale(${imgScale})`;
             }
         });
 
@@ -1136,15 +773,15 @@
                 if (isImgDragging && e.touches.length === 1) {
                     imgPosX = e.touches[0].clientX - startX;
                     imgPosY = e.touches[0].clientY - startY;
-                    updateFloorplanTransform();
+                    img.style.transform = `translate(${imgPosX}px, ${imgPosY}px) scale(${imgScale})`;
                 } else if (e.touches.length === 2) {
                     let currentDist = Math.hypot(
                         e.touches[0].clientX - e.touches[1].clientX,
                         e.touches[0].clientY - e.touches[1].clientY
                     );
                     if (initialTouchDist > 0) {
-                        imgScale = Math.min(Math.max(initialScale * (currentDist / initialTouchDist), 0.2), 5.0);
-                        updateFloorplanTransform();
+                        imgScale = Math.min(Math.max(initialScale * (currentDist / initialTouchDist), 0.5), 3.0);
+                        img.style.transform = `translate(${imgPosX}px, ${imgPosY}px) scale(${imgScale})`;
                     }
                 }
             }

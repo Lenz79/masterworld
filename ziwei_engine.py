@@ -236,7 +236,7 @@ class ZiweiEngine(ZiWeiEngine):
         lu=lu_map[self.birth_gan];put('禄存',lu);put('擎羊',lu+1);put('陀罗',lu-1)
         put('地空',11-hi);put('地劫',11+hi)
         year_zhi=self.lunar.getYearZhi(); group=DI_ZHI.index(year_zhi)%4
-        fire_start={0:2,1:3,2:1,3:9}[group];bell_start={0:10,1:10,2:3,3:10}[group]
+        fire_start={0:2,1:1,2:3,3:9}[group];bell_start={0:10,1:10,2:10,3:10}[group]
         put('火星',fire_start+hi);put('铃星',bell_start+hi)
         # V8.8：四颗常见杂曜的传统安星规则（独立列出，待文墨同设置样盘核验）
         # 红鸾：子年起卯，逆数年支；天喜与红鸾对冲。
@@ -367,7 +367,7 @@ class ZiweiEngine(ZiWeiEngine):
             palace_index=(ming-zidx)%12
             name=PALACE_ORDER[palace_index]
             all_stars=stars[zhi]
-            main=[s for s in all_stars if s in MAJOR_STARS]
+            main=[s for s in all_stars if s in MAJOR_STARS or s in SIX_LUCKY_STARS]
             minor=[s for s in all_stars if s not in main]
             sheng={s:{'val':key[-1], 'type':FOUR_KEYS[key]} for key,s in birth_four.items() if s in all_stars}
             self_map=BIRTH_FOUR_TRANSFORMATIONS[gan_by_zhi[zhi]]
@@ -383,22 +383,31 @@ class ZiweiEngine(ZiWeiEngine):
         for i in range(12):
             idx=(ming+direction*i)%12
             palaces[DI_ZHI[idx]]['decade']=f'{bureau+i*10}-{bureau+i*10+9}'
-        # 大限四化：以所选大限宫位的宫干查现有四化表；仅沿用当前项目流派表。
+        # 报告页面及大限审计使用 decade_charts；与 palaces[*].decade 同源，
+        # 不重复推算大限起运方向，避免出现“未配置岁”。
+        star_locations={}
+        for branch,palace in palaces.items():
+            for star in set(palace['mainStars']+palace['minorStars']):
+                star_locations.setdefault(star,[]).append(branch)
         decade_charts=[]
-        for zhi in DI_ZHI:
-            palace=palaces[zhi]
-            four=BIRTH_FOUR_TRANSFORMATIONS.get(palace['gan'],{})
-            edges=[]
-            for transformation,star in four.items():
-                for target, placed in stars.items():
-                    if star in placed:
-                        edges.append({'from':zhi,'from_palace':palace['name'],
-                                      'to':target,'to_palace':palaces[target]['name'],
-                                      'star':star,'transformation':transformation,
-                                      'self_transform':target==zhi})
-            decade_charts.append({'zhi':zhi,'palace':palace['name'],
-                                  'range':palace['decade'],'gan':palace['gan'],
-                                  'four':four,'flying_transformations':edges})
-        return {'status':'success','name':self.name,'gender':self.gender,'solar':f'{self.solar.getYear()}-{self.solar.getMonth():02d}-{self.solar.getDay():02d} {self.hour:02d}:{self.minute:02d}', 'lunar':f'{ly}年{("闰" if self.lunar.getMonth()<0 else "")}{lm}月{ld}日 {birth_time_label}', 'birth_lunar_month':lm,'birth_hour_branch':DI_ZHI[hi],'birth_shichen':birth_shichen, 'birth_time_label':birth_time_label, 'year_gan_zhi':self.lunar.getYearInGanZhi(), 'animal':ANIMALS[(ly-4)%12], 'bureau':bureau_name,'bureau_number':bureau,'ming_gong':DI_ZHI[ming], 'shen_gong':DI_ZHI[shen], 'birth_four':birth_four, 'ganMap':{z:gan_by_zhi[z]+z for z in DI_ZHI},'palaces':palaces,'flying_transformations':fly,'decade_charts':decade_charts,'secondary_star_audit':secondary_audit,'extra_star_audit':extra_star_audit,'brightness_reference':{**brightness_audit,'coverage':sum(len(p['star_brightness']) for p in palaces.values())},'verification':{'reference':'文墨天机 1988-08-24 17:45、1988-10-29 05:45 男命截图','scope':'两张指定样盘的十四主星、命身宫、五行局；其他日期未全面验证','reverse_water_ji':'待规则核实，不自动判断','secondary_stars':'108项已排布且数量结构验证；新增40项未与文墨天机逐宫核对，部分规则暂为试算','four_transformations':'采用项目现有四化表，流派差异待核实'},'methodology':'V8.2 修正六十甲子纳音表后五组错位（庚戌至己未），校验火六局；庙旺利陷待标准表校准','warnings':['当前以民用日期（午夜00:00换日）计算，23:00至23:59子时的子初换日派别尚未实现。','仅针对两张指定样盘校验部分计算；108项中的新增40项尚未逐宫校准，部分安星规则为临时试算，不宜用于正式命理判断；逆水忌、真太阳时及四化流派仍待验证。']}
+        for branch,palace in palaces.items():
+            stem=palace['gan']
+            transformations=BIRTH_FOUR_TRANSFORMATIONS.get(stem,{})
+            decade_fly=[]
+            for transformation,star in transformations.items():
+                for target in star_locations.get(star,[]):
+                    decade_fly.append({
+                        'from':branch,'from_palace':palace['name'],
+                        'to':target,'to_palace':palaces[target]['name'],
+                        'star':star,'transformation':transformation,
+                        'self_transform':branch==target
+                    })
+            decade_charts.append({
+                'zhi':branch,'palace':palace['name'],'range':palace['decade'],
+                'gan':stem,'four':transformations,
+                'flying_transformations':decade_fly
+            })
+        decade_charts.sort(key=lambda d:int(d['range'].split('-')[0]))
+        return {'status':'success','name':self.name,'gender':self.gender,'solar':f'{self.solar.getYear()}-{self.solar.getMonth():02d}-{self.solar.getDay():02d} {self.hour:02d}:{self.minute:02d}', 'lunar':f'{ly}年{("闰" if self.lunar.getMonth()<0 else "")}{lm}月{ld}日 {birth_time_label}', 'birth_shichen':birth_shichen, 'birth_time_label':birth_time_label, 'birth_lunar_month':lm, 'birth_hour_branch':DI_ZHI[hi], 'year_gan_zhi':self.lunar.getYearInGanZhi(), 'animal':ANIMALS[(ly-4)%12], 'bureau':bureau_name,'bureau_number':bureau,'ming_gong':DI_ZHI[ming], 'shen_gong':DI_ZHI[shen], 'birth_four':birth_four, 'ganMap':{z:gan_by_zhi[z]+z for z in DI_ZHI},'palaces':palaces,'decade_charts':decade_charts,'flying_transformations':fly,'secondary_star_audit':secondary_audit,'extra_star_audit':extra_star_audit,'brightness_reference':{**brightness_audit,'coverage':sum(len(p['star_brightness']) for p in palaces.values())},'verification':{'reference':'文墨天机 1988-08-24 17:45、1988-10-29 05:45 男命截图','scope':'两张指定样盘的十四主星、命身宫、五行局；其他日期未全面验证','reverse_water_ji':'待规则核实，不自动判断','secondary_stars':'108项已排布且数量结构验证；新增40项未与文墨天机逐宫核对，部分规则暂为试算','four_transformations':'采用项目现有四化表，流派差异待核实'},'methodology':'V8.2 修正六十甲子纳音表后五组错位（庚戌至己未），校验火六局；庙旺利陷待标准表校准','warnings':['当前以民用日期（午夜00:00换日）计算，23:00至23:59子时的子初换日派别尚未实现。','仅针对两张指定样盘校验部分计算；108项中的新增40项尚未逐宫校准，部分安星规则为临时试算，不宜用于正式命理判断；逆水忌、真太阳时及四化流派仍待验证。']}
 
 ZiWeiEngineLegacy=ZiWeiEngine

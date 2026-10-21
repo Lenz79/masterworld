@@ -1,1 +1,2 @@
-lunar_python>=1.3,<2
+lunar-python
+supabase

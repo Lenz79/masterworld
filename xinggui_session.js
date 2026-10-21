@@ -96,7 +96,22 @@ async function accessToken(){
  if(error)return null;
  return data?.session?.access_token||null;
 }
-async function logout(){if(client)await client.auth.signOut();active=null;loaded=true;emit()}
+async function logout(){
+ // Immediately revoke this page's authenticated UI state before any async request.
+ active=null;loaded=true;emit();
+ if(!client)return;
+ const {error}=await client.auth.signOut({scope:'global'});
+ if(error)throw Error('退出登录失败：'+error.message);
+ const {data}=await client.auth.getSession();
+ if(data?.session)throw Error('退出登录未完成，请重试');
+}
+async function verifyLogin(){
+ await ready;
+ const {data:{user},error}=await client.auth.getUser();
+ if(error||!user){active=null;loaded=true;emit();return false}
+ if(!active||active.id!==user.id)await refresh();
+ return !!active;
+}
 const ready=init().catch(e=>{loaded=true;emit();console.error(e);throw e});
-root.XingguiSession=Object.freeze({ready,refresh,account,profile,moduleContext,requireLogin,onChange,signup,login,loginWithGoogle,onPasswordRecovery,sendPasswordReset,updatePassword,sendPhoneOtp,verifyPhoneOtp,saveProfile,accessToken,logout});
+root.XingguiSession=Object.freeze({ready,refresh,account,profile,moduleContext,requireLogin,verifyLogin,onChange,signup,login,loginWithGoogle,onPasswordRecovery,sendPasswordReset,updatePassword,sendPhoneOtp,verifyPhoneOtp,saveProfile,accessToken,logout});
 })(window);

@@ -176,7 +176,7 @@
             <button class="btn-submit" onclick="calculateAndSaveBazi()">🚀 生成专业排盘与详批报告</button>
             <div style="text-align: center; margin-top: 15px;">
                 <button class="btn-home" onclick="baziOpenSharedCustomers()" style="background: #0f172a; color: #f59e0b; border: 1px solid #f59e0b;">📂 读取档案</button>
-                <button class="btn-home" type="button" onclick="SharedCustomers.showForm(null);document.getElementById('shared-customer-modal').hidden=false;document.getElementById('shared-customer-modal').style.display='flex';document.getElementById('shared-customer-list').hidden=true">➕ 添加用户</button>
+                <button class="btn-home" type="button" onclick="SharedCustomers.openAdd()">➕ 添加用户</button>
                 <a href="index.html" class="btn-home" style="display:inline-block; margin-left:10px; background:#1e293b; color:#38bdf8; border:1px solid #38bdf8; text-decoration:none;">🏠 返回综合导航首页</a>
             </div>
         </div>
@@ -676,9 +676,25 @@
             document.getElementById('info-minggua').innerText = ex.ming_gua || '西四命 · 艮卦';
             document.getElementById('info-kongwang').innerText = `日空：${ex.day_kong || '子丑'} / 年空：${ex.year_kong || '戌亥'}`;
 
-            document.getElementById('info-yongxi').innerText = ex.yong_xi || '用:水金 | 喜:木火 | 闲仇忌:土';
-            document.getElementById('info-wangxiang').innerText = ex.wang_xiang || '旺:火土 | 相:金水 | 死囚休:木';
-            document.getElementById('info-strength-details').innerText = ex.strength_details || '同党得分适配中';
+            // 仅为五行文字显色；不修改命盘计算结果。旧数据也按相同颜色显示。
+            const elementColors = { '木':'#22c55e', '火':'#ef4444', '土':'#d4a017', '金':'#f8fafc', '水':'#3b82f6' };
+            const renderFiveElementText = (id, value) => {
+                const node = document.getElementById(id);
+                const fragment = document.createDocumentFragment();
+                for (const char of String(value ?? '—')) {
+                    const span = document.createElement('span');
+                    span.textContent = char;
+                    if (elementColors[char]) {
+                        span.style.color = elementColors[char];
+                        span.style.fontWeight = '800';
+                    }
+                    fragment.appendChild(span);
+                }
+                node.replaceChildren(fragment);
+            };
+            renderFiveElementText('info-yongxi', ex.yong_xi || '—');
+            renderFiveElementText('info-wangxiang', ex.wang_xiang || '—');
+            document.getElementById('info-strength-details').innerText = ex.strength_details || '尚未提供旺衰评分明细';
 
             document.getElementById('guide-yongxi').innerText = ex.yong_xi || '-';
             document.getElementById('guide-colors').innerText = '绿色、青色、红色、紫色 (助旺喜用神)';
@@ -768,69 +784,8 @@
             `;
         }).join('');
 
-        const categoryExtenders = {
-            career: { text: " 职场星曜磁场感应明显，工作推进易面临新任务交接或权责重组。宜注重团队协作与向上管理，保持与上司及核心同仁的顺畅沟通。", tips: "稳字当头，注意文件合规，避免因沟通不畅导致项目延误。" },
-            wealth: { text: " 财星气场波动，正财收益虽稳但偏财投资风险增加。资金周转需精打细算，面对高回报诱惑切忌盲目跟风借贷或盲目扩张。", tips: "严禁高风险投机，开源节流，妥善管理现金流。" },
-            health: { text: " 岁运五行交战，身体易感疲惫或因劳累引发旧疾。日常作息需规律有度，饮食宜清淡温和，注重脾胃消化及肩颈脊椎放松。", tips: "保证规律作息，劳逸结合，适度进行舒缓运动。" },
-            marriage: { text: " 情感关系面临外界琐事或工作压力带来的摩擦考验。夫妻双方多包容体谅，遇到分歧切忌意气用事，多一些温和倾听。", tips: "严格执行冷静10分钟沟通法，多制造温馨陪伴。" },
-            social: { text: " 人际交往圈子面临新旧交替，容易结识新朋友但也易遭小人暗中嫉妒。在社交场合言行宜谨言慎行，保持合理边界感。", tips: "保持边界感，交友不宜过深，防范口舌是非。" },
-            accident: { text: " 出行或户外活动时安全意识需加倍提升。尤其在驾车、远行或前往陌生环境时，当遵守交通规范，避开复杂的风险地带。", tips: "遵守交通规则，恶劣天气尽量减少远行。" }
-        };
-
-        // 🌟 12流月十神专属深度详批文案库（确保每个月、每个十神完全不同！）
-        const liuyueStarMap = {
-            '正官': "正官临值，事业气场正派平稳，利于职场晋升、公务考核、签约授薪。本月贵人运较旺，上司对您的表现多有认可，适合展现专业执行力。",
-            '七杀': "七杀临值，本月压力骤增，工作或生活中易遇突发挑战与竞争。情绪容易急躁，切忌硬碰硬，凡事讲究策略与迂回，注意劳逸结合。",
-            '正印': "正印临值，贵人暗中相助，心态趋于平和安稳。本月极利于学习进修、签署合同、筹备长远计划，或得到长辈、师长的关照提携。",
-            '偏印': "偏印临值，思维灵敏且直觉敏锐，适合从事策划、设计、研发、玄学或技术攻关。思想上易感孤独或多思多虑，宜多与人交流。",
-            '劫财': "劫财临值，本月竞争激烈，合作或财务上易有破耗支出。理财宜保守，切忌盲目借贷担保，人际交往防范同行竞争或口舌争执。",
-            '比肩': "比肩临值，同辈助力增强，适合团队协作与集体活动。但主观意识较强，合作中易产生利益分歧或意见不合，宜求同存异。",
-            '伤官': "伤官临值，才华横溢、灵感迸发，利于创新、演说、艺术创作。但锋芒过露易招惹口舌是非、得罪领导或伴侣，切记谨言慎行。",
-            '食神': "食神临值，心情愉悦，口福佳，人际关系和谐。本月压力减轻，生活节奏舒缓，适合享受生活、休闲度假或进行温和的创意规划。",
-            '正财': "正财临值，正财收入稳定，商业触觉敏锐。本月利于薪资调整、实业投资、盘点账目，财务管理宜精细化，踏实肯干必有收获。",
-            '偏财': "偏财临值，财运交投活跃，有意外之财或副业收入的机遇。但财来财去波动大，切忌投机冒进或沉迷高风险博弈，见好即收。"
-        };
-
-        globalDayunList = record.dayun_list.map(dy => {
-            if (dy.dayun_analysis) {
-                Object.keys(dy.dayun_analysis).forEach(k => {
-                    let item = dy.dayun_analysis[k];
-                    if (typeof item === 'string') {
-                        dy.dayun_analysis[k] = { text: item + " 在此大运期间，天干地支气场对命主命运轨迹产生深度赋能，宜因势利导，把握机遇。", tips: "稳中求进，加强专业沉淀。" };
-                    }
-                });
-            }
-            if (dy.liunian) {
-                dy.liunian = dy.liunian.map(ln => {
-                    if (ln.analysis) {
-                        ['career', 'wealth', 'health', 'marriage', 'social', 'accident'].forEach(lk => {
-                            let sub = ln.analysis[lk];
-                            const extender = categoryExtenders[lk] || { text: " 流年气场交替，宜顺应天时，稳妥行事。", tips: "未雨绸缪，审时度势。" };
-                            if (sub) {
-                                if (typeof sub === 'string') {
-                                    ln.analysis[lk] = { text: sub + extender.text, tips: extender.tips };
-                                } else if (sub.text && !sub.text.includes("职场") && !sub.text.includes("财星") && !sub.text.includes("岁运") && !sub.text.includes("情感") && !sub.text.includes("人际") && !sub.text.includes("出行")) {
-                                    sub.text += extender.text;
-                                    if(!sub.tips) sub.tips = extender.tips;
-                                }
-                            }
-                        });
-                        if (ln.analysis.liuyue) {
-                            ln.analysis.liuyue = ln.analysis.liuyue.map(m => {
-                                let starKey = m.main_star || '正官';
-                                let desc = liuyueStarMap[starKey] || `本月 ${starKey} 临值，气场平稳流转，适合按部就班推进各项日常事务。`;
-                                return {
-                                    ...m,
-                                    summary: `${m.chinese_month} (${m.gan_zhi}·${starKey})：${desc} 建议审时度势，灵活应对。`
-                                };
-                            });
-                        }
-                    }
-                    return ln;
-                });
-            }
-            return dy;
-        });
+        // 大运／流年／流月报告均直接采用引擎生成的个性化内容，不注入固定模板。
+        globalDayunList = Array.isArray(record.dayun_list) ? record.dayun_list : [];
 
         let currentIndex = 0;
         globalDayunList.forEach((d, idx) => { if (d.status === 'current') currentIndex = idx; });
@@ -976,41 +931,38 @@
 </script>
 
 
-<!-- 全平台客户档案弹窗：仅用户主动点击「读取档案」时显示 -->
-<div id="shared-customer-modal" hidden style="position:fixed;inset:0;z-index:100000;background:#000b;align-items:center;justify-content:center;padding:16px">
- <div style="background:#1e293b;color:#f8fafc;border:1px solid #475569;border-radius:14px;padding:22px;width:min(740px,95vw);max-height:85vh;overflow:auto">
-  <div style="display:flex;justify-content:space-between;align-items:center"><strong style="color:#f59e0b">📂 全平台客户档案</strong><button type="button" onclick="SharedCustomers.close()">✕</button></div>
-  <div id="shared-customer-list" style="padding:12px 0"></div>
-  <form id="shared-customer-form" hidden style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding-top:12px">
-   <label>姓名 <input name="name" required maxlength="100" style="width:100%"></label>
-   <label>性别 <select name="gender"><option value="男">男</option><option value="女">女</option></select></label>
-   <label>历法 <select name="calendar"><option value="solar">公历</option><option value="lunar">农历</option></select></label>
-   <label>出生年 <input name="year" type="number" min="1900" max="2200" required style="width:100%"></label>
-   <label>月 <input name="month" type="number" min="1" max="12" required style="width:100%"></label>
-   <label>日 <input name="day" type="number" min="1" max="31" required style="width:100%"></label>
-   <label>时 (0–23) <input name="hour" type="number" min="0" max="23" required style="width:100%"></label>
-   <label>分 (0–59) <input name="minute" type="number" min="0" max="59" required style="width:100%"></label>
-   <div style="grid-column:1/-1;display:flex;gap:8px"><button type="submit">保存资料</button><button type="button" onclick="SharedCustomers.cancelEdit()">取消</button></div>
-  </form>
-  <div id="shared-customer-error" role="status" style="color:#fda4af"></div>
- </div>
-</div>
 <script>
-const SharedCustomers=(()=>{
- let rows=[],editId=null,applyBirth=null;
- const el=id=>document.getElementById(id), modal=()=>el('shared-customer-modal'), form=()=>el('shared-customer-form');
- async function headers(){const c=await XingguiSession.ready;const {data:{session}}=await c.auth.getSession();if(!session?.access_token)throw Error('请先登录');return {'Authorization':'Bearer '+session.access_token,'Content-Type':'application/json'};}
- async function api(path,body){const options={headers:await headers()};if(body){options.method='POST';options.body=JSON.stringify(body)}const r=await fetch(path,options);const d=await r.json();if(!r.ok||d.status!=='success')throw Error(d.message||'客户档案接口不可用');return d;}
- function error(s){el('shared-customer-error').textContent=s||'';}
- function close(){modal().hidden=true;modal().style.display='none';form().hidden=true;error('');}
- function cancelEdit(){form().hidden=true;editId=null;error('');}
- function showForm(row){editId=row?.id||null;form().hidden=false;el('shared-customer-list').hidden=!!row;for(const key of ['name','gender','calendar','year','month','day','hour','minute'])form().elements[key].value=row?.[key]??({name:'',gender:'男',calendar:'solar',year:'',month:'',day:'',hour:12,minute:0}[key]);error('');}
- async function open(apply){applyBirth=apply;modal().hidden=false;modal().style.display='flex';cancelEdit();el('shared-customer-list').hidden=false;await refresh();}
- async function refresh(){const box=el('shared-customer-list');box.replaceChildren();error('');try{rows=(await api('/api/customers')).data||[];if(!rows.length){box.textContent='暂无客户档案';return}for(const r of rows){const item=document.createElement('div');item.style.cssText='display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid #475569';const label=document.createElement('span');label.style.flex='1';label.textContent=`${r.name}（${r.gender}） ${r.year}-${r.month}-${r.day} ${String(r.hour).padStart(2,'0')}:${String(r.minute).padStart(2,'0')}`;item.append(label);const actions=[['读取',()=>{applyBirth(r);close()}],['改名',()=>rename(r)],['更新',()=>showForm(r)],['删除',()=>remove(r)]];for(const [name,fn] of actions){const b=document.createElement('button');b.type='button';b.textContent=name;b.onclick=fn;item.append(b)}box.append(item)}}catch(e){error('暂时无法读取客户档案，请检查登录状态及接口。');console.warn('客户档案读取失败',e)}}
- async function rename(r){const name=prompt('客户新姓名',r.name);if(name===null)return;if(!name.trim())return error('姓名不能为空');try{await api('/api/customers/manage',{id:r.id,action:'rename',name:name.trim()});await refresh()}catch(e){error(e.message)}}
- async function remove(r){if(!confirm(`确定删除客户「${r.name}」？此操作无法撤销。`))return;try{await api('/api/customers/manage',{id:r.id,action:'delete'});await refresh()}catch(e){error(e.message)}}
- form().addEventListener('submit',async e=>{e.preventDefault();const p={};for(const k of ['name','gender','calendar','year','month','day','hour','minute'])p[k]=form().elements[k].value;if(!p.name.trim())return error('姓名不能为空');for(const k of ['year','month','day','hour','minute'])p[k]=Number(p[k]);try{await api(editId?'/api/customers/manage':'/api/customers/save',editId?{...p,id:editId,action:'update'}:p);cancelEdit();el('shared-customer-list').hidden=false;await refresh()}catch(err){error(err.message)}});
- return {open,close,cancelEdit,showForm,refresh};
+/* 星轨智盘共用客户档案管理：所有模块同一客户表，不修改排盘计算 */
+window.SharedCustomers=(()=>{
+ const fields=['name','gender','calendar','year','month','day','hour','minute'];
+ let rows=[],selected=null,applyBirth=()=>{},editId=null,busy=false;
+ const $=id=>document.getElementById(id);
+ const modal=()=>$('sc-modal'), status=s=>{$('sc-status').textContent=s||''};
+ const show=(id,visible)=>{$(id).hidden=!visible};
+ function init(){if(modal())return;
+  const style=document.createElement('style');style.textContent=`#sc-modal[hidden]{display:none!important}#sc-modal{position:fixed;inset:0;z-index:999999;background:#000c;display:flex;align-items:center;justify-content:center;padding:14px;color:#e5edf7}#sc-box{width:min(1180px,98vw);max-height:92vh;overflow:auto;background:#1e293b;border:1px solid #475569;border-radius:12px;padding:20px;font:15px system-ui,sans-serif}#sc-box button{cursor:pointer;padding:8px 14px;border-radius:6px;border:1px solid #64748b;background:#2563a4;color:white}#sc-box button:disabled{opacity:.45;cursor:not-allowed}#sc-box input,#sc-box select{background:#0f172a;color:#fff;border:1px solid #64748b;border-radius:5px;padding:8px;max-width:100%}#sc-box table{border-collapse:collapse;width:100%;white-space:nowrap}#sc-box th,#sc-box td{padding:9px 10px;text-align:left;border-bottom:1px solid #475569}#sc-box tbody tr{cursor:pointer}#sc-box tbody tr:hover{background:#334155}#sc-box tbody tr[aria-selected=true]{background:#075985}#sc-box .sc-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:12px 0}#sc-form[hidden],#sc-list[hidden]{display:none!important}#sc-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:12px 0}#sc-form label{display:grid;gap:5px}#sc-status{color:#fbbf24;min-height:1.4em}`;document.head.append(style);
+  const d=document.createElement('div');d.id='sc-modal';d.hidden=true;d.innerHTML=`<section id="sc-box" role="dialog" aria-modal="true" aria-label="客户档案管理"><div class="sc-row" style="justify-content:space-between"><strong style="color:#f59e0b;font-size:21px">📂 全平台客户档案</strong><button type="button" id="sc-x">✕ 关闭</button></div><div id="sc-list"><div class="sc-row"><label>搜索客户 <input id="sc-search" placeholder="姓名 / 日期"></label><span id="sc-count"></span></div><div style="overflow-x:auto;max-height:50vh"><table><thead><tr><th>#</th><th>姓名</th><th>性别</th><th>历法</th><th>出生日期</th><th>出生时间</th><th>创建日期</th></tr></thead><tbody id="sc-body"></tbody></table></div><div class="sc-row"><button id="sc-read">开启 / 读取</button><button id="sc-edit">修改资料</button><button id="sc-rename">改名</button><button id="sc-delete">删除</button><button id="sc-import">导入</button><button id="sc-export">导出全部</button><button id="sc-refresh">刷新</button><button id="sc-add">添加用户</button></div></div><form id="sc-form" hidden><label>姓名<input name="name" maxlength="100" required></label><label>性别<select name="gender"><option>男</option><option>女</option></select></label><label>历法<select name="calendar"><option value="solar">公历</option><option value="lunar">农历</option></select></label><label>年<input type="number" name="year" min="1900" max="2200" required></label><label>月<input type="number" name="month" min="1" max="12" required></label><label>日<input type="number" name="day" min="1" max="31" required></label><label>时<input type="number" name="hour" min="0" max="23" required></label><label>分<input type="number" name="minute" min="0" max="59" required></label><div class="sc-row" style="grid-column:1/-1"><button type="submit">保存客户资料</button><button type="button" id="sc-cancel">返回名单</button></div></form><input type="file" id="sc-file" accept=".json,application/json" hidden><div id="sc-status" role="status"></div></section>`;document.body.append(d);
+  const on=(id,fn)=>$(id).addEventListener('click',fn);
+  on('sc-x',close);on('sc-read',read);on('sc-edit',()=>{if(selected)form(selected)});on('sc-rename',rename);on('sc-delete',remove);on('sc-import',()=>$('sc-file').click());on('sc-export',exportAll);on('sc-refresh',refresh);on('sc-add',()=>form(null));on('sc-cancel',()=>{show('sc-form',false);show('sc-list',true);status('')});$('sc-search').addEventListener('input',render);$('sc-file').addEventListener('change',importFile);$('sc-form').addEventListener('submit',save);
+  d.addEventListener('click',e=>{if(e.target===d)close()});
+ }
+ async function headers(){if(typeof XingguiSession==='undefined')throw Error('登录组件未加载');const c=await XingguiSession.ready;const {data:{session}}=await c.auth.getSession();if(!session?.access_token)throw Error('请先登录');return {'Authorization':'Bearer '+session.access_token,'Content-Type':'application/json'};}
+ async function api(path,body){const opt={headers:await headers()};if(body!==undefined){opt.method='POST';opt.body=JSON.stringify(body)}const res=await fetch(path,opt);const type=res.headers.get('content-type')||'';if(!type.includes('application/json'))throw Error('服务器未返回客户档案接口，请检查 server.py');const data=await res.json();if(!res.ok||data.status!=='success')throw Error(data.message||'操作失败');return data;}
+ function setBusy(v){busy=v;for(const b of modal().querySelectorAll('button'))b.disabled=v;}
+ function close(){init();modal().hidden=true;status('')}
+ async function open(fn){init();if(typeof fn==='function')applyBirth=fn;modal().hidden=false;show('sc-form',false);show('sc-list',true);rows=[];selected=null;render();status('正在读取客户名单…');await refresh()}
+ function openAdd(){init();modal().hidden=false;form(null)}
+ function form(row){editId=row?.id||null;show('sc-list',false);show('sc-form',true);for(const k of fields){const def={name:'',gender:'男',calendar:'solar',year:'',month:'',day:'',hour:12,minute:0};$('sc-form').elements.namedItem(k).value=row?.[k]??def[k]}status('')}
+ function render(){const term=$('sc-search').value.trim().toLowerCase();const filtered=rows.filter(r=>`${r.name} ${r.year}-${r.month}-${r.day}`.toLowerCase().includes(term));const body=$('sc-body');body.replaceChildren();filtered.forEach((r,i)=>{const tr=document.createElement('tr');tr.tabIndex=0;tr.setAttribute('aria-selected',String(r.id===selected?.id));const values=[i+1,r.name,r.gender,r.calendar==='lunar'?'农历':'公历',`${r.year}-${String(r.month).padStart(2,'0')}-${String(r.day).padStart(2,'0')}`,`${String(r.hour).padStart(2,'0')}:${String(r.minute).padStart(2,'0')}`,r.created_at?String(r.created_at).slice(0,10):''];for(const v of values){const td=document.createElement('td');td.textContent=v;tr.append(td)}tr.onclick=()=>{selected=r;render()};tr.ondblclick=()=>{selected=r;read()};tr.onkeydown=e=>{if(e.key==='Enter'){selected=r;read()}};body.append(tr)});$('sc-count').textContent=`共 ${rows.length} 位客户，显示 ${filtered.length} 位`;for(const id of ['sc-read','sc-edit','sc-rename','sc-delete'])$(id).disabled=!selected||busy;}
+ async function refresh(){status('正在读取客户名单…');try{const d=await api('/api/customers');rows=Array.isArray(d.data)?d.data:[];selected=rows.find(r=>r.id===selected?.id)||null;render();status(rows.length?'':'暂无客户档案，可添加或导入')}catch(e){rows=[];selected=null;render();status('客户名单暂时无法读取：'+e.message+'。仍可点击「添加用户」填写新档案。')}}
+ function read(){if(!selected)return status('请先选择一位客户');try{applyBirth(selected);close()}catch(e){status('载入失败：'+e.message)}}
+ async function rename(){if(!selected)return;const name=prompt('修改客户姓名',selected.name);if(name===null)return;if(!name.trim())return status('姓名不能为空');try{setBusy(true);await api('/api/customers/manage',{action:'rename',id:selected.id,name:name.trim()});await refresh()}catch(e){status('改名失败：'+e.message)}finally{setBusy(false);render()}}
+ async function remove(){if(!selected)return;const r=selected;if(!confirm(`确定永久删除客户「${r.name}」？此操作不能撤销，建议先导出备份。`))return;try{setBusy(true);await api('/api/customers/manage',{action:'delete',id:r.id});selected=null;await refresh()}catch(e){status('删除失败：'+e.message)}finally{setBusy(false);render()}}
+ async function save(e){e.preventDefault();const p={};for(const k of fields)p[k]=$('sc-form').elements.namedItem(k).value;p.name=p.name.trim();for(const k of ['year','month','day','hour','minute'])p[k]=Number(p[k]);try{setBusy(true);await api(editId?'/api/customers/manage':'/api/customers/save',editId?{...p,action:'update',id:editId}:p);show('sc-form',false);show('sc-list',true);await refresh()}catch(err){status('保存失败：'+err.message)}finally{setBusy(false);render()}}
+ function exportAll(){if(!rows.length)return status('没有可导出的客户资料');const data={format:'xinggui-customer-profiles',version:1,exported_at:new Date().toISOString(),customers:rows.map(r=>Object.fromEntries(fields.map(k=>[k,r[k]])))};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='星轨智盘_客户档案_'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);status(`已导出 ${rows.length} 位客户（JSON）`)}
+ function valid(r){if(!r||typeof r!=='object'||Array.isArray(r))return false;if(typeof r.name!=='string'||!r.name.trim()||r.name.length>100||!['男','女'].includes(r.gender)||!['solar','lunar'].includes(r.calendar))return false;for(const [k,lo,hi] of [['year',1900,2200],['month',1,12],['day',1,31],['hour',0,23],['minute',0,59]])if(!Number.isInteger(r[k])||r[k]<lo||r[k]>hi)return false;if(r.calendar==='solar'){const d=new Date(Date.UTC(r.year,r.month-1,r.day));if(d.getUTCFullYear()!==r.year||d.getUTCMonth()+1!==r.month||d.getUTCDate()!==r.day)return false}return true}
+ async function importFile(e){const file=e.target.files?.[0];e.target.value='';if(!file)return;if(file.size>2*1024*1024)return status('文件超过 2 MB，请拆分后导入');let list;try{const parsed=JSON.parse(await file.text());if(parsed?.format!=='xinggui-customer-profiles'||parsed.version!==1||!Array.isArray(parsed.customers))throw Error('文件格式不符合星轨智盘客户备份');list=parsed.customers;if(!list.length||list.length>200)throw Error('每次导入须为 1 至 200 位客户');if(!list.every(valid))throw Error('包含不合法的客户资料，请检查出生日期及字段');}catch(err){return status('导入文件无效：'+err.message)}if(!confirm(`准备导入 ${list.length} 位客户。与现有客户完全相同的资料将跳过；是否继续？`))return;let ok=0,failed=0;setBusy(true);for(const row of list){try{await api('/api/customers/save',Object.fromEntries(fields.map(k=>[k,row[k]])));ok++}catch(err){failed++;console.warn('客户导入失败',row.name,err)}}setBusy(false);await refresh();status(`导入完成：成功或已存在 ${ok} 位，失败 ${failed} 位。请核对名单。`)}
+ return {open,openAdd,close,refresh};
 })();
 </script>
 

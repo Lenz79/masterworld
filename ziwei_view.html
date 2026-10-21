@@ -120,7 +120,7 @@
             align-items: flex-start;
             gap: 6px;
             padding-right: 4px;
-            border-left: 1px dashed #cbd5e1;
+            border-left: none; /* 去掉每个宫位内的浅灰色竖线 */
             justify-content: flex-start;
         }
 
@@ -858,6 +858,14 @@ body.chart-fit-active .chart-mode-bar{position:sticky;top:0;z-index:100}
     border-left: none !important;
 }
 
+
+.ziwei-report-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;padding:5px;border-bottom:1px solid #dbe3ef}
+.ziwei-report-tabs button{background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;border-radius:8px;padding:9px 14px;cursor:pointer;font-weight:650}
+.ziwei-report-tabs button[aria-selected="true"]{background:#1d4ed8;color:#fff;border-color:#1d4ed8}
+@media screen{#full-report-content section.ziwei-tab-hidden{display:none!important}}
+@media print{.ziwei-report-tabs{display:none!important}#full-report-content section.ziwei-tab-hidden,#full-report-content .report-palace.ziwei-subject-hidden{display:block!important}}
+
+#advanced-analysis-result{display:none!important}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="xinggui_session.js"></script>
@@ -878,7 +886,7 @@ body.chart-fit-active .chart-mode-bar{position:sticky;top:0;z-index:100}
     <section id="ziwei-profile-records" style="padding:9px;margin:6px 0;background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;font-size:13px">
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><strong>👤 我的个人命盘（账号绑定出生档案）</strong>
       <button type="button" onclick="ziweiOpenSharedCustomers()">📂 读取档案</button>
-      <button type="button" onclick="SharedCustomers.showForm(null);document.getElementById('shared-customer-modal').hidden=false;document.getElementById('shared-customer-modal').style.display='flex';document.getElementById('shared-customer-list').hidden=true">➕ 添加用户</button></div>
+      <button type="button" onclick="SharedCustomers.openAdd()">➕ 添加用户</button></div>
       <div id="ziwei-records-list" hidden style="padding:8px 0"></div>
 
     </section>
@@ -955,12 +963,12 @@ body.chart-fit-active .chart-mode-bar{position:sticky;top:0;z-index:100}
         <label><input type="checkbox" id="print-decade" checked onchange="renderFullReport()"> 大限十二宫</label>
         <label><input type="checkbox" id="print-annual" checked onchange="renderFullReport()"> 流年运程</label>
         <label><input type="checkbox" id="print-month" checked onchange="renderFullReport()"> 流月运程</label>
-        <label><input type="checkbox" id="print-advanced" checked onchange="renderFullReport()"> 当前流派高阶分析</label>
+        <input type="checkbox" id="print-advanced" hidden disabled aria-hidden="true">
         <button type="button" onclick="setAllReportSections(true)">全选</button>
         <button type="button" onclick="setAllReportSections(false)">清空</button>
         <button type="button" class="report-print" onclick="printFullReport()">🖨️ 打印所选报告 / 保存 PDF</button>
       </div>
-      <div class="report-options"><button type="button" onclick="runAdvancedAnalysis()">生成当前流派高阶分析</button></div><div id="advanced-analysis-result"></div><div id="full-report-content"><p>请先完成排盘，即可生成十二宫分层解读报告。</p></div>
+      <div id="advanced-analysis-result" hidden></div><nav id="ziwei-report-tabs" class="ziwei-report-tabs" aria-label="紫微报告分类"></nav><div id="full-report-content"><p>请先完成排盘，即可生成十二宫分层解读报告。</p></div>
     </section>
     <!-- AI 深度堪舆报告区 -->
     <details class="analysis-section">
@@ -978,7 +986,7 @@ body.chart-fit-active .chart-mode-bar{position:sticky;top:0;z-index:100}
 
 <script>
 const gridMapping=[{r:0,c:0,zhi:'巳'},{r:0,c:1,zhi:'午'},{r:0,c:2,zhi:'未'},{r:0,c:3,zhi:'申'},{r:1,c:0,zhi:'辰'},{r:1,c:3,zhi:'酉'},{r:2,c:0,zhi:'卯'},{r:2,c:3,zhi:'戌'},{r:3,c:0,zhi:'寅'},{r:3,c:1,zhi:'丑'},{r:3,c:2,zhi:'子'},{r:3,c:3,zhi:'亥'}];
-let chart=null, selected='命宫', activeFlyPalace=null, chartLayer='combined', selectedDecadeZhi=null, selectedAnnualYear=2026, selectedLunarMonth=1, decadeLayerEnabled=true, annualLayerEnabled=true;
+let chart=null, selected='命宫', activeFlyPalace=null, chartLayer='combined', selectedDecadeZhi=null, selectedAnnualYear=new Date().getFullYear(), selectedLunarMonth=1, decadeLayerEnabled=true, annualLayerEnabled=true;
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function ziweiOpenSharedCustomers(){return SharedCustomers.open(r=>{
  for(const k of ['name','gender','calendar','year','month','day','hour','minute'])document.getElementById('birth-'+k).value=r[k];
@@ -1141,8 +1149,9 @@ function refreshDecadeSelector(){
 function monthDouJunBranch(year,month){
  // 流年太岁起正月，逆数生月，再从该宫起子时顺数生时，作为正月斗君；其余月份顺行。
  // 仍须核对闰月及不同流派的斗君细节。
- const lunarMonth=Number(chart?.birth_lunar_month||1);
- const hourIndex=LAYER_BRANCHES.indexOf(chart?.birth_hour_branch);
+ const lunarMonth=Number(chart?.birth_lunar_month);
+ if(!Number.isInteger(lunarMonth)||lunarMonth<1||lunarMonth>12)return null;
+ const hourIndex=LAYER_BRANCHES.indexOf(chart?.birth_hour_branch||String(chart?.birth_shichen||'').charAt(0));
  const origin=LAYER_BRANCHES.indexOf(annualBranch(year));
  if(hourIndex<0)return null;
  return LAYER_BRANCHES[((origin-(lunarMonth-1)+hourIndex+(month-1))%12+12)%12];
@@ -1165,7 +1174,7 @@ function renderTimeline(){
 function switchMode(mode){advancedAnalysisCache=null;const a=document.getElementById('advanced-analysis-result');if(a)a.innerHTML='';const radio=document.querySelector('input[name="view-mode"][value="'+mode+'"]');if(radio)radio.checked=true;activeFlyPalace=null;document.querySelectorAll('.chart-mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));document.getElementById('pan-title-desc').textContent=mode==='sanhe'?'🏛️ 三合派：点击宫位查看三方四正':'🌀 飞星派：十四主星及红色辅煞星（含六吉）；点击宫位显示／隐藏飞化箭头';renderGrid();renderFullReport()}
 async function calculate(){const seq=++calculationSequence;let msg=document.getElementById('ziwei-status');msg.textContent='正在计算命盘…';
  let payload;
- try{normalizeBirthTime();payload={};for(const k of ['name','gender','year','month','day','hour','minute','calendar'])payload[k]=val(k);const res=await fetch('/api/ziwei/calculate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const data=await res.json();if(seq!==calculationSequence)return;if(!res.ok||data.status==='error')throw Error(data.message||'计算失败');chart=data;msg.textContent='排盘成功 · '+data.methodology;selected='命宫';activeFlyPalace=null;selectedDecadeZhi=null;decadeLayerEnabled=true;annualLayerEnabled=true;refreshDecadeSelector();renderGrid();syncMobileChartLayout();}
+ try{normalizeBirthTime();payload={};for(const k of ['name','gender','year','month','day','hour','minute','calendar'])payload[k]=val(k);const res=await fetch('/api/ziwei/calculate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const data=await res.json();if(seq!==calculationSequence)return;if(!res.ok||data.status==='error')throw Error(data.message||'计算失败');chart=data;msg.textContent='排盘成功 · '+data.methodology;selected='命宫';activeFlyPalace=null;selectedDecadeZhi=null;selectedAnnualYear=new Date().getFullYear();selectedLunarMonth=1;decadeLayerEnabled=true;annualLayerEnabled=true;refreshDecadeSelector();renderGrid();syncMobileChartLayout();}
  catch(e){if(seq!==calculationSequence)return;chart=null;document.getElementById('ziwei-grid-container').innerHTML='';msg.textContent='⚠️ '+e.message+(e instanceof TypeError?'。请确认已运行 python server.py 并通过 http://127.0.0.1:8000/ziwei_view.html 访问。':'');if(e.message.includes('历法库'))msg.innerHTML+=' <a href="/api/ziwei/diagnostics" target="_blank">查看依赖诊断</a>';}}
 // 逆水判定：仅本命命/财/官三合宫射向对应对宫；目标必须有同类生年四化且无任何自化。
 function classifyReverseWater(f){
@@ -1519,6 +1528,27 @@ function printableZiweiChart(layer,monthNumber){
  '<div class="report-ziwei-grid">'+cells+center+'</div><p class="report-meta">飞化证据中的地支宫位可在本图定位；点击报告中的宫位链接会高亮对应的物理宫格。此图取自当前排盘数据。'+
  (layer==='month'?'流月斗君、闰月与流月四化尚待校准。':layer==='annual'?'流年年界及四化尚待校准。':'星曜与四化部分规则仍待校准。')+'</p></figure>';
 }
+
+let ziweiActiveReportTab='natal';
+function selectZiweiReportTab(key){ziweiActiveReportTab=key;updateZiweiReportTabs();}
+function updateZiweiReportTabs(){
+ const nav=document.getElementById('ziwei-report-tabs'),content=document.getElementById('full-report-content'),advanced=document.getElementById('advanced-analysis-result');
+ if(!nav||!content)return;
+ const sections=[...content.querySelectorAll(':scope > section')];
+ const available=[['natal','本命十二宫'],['decade','大限十二宫'],['annual','流年运程'],['month','流月运程']].filter(e=>sections.some(s=>s.dataset.ziweiTab===e[0]));
+
+ if(!available.some(e=>e[0]===ziweiActiveReportTab))ziweiActiveReportTab=available[0]?.[0]||'natal';
+ nav.replaceChildren();
+ for(const [key,label] of available){
+  const b=document.createElement('button');b.type='button';b.textContent=label;b.setAttribute('aria-selected',String(key===ziweiActiveReportTab));b.onclick=()=>selectZiweiReportTab(key);nav.appendChild(b);
+ }
+ for(const s of sections){
+  const key=s.dataset.ziweiTab;s.classList.toggle('ziwei-tab-hidden',key!==ziweiActiveReportTab);
+
+ }
+ if(advanced)advanced.style.display=reportEnabled('print-advanced')&&ziweiActiveReportTab==='advanced'?'':'none';
+}
+
 function renderFullReport(){
  const adv=document.getElementById('advanced-analysis-result');if(adv)adv.style.display=reportEnabled('print-advanced')?'':'none';
  const target=document.getElementById('full-report-content');if(!target)return;
@@ -1562,11 +1592,16 @@ function renderFullReport(){
   const blocks=months.map((name,i)=>{
    const zhi=monthDouJunBranch(selectedAnnualYear,i+1);
    const p=chart.palaces?.[zhi];
-   return '<article class="report-palace"><h4>'+esc(name)+' · '+esc(zhi||'待校准')+'宫</h4><p>试算月份落在本命'+esc(p?.name||'未知')+'；可关注'+esc(REPORT_MEANINGS[p?.name]?.[0]||'相关生活主题')+'。</p><p class="report-meta">仅为斗君试算，未校准闰月、农历交界及流月四化，不作为具体事件预测。</p></article>';
+   return '<article class="report-palace"><h4>'+esc(name)+' · '+esc(zhi||'资料不足')+'宫</h4><p>'+(p?'斗君试算落在本命'+esc(p.name)+'（'+esc(zhi)+'宫）；该宫主星：'+esc((p.mainStars||[]).join('、')||'无主星')+'。观察主题：'+esc((REPORT_MEANINGS[p.name]||[])[0]||p.name)+'。':'出生农历月份或时辰资料缺失，无法定位本月宫位；请重新排盘。')+'</p><p class="report-meta">仅为斗君试算，未校准闰月、农历交界及流月四化，不作为具体事件预测。</p></article>';
   }).join('');
   out+=reportSection('四、流月：'+selectedAnnualYear+'年 · 十二个月主题（试算）',printableZiweiChart('month',selectedLunarMonth)+'<div class="report-palaces">'+blocks+'</div>');
  }
  target.innerHTML=out;
+ [...target.querySelectorAll(':scope > section')].forEach((s,i)=>{
+  const title=s.querySelector('h3')?.textContent||'';
+  s.dataset.ziweiTab=title.startsWith('一、')?'natal':title.startsWith('二、')?'decade':title.startsWith('三、')?'annual':title.startsWith('四、')?'month':['natal','decade','annual','month'][i];
+ });
+ updateZiweiReportTabs();
 }
 
 // V8.47: report evidence -> the same physical branch in the printed chart.
@@ -1774,41 +1809,38 @@ document.addEventListener('DOMContentLoaded',async()=>{try{await XingguiSession.
 </script>
 
 
-<!-- 全平台客户档案弹窗：仅用户主动点击「读取档案」时显示 -->
-<div id="shared-customer-modal" hidden style="position:fixed;inset:0;z-index:100000;background:#000b;align-items:center;justify-content:center;padding:16px">
- <div style="background:#1e293b;color:#f8fafc;border:1px solid #475569;border-radius:14px;padding:22px;width:min(740px,95vw);max-height:85vh;overflow:auto">
-  <div style="display:flex;justify-content:space-between;align-items:center"><strong style="color:#f59e0b">📂 全平台客户档案</strong><button type="button" onclick="SharedCustomers.close()">✕</button></div>
-  <div id="shared-customer-list" style="padding:12px 0"></div>
-  <form id="shared-customer-form" hidden style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding-top:12px">
-   <label>姓名 <input name="name" required maxlength="100" style="width:100%"></label>
-   <label>性别 <select name="gender"><option value="男">男</option><option value="女">女</option></select></label>
-   <label>历法 <select name="calendar"><option value="solar">公历</option><option value="lunar">农历</option></select></label>
-   <label>出生年 <input name="year" type="number" min="1900" max="2200" required style="width:100%"></label>
-   <label>月 <input name="month" type="number" min="1" max="12" required style="width:100%"></label>
-   <label>日 <input name="day" type="number" min="1" max="31" required style="width:100%"></label>
-   <label>时 (0–23) <input name="hour" type="number" min="0" max="23" required style="width:100%"></label>
-   <label>分 (0–59) <input name="minute" type="number" min="0" max="59" required style="width:100%"></label>
-   <div style="grid-column:1/-1;display:flex;gap:8px"><button type="submit">保存资料</button><button type="button" onclick="SharedCustomers.cancelEdit()">取消</button></div>
-  </form>
-  <div id="shared-customer-error" role="status" style="color:#fda4af"></div>
- </div>
-</div>
 <script>
-const SharedCustomers=(()=>{
- let rows=[],editId=null,applyBirth=null;
- const el=id=>document.getElementById(id), modal=()=>el('shared-customer-modal'), form=()=>el('shared-customer-form');
- async function headers(){const c=await XingguiSession.ready;const {data:{session}}=await c.auth.getSession();if(!session?.access_token)throw Error('请先登录');return {'Authorization':'Bearer '+session.access_token,'Content-Type':'application/json'};}
- async function api(path,body){const options={headers:await headers()};if(body){options.method='POST';options.body=JSON.stringify(body)}const r=await fetch(path,options);const d=await r.json();if(!r.ok||d.status!=='success')throw Error(d.message||'客户档案接口不可用');return d;}
- function error(s){el('shared-customer-error').textContent=s||'';}
- function close(){modal().hidden=true;modal().style.display='none';form().hidden=true;error('');}
- function cancelEdit(){form().hidden=true;editId=null;error('');}
- function showForm(row){editId=row?.id||null;form().hidden=false;el('shared-customer-list').hidden=!!row;for(const key of ['name','gender','calendar','year','month','day','hour','minute'])form().elements[key].value=row?.[key]??({name:'',gender:'男',calendar:'solar',year:'',month:'',day:'',hour:12,minute:0}[key]);error('');}
- async function open(apply){applyBirth=apply;modal().hidden=false;modal().style.display='flex';cancelEdit();el('shared-customer-list').hidden=false;await refresh();}
- async function refresh(){const box=el('shared-customer-list');box.replaceChildren();error('');try{rows=(await api('/api/customers')).data||[];if(!rows.length){box.textContent='暂无客户档案';return}for(const r of rows){const item=document.createElement('div');item.style.cssText='display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid #475569';const label=document.createElement('span');label.style.flex='1';label.textContent=`${r.name}（${r.gender}） ${r.year}-${r.month}-${r.day} ${String(r.hour).padStart(2,'0')}:${String(r.minute).padStart(2,'0')}`;item.append(label);const actions=[['读取',()=>{applyBirth(r);close()}],['改名',()=>rename(r)],['更新',()=>showForm(r)],['删除',()=>remove(r)]];for(const [name,fn] of actions){const b=document.createElement('button');b.type='button';b.textContent=name;b.onclick=fn;item.append(b)}box.append(item)}}catch(e){error('暂时无法读取客户档案，请检查登录状态及接口。');console.warn('客户档案读取失败',e)}}
- async function rename(r){const name=prompt('客户新姓名',r.name);if(name===null)return;if(!name.trim())return error('姓名不能为空');try{await api('/api/customers/manage',{id:r.id,action:'rename',name:name.trim()});await refresh()}catch(e){error(e.message)}}
- async function remove(r){if(!confirm(`确定删除客户「${r.name}」？此操作无法撤销。`))return;try{await api('/api/customers/manage',{id:r.id,action:'delete'});await refresh()}catch(e){error(e.message)}}
- form().addEventListener('submit',async e=>{e.preventDefault();const p={};for(const k of ['name','gender','calendar','year','month','day','hour','minute'])p[k]=form().elements[k].value;if(!p.name.trim())return error('姓名不能为空');for(const k of ['year','month','day','hour','minute'])p[k]=Number(p[k]);try{await api(editId?'/api/customers/manage':'/api/customers/save',editId?{...p,id:editId,action:'update'}:p);cancelEdit();el('shared-customer-list').hidden=false;await refresh()}catch(err){error(err.message)}});
- return {open,close,cancelEdit,showForm,refresh};
+/* 星轨智盘共用客户档案管理：所有模块同一客户表，不修改排盘计算 */
+window.SharedCustomers=(()=>{
+ const fields=['name','gender','calendar','year','month','day','hour','minute'];
+ let rows=[],selected=null,applyBirth=()=>{},editId=null,busy=false;
+ const $=id=>document.getElementById(id);
+ const modal=()=>$('sc-modal'), status=s=>{$('sc-status').textContent=s||''};
+ const show=(id,visible)=>{$(id).hidden=!visible};
+ function init(){if(modal())return;
+  const style=document.createElement('style');style.textContent=`#sc-modal[hidden]{display:none!important}#sc-modal{position:fixed;inset:0;z-index:999999;background:#000c;display:flex;align-items:center;justify-content:center;padding:14px;color:#e5edf7}#sc-box{width:min(1180px,98vw);max-height:92vh;overflow:auto;background:#1e293b;border:1px solid #475569;border-radius:12px;padding:20px;font:15px system-ui,sans-serif}#sc-box button{cursor:pointer;padding:8px 14px;border-radius:6px;border:1px solid #64748b;background:#2563a4;color:white}#sc-box button:disabled{opacity:.45;cursor:not-allowed}#sc-box input,#sc-box select{background:#0f172a;color:#fff;border:1px solid #64748b;border-radius:5px;padding:8px;max-width:100%}#sc-box table{border-collapse:collapse;width:100%;white-space:nowrap}#sc-box th,#sc-box td{padding:9px 10px;text-align:left;border-bottom:1px solid #475569}#sc-box tbody tr{cursor:pointer}#sc-box tbody tr:hover{background:#334155}#sc-box tbody tr[aria-selected=true]{background:#075985}#sc-box .sc-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:12px 0}#sc-form[hidden],#sc-list[hidden]{display:none!important}#sc-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:12px 0}#sc-form label{display:grid;gap:5px}#sc-status{color:#fbbf24;min-height:1.4em}`;document.head.append(style);
+  const d=document.createElement('div');d.id='sc-modal';d.hidden=true;d.innerHTML=`<section id="sc-box" role="dialog" aria-modal="true" aria-label="客户档案管理"><div class="sc-row" style="justify-content:space-between"><strong style="color:#f59e0b;font-size:21px">📂 全平台客户档案</strong><button type="button" id="sc-x">✕ 关闭</button></div><div id="sc-list"><div class="sc-row"><label>搜索客户 <input id="sc-search" placeholder="姓名 / 日期"></label><span id="sc-count"></span></div><div style="overflow-x:auto;max-height:50vh"><table><thead><tr><th>#</th><th>姓名</th><th>性别</th><th>历法</th><th>出生日期</th><th>出生时间</th><th>创建日期</th></tr></thead><tbody id="sc-body"></tbody></table></div><div class="sc-row"><button id="sc-read">开启 / 读取</button><button id="sc-edit">修改资料</button><button id="sc-rename">改名</button><button id="sc-delete">删除</button><button id="sc-import">导入</button><button id="sc-export">导出全部</button><button id="sc-refresh">刷新</button><button id="sc-add">添加用户</button></div></div><form id="sc-form" hidden><label>姓名<input name="name" maxlength="100" required></label><label>性别<select name="gender"><option>男</option><option>女</option></select></label><label>历法<select name="calendar"><option value="solar">公历</option><option value="lunar">农历</option></select></label><label>年<input type="number" name="year" min="1900" max="2200" required></label><label>月<input type="number" name="month" min="1" max="12" required></label><label>日<input type="number" name="day" min="1" max="31" required></label><label>时<input type="number" name="hour" min="0" max="23" required></label><label>分<input type="number" name="minute" min="0" max="59" required></label><div class="sc-row" style="grid-column:1/-1"><button type="submit">保存客户资料</button><button type="button" id="sc-cancel">返回名单</button></div></form><input type="file" id="sc-file" accept=".json,application/json" hidden><div id="sc-status" role="status"></div></section>`;document.body.append(d);
+  const on=(id,fn)=>$(id).addEventListener('click',fn);
+  on('sc-x',close);on('sc-read',read);on('sc-edit',()=>{if(selected)form(selected)});on('sc-rename',rename);on('sc-delete',remove);on('sc-import',()=>$('sc-file').click());on('sc-export',exportAll);on('sc-refresh',refresh);on('sc-add',()=>form(null));on('sc-cancel',()=>{show('sc-form',false);show('sc-list',true);status('')});$('sc-search').addEventListener('input',render);$('sc-file').addEventListener('change',importFile);$('sc-form').addEventListener('submit',save);
+  d.addEventListener('click',e=>{if(e.target===d)close()});
+ }
+ async function headers(){if(typeof XingguiSession==='undefined')throw Error('登录组件未加载');const c=await XingguiSession.ready;const {data:{session}}=await c.auth.getSession();if(!session?.access_token)throw Error('请先登录');return {'Authorization':'Bearer '+session.access_token,'Content-Type':'application/json'};}
+ async function api(path,body){const opt={headers:await headers()};if(body!==undefined){opt.method='POST';opt.body=JSON.stringify(body)}const res=await fetch(path,opt);const type=res.headers.get('content-type')||'';if(!type.includes('application/json'))throw Error('服务器未返回客户档案接口，请检查 server.py');const data=await res.json();if(!res.ok||data.status!=='success')throw Error(data.message||'操作失败');return data;}
+ function setBusy(v){busy=v;for(const b of modal().querySelectorAll('button'))b.disabled=v;}
+ function close(){init();modal().hidden=true;status('')}
+ async function open(fn){init();if(typeof fn==='function')applyBirth=fn;modal().hidden=false;show('sc-form',false);show('sc-list',true);rows=[];selected=null;render();status('正在读取客户名单…');await refresh()}
+ function openAdd(){init();modal().hidden=false;form(null)}
+ function form(row){editId=row?.id||null;show('sc-list',false);show('sc-form',true);for(const k of fields){const def={name:'',gender:'男',calendar:'solar',year:'',month:'',day:'',hour:12,minute:0};$('sc-form').elements.namedItem(k).value=row?.[k]??def[k]}status('')}
+ function render(){const term=$('sc-search').value.trim().toLowerCase();const filtered=rows.filter(r=>`${r.name} ${r.year}-${r.month}-${r.day}`.toLowerCase().includes(term));const body=$('sc-body');body.replaceChildren();filtered.forEach((r,i)=>{const tr=document.createElement('tr');tr.tabIndex=0;tr.setAttribute('aria-selected',String(r.id===selected?.id));const values=[i+1,r.name,r.gender,r.calendar==='lunar'?'农历':'公历',`${r.year}-${String(r.month).padStart(2,'0')}-${String(r.day).padStart(2,'0')}`,`${String(r.hour).padStart(2,'0')}:${String(r.minute).padStart(2,'0')}`,r.created_at?String(r.created_at).slice(0,10):''];for(const v of values){const td=document.createElement('td');td.textContent=v;tr.append(td)}tr.onclick=()=>{selected=r;render()};tr.ondblclick=()=>{selected=r;read()};tr.onkeydown=e=>{if(e.key==='Enter'){selected=r;read()}};body.append(tr)});$('sc-count').textContent=`共 ${rows.length} 位客户，显示 ${filtered.length} 位`;for(const id of ['sc-read','sc-edit','sc-rename','sc-delete'])$(id).disabled=!selected||busy;}
+ async function refresh(){status('正在读取客户名单…');try{const d=await api('/api/customers');rows=Array.isArray(d.data)?d.data:[];selected=rows.find(r=>r.id===selected?.id)||null;render();status(rows.length?'':'暂无客户档案，可添加或导入')}catch(e){rows=[];selected=null;render();status('客户名单暂时无法读取：'+e.message+'。仍可点击「添加用户」填写新档案。')}}
+ function read(){if(!selected)return status('请先选择一位客户');try{applyBirth(selected);close()}catch(e){status('载入失败：'+e.message)}}
+ async function rename(){if(!selected)return;const name=prompt('修改客户姓名',selected.name);if(name===null)return;if(!name.trim())return status('姓名不能为空');try{setBusy(true);await api('/api/customers/manage',{action:'rename',id:selected.id,name:name.trim()});await refresh()}catch(e){status('改名失败：'+e.message)}finally{setBusy(false);render()}}
+ async function remove(){if(!selected)return;const r=selected;if(!confirm(`确定永久删除客户「${r.name}」？此操作不能撤销，建议先导出备份。`))return;try{setBusy(true);await api('/api/customers/manage',{action:'delete',id:r.id});selected=null;await refresh()}catch(e){status('删除失败：'+e.message)}finally{setBusy(false);render()}}
+ async function save(e){e.preventDefault();const p={};for(const k of fields)p[k]=$('sc-form').elements.namedItem(k).value;p.name=p.name.trim();for(const k of ['year','month','day','hour','minute'])p[k]=Number(p[k]);try{setBusy(true);await api(editId?'/api/customers/manage':'/api/customers/save',editId?{...p,action:'update',id:editId}:p);show('sc-form',false);show('sc-list',true);await refresh()}catch(err){status('保存失败：'+err.message)}finally{setBusy(false);render()}}
+ function exportAll(){if(!rows.length)return status('没有可导出的客户资料');const data={format:'xinggui-customer-profiles',version:1,exported_at:new Date().toISOString(),customers:rows.map(r=>Object.fromEntries(fields.map(k=>[k,r[k]])))};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='星轨智盘_客户档案_'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);status(`已导出 ${rows.length} 位客户（JSON）`)}
+ function valid(r){if(!r||typeof r!=='object'||Array.isArray(r))return false;if(typeof r.name!=='string'||!r.name.trim()||r.name.length>100||!['男','女'].includes(r.gender)||!['solar','lunar'].includes(r.calendar))return false;for(const [k,lo,hi] of [['year',1900,2200],['month',1,12],['day',1,31],['hour',0,23],['minute',0,59]])if(!Number.isInteger(r[k])||r[k]<lo||r[k]>hi)return false;if(r.calendar==='solar'){const d=new Date(Date.UTC(r.year,r.month-1,r.day));if(d.getUTCFullYear()!==r.year||d.getUTCMonth()+1!==r.month||d.getUTCDate()!==r.day)return false}return true}
+ async function importFile(e){const file=e.target.files?.[0];e.target.value='';if(!file)return;if(file.size>2*1024*1024)return status('文件超过 2 MB，请拆分后导入');let list;try{const parsed=JSON.parse(await file.text());if(parsed?.format!=='xinggui-customer-profiles'||parsed.version!==1||!Array.isArray(parsed.customers))throw Error('文件格式不符合星轨智盘客户备份');list=parsed.customers;if(!list.length||list.length>200)throw Error('每次导入须为 1 至 200 位客户');if(!list.every(valid))throw Error('包含不合法的客户资料，请检查出生日期及字段');}catch(err){return status('导入文件无效：'+err.message)}if(!confirm(`准备导入 ${list.length} 位客户。与现有客户完全相同的资料将跳过；是否继续？`))return;let ok=0,failed=0;setBusy(true);for(const row of list){try{await api('/api/customers/save',Object.fromEntries(fields.map(k=>[k,row[k]])));ok++}catch(err){failed++;console.warn('客户导入失败',row.name,err)}}setBusy(false);await refresh();status(`导入完成：成功或已存在 ${ok} 位，失败 ${failed} 位。请核对名单。`)}
+ return {open,openAdd,close,refresh};
 })();
 </script>
 

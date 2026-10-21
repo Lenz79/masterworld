@@ -1,27 +1,50 @@
-# -*- coding: utf-8 -*-
-"""庙旺利陷公开资料读取器。资料仅为公开转录，未经独立流派校准。"""
-import csv
+"""可追溯的星曜亮度数据读取器：只接纳逐项确认的星曜/地支记录。"""
+import json
 from pathlib import Path
+from ziwei_brightness_schema import STAR_NAMES, BRANCHES, LEVELS
 
-DATA_FILE = Path(__file__).resolve().parent / '庙旺利陷_312项_公开资料已填168项.csv'
-BRANCHES = frozenset('子丑寅卯辰巳午未申酉戌亥')
-LEVELS = frozenset(('庙','旺','得','利','平','陷','不','闲'))
+DEFAULT_PATH = Path(__file__).with_name('ziwei_brightness_verified.json')
 
-def load_brightness_audit():
-    rules = {}
-    entries = 0
-    if not DATA_FILE.is_file():
-        return {}, {'verified_entries': 0, 'source_entries': 0, 'status': 'missing_data', 'message': '未找到庙旺利陷资料，暂不显示星曜亮度；排盘不受影响。'}
-    with DATA_FILE.open('r', encoding='utf-8-sig', newline='') as handle:
-        for row in csv.DictReader(handle):
-            star=(row.get('star') or '').strip()
-            branch=(row.get('branch') or '').strip()
-            level=(row.get('level') or '').strip()
-            if not star or branch not in BRANCHES or not level or level not in LEVELS:
-                continue
-            if branch not in rules.setdefault(star, {}):
-                rules[star][branch]=level
-                entries += 1
-    return rules, {'verified_entries': 0, 'source_entries': entries, 'unverified_entries': entries,
-                   'status': 'public_source_not_independently_verified',
-                   'message': f'公开亮度资料已录入{entries}项，尚未与标准命盘逐项校准。'}
+
+def load_brightness_audit(path=DEFAULT_PATH):
+    raw = json.loads(Path(path).read_text(encoding='utf-8'))
+    if not isinstance(raw, dict):
+        raise ValueError('亮度文件必须是 JSON 对象')
+    status = raw.get('status', 'unverified')
+    if status not in ('unverified', 'partial', 'verified'):
+        raise ValueError('status 只能是 unverified、partial 或 verified')
+    records = raw.get('stars', {})
+    if not isinstance(records, dict):
+        raise ValueError('stars 必须是对象')
+    checked = {}
+    for star, entries in records.items():
+        if star not in STAR_NAMES:
+            raise ValueError(f'未知星曜：{star}')
+        if not isinstance(entries, dict):
+            raise ValueError(f'{star} 的宫位表格式错误')
+        for branch, record in entries.items():
+            if branch not in BRANCHES:
+                raise ValueError(f'未知地支：{branch}')
+            if not isinstance(record, dict):
+                raise ValueError(f'{star}{branch} 必须有 level、source、checked_by 字段')
+            level = record.get('level')
+            if level not in LEVELS:
+                raise ValueError(f'{star}{branch} 亮度等级无效：{level}')
+            if not str(record.get('source', '')).strip() or not str(record.get('checked_by', '')).strip():
+                raise ValueError(f'{star}{branch} 缺少核对来源或核对人')
+            checked.setdefault(star, {})[branch] = level
+    total = len(STAR_NAMES) * len(BRANCHES)
+    count = sum(map(len, checked.values()))
+    if status == 'verified' and count != total:
+        raise ValueError(f'不能标为全部核验：只有 {count}/{total} 条')
+    if status == 'unverified' and count:
+        raise ValueError('有已核验记录时，请把 status 改为 partial')
+    note = f'庙旺利陷已核验 {count}/{total} 项；未核验的不显示'
+    return checked, {'status': 'verified' if count == total else ('partial' if count else 'pending'),
+                     'message': note, 'verified_entries': count, 'total_entries': total,
+                     'star_count': len(STAR_NAMES)}
+
+
+def load_verified_brightness(path=DEFAULT_PATH):
+    data, audit = load_brightness_audit(path)
+    return data, audit['message']
