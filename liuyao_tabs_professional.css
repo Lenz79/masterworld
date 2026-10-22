@@ -1,0 +1,318 @@
+/* App-ready 三个不同专业盘面；仅限定在结果面板 */
+#liuyao-tab-panel .am-date,#liuyao-tab-panel .am-relation,#liuyao-tab-panel .am-text{padding:12px;background:#101b30;border:1px solid #334155;border-radius:10px;margin-bottom:10px;line-height:1.7}
+#liuyao-tab-panel .am-hint{color:#94a3b8;font-size:.76rem;margin-top:5px}
+#liuyao-tab-panel .am-three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-bottom:10px}
+#liuyao-tab-panel .am-hex{border:1px solid #475569;border-radius:9px;overflow:hidden;text-align:center;min-width:0;background:#101b30}
+#liuyao-tab-panel .am-hex-heading{background:#334155;color:#fbbf24;padding:9px 2px;font-weight:700}
+#liuyao-tab-panel .am-half{display:grid;grid-template-columns:1fr;justify-items:center;gap:5px;padding:8px 2px;border-bottom:1px solid #334155;font-size:.8rem}
+#liuyao-tab-panel .am-glyphs{display:flex;flex-direction:column;gap:6px;width:min(100%,105px)}
+#liuyao-tab-panel .am-yao{display:flex;height:9px;width:100%;gap:6px}
+#liuyao-tab-panel .am-yao i{flex:1;background:#e2e8f0;border-radius:1px}
+#liuyao-tab-panel .am-yao.am-moving i{background:#f59e0b}
+#liuyao-tab-panel .am-hexname{padding:9px 2px;color:#fbbf24;font-weight:700;font-size:.85rem}
+#liuyao-tab-panel .am-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+#liuyao-tab-panel .am-prof{width:100%;min-width:610px;border-collapse:collapse;background:#101b30;font-size:.81rem}
+#liuyao-tab-panel .am-prof th,#liuyao-tab-panel .am-prof td{padding:12px 5px;border:1px solid #334155;text-align:center;white-space:nowrap}
+#liuyao-tab-panel .am-prof th{background:#334155;color:#fbbf24}
+#liuyao-tab-panel .am-prof .am-yao{width:65px;margin:0 auto}
+#liuyao-tab-panel .am-prof em{color:#fbbf24;font-style:normal;font-weight:700}
+#liuyao-tab-panel .am-element{color:#34d399}
+#liuyao-tab-panel .am-spirit{color:#93c5fd}
+#liuyao-tab-panel .am-muted{color:#64748b}
+#liuyao-tab-panel .am-subtabs{display:flex;gap:5px;overflow-x:auto;margin-bottom:10px}
+#liuyao-tab-panel .am-subtabs button{flex:1;min-width:110px;background:#101b30;color:#93c5fd;border:1px solid #475569;font-size:.8rem}
+#liuyao-tab-panel .am-subtabs button[aria-selected="true"]{background:#f59e0b;color:#111827}
+#liuyao-tab-panel .am-classichead{display:flex;align-items:center;gap:20px;padding:15px;background:#101b30;border-radius:10px;margin-bottom:10px}
+#liuyao-tab-panel .am-classichead .am-glyphs{width:88px;flex-shrink:0}
+#liuyao-tab-panel .am-classichead h3{margin:0 0 6px;color:#fbbf24}
+#liuyao-tab-panel .am-text b{display:block;background:#334155;padding:6px 9px;margin:8px -3px;color:#fbbf24}
+#liuyao-tab-panel .am-text p{margin:9px 0}
+@media(max-width:480px){#liuyao-tab-panel .am-half{font-size:.72rem}#liuyao-tab-panel .am-hexname{font-size:.72rem}#liuyao-tab-panel .am-yao{height:7px;gap:4px}#liuyao-tab-panel .am-classichead{gap:12px}}
+
+.am-export{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:12px 0}.am-export button{border:1px solid #b59b59;border-radius:8px;padding:10px 14px;background:#182f4a;color:#f4df9e;cursor:pointer;min-height:44px}.am-export span{font-size:13px;color:#c5d4e3}
+
+#liuyao-tab-panel .am-export{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:10px 0}#liuyao-tab-panel .am-export button{min-height:44px;border:1px solid #b59b59;background:#182f4a;color:#f4df9e;border-radius:8px;padding:10px 14px;cursor:pointer}#liuyao-tab-panel .am-export span{font-size:.8rem;color:#c5d4e3}
+
+#liuyao-tab-panel .am-empty{display:inline-block;color:#ffcf8a;border:1px solid #b58946;border-radius:4px;padding:1px 4px;font-size:11px;white-space:nowrap}
+
+.am-strength{display:inline-block;padding:1px 4px;border-radius:4px;border:1px solid #b59b59;font-size:11px;color:#f4df9e}
+
+/* X10 增量：专业盘地支关系标签及手机滚动 */
+.am-branch-tag{display:inline-block;margin:2px 2px 0 3px;padding:1px 4px;border:1px solid #ae935d;border-radius:4px;color:#efd393;font-size:11px;white-space:nowrap}.am-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}.am-prof{min-width:670px}.am-prof th,.am-prof td{white-space:nowrap}.am-export button{min-height:44px}
+
+/* Mobile-first: keep six-line table legible without shrinking page */
+#liuyao-tab-panel .am-scroll{overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;max-width:100%}
+#liuyao-tab-panel .am-prof{min-width:680px;white-space:nowrap}
+#liuyao-tab-panel .am-prof td,#liuyao-tab-panel .am-prof th{padding:8px 6px;text-align:center}
+#liuyao-tab-panel .am-fushen{color:#d7bb83}
+@media(max-width:600px){#liuyao-tab-panel .am-prof{font-size:12px;min-width:660px}#liuyao-tab-panel .am-date{font-size:13px;line-height:1.7}#liuyao-tab-buttons button{min-height:46px}#liuyao-tab-panel .am-scroll{margin-right:-8px}}
+
+@media(max-width:600px){#liuyao-tab-panel .am-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}#liuyao-tab-panel .am-prof{min-width:730px}#liuyao-tab-panel button{min-height:44px}#liuyao-calendar-status{line-height:1.5;margin:8px 0}}
+
+/* Remain · mobile-first light appearance, CSS only; no calculation changes */
+html body{background:#f7f9fc!important;color:#172334!important}
+body .panel,body header{background:#fff!important;color:#172334!important;border-color:#dbe3ed!important}
+body h1,body h2{color:#142e51!important}
+body label{color:#234c7a!important}
+body input,body select,body textarea{background:#fff!important;color:#172334!important;border-color:#b9c7d8!important}
+body a{color:#126bd1}
+body button{background:#1677df;color:#fff}
+body button.secondary{background:#eaf2fc;color:#174675}
+#liuyao-tab-panel{color:#172334}
+#liuyao-tab-panel .am-date,#liuyao-tab-panel .am-relation,#liuyao-tab-panel .am-text,#liuyao-tab-panel .am-classichead,#liuyao-tab-panel .am-hex{background:#fff;color:#172334;border-color:#dbe3ed}
+#liuyao-tab-panel .am-hint{color:#53657a}
+#liuyao-tab-panel .am-prof{background:#fff;color:#151c27}
+#liuyao-tab-panel .am-prof th{background:#eff5fb;color:#174675}
+#liuyao-tab-panel .am-prof td{background:#fff;color:#172334}
+#liuyao-tab-panel .am-prof td,#liuyao-tab-panel .am-prof th{border-color:#dfe6ef}
+#liuyao-tab-panel .am-prof tbody tr:nth-child(even) td{background:#fbfcfe}
+#liuyao-tab-panel .am-prof .am-yao i{background:#111827}
+#liuyao-tab-panel .am-prof .am-yao.am-moving i{background:#ff8a00}
+#liuyao-tab-panel .am-prof .am-spirit{color:#1475c8}
+#liuyao-tab-panel .am-prof .am-element{color:#078a62}
+#liuyao-tab-panel .am-prof .am-fushen{color:#8b560e}
+#liuyao-tab-panel .am-prof em{color:#f97316}
+#liuyao-tab-panel .am-prof .am-shi{color:#f97316}
+#liuyao-tab-panel .am-prof .am-ying{color:#e11d48}
+#liuyao-tab-panel .am-prof .am-change-mark{color:#e11d48}
+#liuyao-tab-panel .am-branch-tag,#liuyao-tab-panel .am-strength,#liuyao-tab-panel .am-empty{color:#925313;border-color:#e8b76c;background:#fff8eb}
+#liuyao-tab-panel .am-export button{background:#eef6ff;color:#0866c7;border:1px solid #b7d9ff}
+#liuyao-tab-panel .am-export span{color:#53657a}
+#liuyao-tab-panel .am-subtabs button{background:#fff;color:#174675;border-color:#cbd5e1}
+#liuyao-tab-panel .am-subtabs button[aria-selected=true]{background:#1677df;color:#fff}
+#liuyao-tab-panel .am-text b{background:#eff5fb;color:#174675}
+#liuyao-tab-panel .am-classichead h3,#liuyao-tab-panel .am-hexname{color:#174675}
+#liuyao-tab-panel .am-hex-heading{background:#eff5fb;color:#174675}
+#liuyao-tab-panel .am-half{border-color:#dbe3ed}
+#liuyao-tab-panel .am-line-inline{display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap;min-width:105px}
+#liuyao-tab-panel .am-line-inline>.am-yao{margin:0!important;flex:0 0 65px}
+#liuyao-tab-panel .am-line-markers{display:inline-flex;align-items:center;gap:3px;min-width:18px}
+#liuyao-tab-panel .am-line-markers em{font-style:normal;font-weight:800}
+#liuyao-tab-panel .am-prof td.am-yaocell{min-width:125px}
+@media(max-width:600px){body{padding:8px!important}.wrap{max-width:100%}#liuyao-tab-panel .am-prof{min-width:760px}#liuyao-tab-panel .am-line-inline{min-width:105px}#liuyao-tab-panel .am-prof td.am-yaocell{min-width:120px}#liuyao-tab-panel .am-scroll{border:1px solid #dbe3ed;border-radius:9px}}
+
+
+/* Remain / App-Ready: all text on Liuyao page +2px; no engine or markup changes. */
+html body{font-size:18px;line-height:1.55}
+body h1{font-size:calc(1.35rem + 2px)}
+body h2{font-size:calc(1rem + 2px)}
+body label{font-size:calc(.85rem + 2px)}
+body input,body select,body textarea,body button{font-size:18px}
+body .small{font-size:calc(.8rem + 2px)}
+body .notice{font-size:calc(.83rem + 2px)}
+body .cell .top{font-size:calc(.82rem + 2px)}
+body .cell .mid{font-size:calc(1.1rem + 2px)}
+body .cell .bottom{font-size:calc(.8rem + 2px)}
+body .yao{font-size:calc(1.3rem + 2px)}
+#manual .manual-yao-name,#manual .manual-yao-row select{font-size:calc(1rem + 2px)}
+#manual .manual-preview-title{font-size:calc(.95rem + 2px)}
+#manual .manual-preview-foot{font-size:calc(.74rem + 2px)}
+#manual .manual-preview-mark{font-size:calc(1.1rem + 2px)}
+#liuyao-tab-panel .am-prof{font-size:calc(.81rem + 2px);min-width:900px}
+#liuyao-tab-panel .am-prof th,#liuyao-tab-panel .am-prof td{padding:12px 9px;line-height:1.5}
+#liuyao-tab-panel .am-hint{font-size:calc(.76rem + 2px)}
+#liuyao-tab-panel .am-half{font-size:calc(.8rem + 2px)}
+#liuyao-tab-panel .am-hexname{font-size:calc(.85rem + 2px)}
+#liuyao-tab-panel .am-subtabs button{font-size:calc(.8rem + 2px)}
+#liuyao-tab-panel .am-export span{font-size:calc(.8rem + 2px)}
+#liuyao-tab-panel .am-empty,#liuyao-tab-panel .am-strength,#liuyao-tab-panel .am-branch-tag{font-size:13px}
+#liuyao-tab-panel .ly-hexcard h3{font-size:calc(.95rem + 2px)}
+#liuyao-tab-panel .ly-hexcard p{font-size:calc(.8rem + 2px)}
+#liuyao-tab-panel .ly-hexmeta{font-size:calc(.77rem + 2px)}
+#liuyao-tab-panel .ly-six-table{font-size:calc(.78rem + 2px)}
+#liuyao-tab-panel .ly-note{font-size:calc(.82rem + 2px)}
+#liuyao-tab-panel .am-prof td.am-yaocell{min-width:145px}
+#liuyao-tab-panel .am-line-inline{min-width:130px}
+@media(max-width:620px){
+  #manual .manual-yao-name,#manual .manual-yao-row select{font-size:calc(.85rem + 2px)}
+  #manual .manual-preview-mark{font-size:calc(.9rem + 2px)}
+  #manual .manual-preview-title{font-size:calc(.82rem + 2px)}
+  body .cell .mid{font-size:calc(.9rem + 2px)}
+  body .yao{font-size:calc(1rem + 2px)}
+  #liuyao-tab-panel .am-prof{font-size:14px;min-width:900px}
+  #liuyao-tab-panel .am-date{font-size:15px}
+  #liuyao-tab-panel .am-half{font-size:calc(.72rem + 2px)}
+  #liuyao-tab-panel .am-hexname{font-size:calc(.72rem + 2px)}
+  #liuyao-tab-panel .ly-hexcard h3{font-size:calc(.83rem + 2px)}
+  #liuyao-tab-panel .ly-hexmeta{font-size:calc(.7rem + 2px)}
+  #liuyao-tab-panel .am-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+}
+
+
+/* Remain / App-Ready: requested additional +3px and bold text across the Liuyao page.
+   Applies on top of the previous +2px version. No JavaScript/HTML changes. */
+html body{font-size:21px;font-weight:700}
+body h1{font-size:calc(1.35rem + 5px);font-weight:700}
+body h2{font-size:calc(1rem + 5px);font-weight:700}
+body label{font-size:calc(.85rem + 5px);font-weight:700}
+body input,body select,body textarea,body button{font-size:21px;font-weight:700}
+body .small{font-size:calc(.8rem + 5px);font-weight:700}
+body .notice{font-size:calc(.83rem + 5px);font-weight:700}
+body .cell .top{font-size:calc(.82rem + 5px);font-weight:700}
+body .cell .mid{font-size:calc(1.1rem + 5px);font-weight:700}
+body .cell .bottom{font-size:calc(.8rem + 5px);font-weight:700}
+body .yao{font-size:calc(1.3rem + 5px)}
+#manual .manual-yao-name,#manual .manual-yao-row select{font-size:calc(1rem + 5px);font-weight:700}
+#manual .manual-preview-title{font-size:calc(.95rem + 5px);font-weight:700}
+#manual .manual-preview-foot{font-size:calc(.74rem + 5px);font-weight:700}
+#manual .manual-preview-mark{font-size:calc(1.1rem + 5px);font-weight:700}
+#liuyao-tab-panel, #liuyao-tab-panel *{font-weight:700}
+#liuyao-tab-panel .am-prof{font-size:calc(.81rem + 5px);min-width:1030px}
+#liuyao-tab-panel .am-hint{font-size:calc(.76rem + 5px)}
+#liuyao-tab-panel .am-half{font-size:calc(.8rem + 5px)}
+#liuyao-tab-panel .am-hexname{font-size:calc(.85rem + 5px)}
+#liuyao-tab-panel .am-subtabs button{font-size:calc(.8rem + 5px)}
+#liuyao-tab-panel .am-export span{font-size:calc(.8rem + 5px)}
+#liuyao-tab-panel .am-empty,#liuyao-tab-panel .am-strength,#liuyao-tab-panel .am-branch-tag{font-size:16px}
+#liuyao-tab-panel .ly-hexcard h3{font-size:calc(.95rem + 5px)}
+#liuyao-tab-panel .ly-hexcard p{font-size:calc(.8rem + 5px)}
+#liuyao-tab-panel .ly-hexmeta{font-size:calc(.77rem + 5px)}
+#liuyao-tab-panel .ly-six-table{font-size:calc(.78rem + 5px)}
+#liuyao-tab-panel .ly-note{font-size:calc(.82rem + 5px)}
+/* The question field is a 2-row textarea by HTML default. Make its visible height
+   match the adjacent selectors/date field while retaining multiline entry. */
+body .inputs>label>textarea#question,
+body .inputs>label>select,
+body .inputs>label>input#when{
+  height:56px;
+  min-height:56px;
+  box-sizing:border-box;
+}
+body .inputs>label>textarea#question{
+  resize:vertical;
+  max-height:160px;
+  overflow-y:auto;
+  line-height:1.25;
+}
+body .inputs>label{min-width:0}
+body .inputs>label>textarea#question{width:100%}
+@media(max-width:620px){
+  #manual .manual-yao-name,#manual .manual-yao-row select{font-size:calc(.85rem + 5px)}
+  #manual .manual-preview-mark{font-size:calc(.9rem + 5px)}
+  #manual .manual-preview-title{font-size:calc(.82rem + 5px)}
+  body .cell .mid{font-size:calc(.9rem + 5px)}
+  body .yao{font-size:calc(1rem + 5px)}
+  #liuyao-tab-panel .am-prof{font-size:17px;min-width:1030px}
+  #liuyao-tab-panel .am-date{font-size:18px}
+  #liuyao-tab-panel .am-half{font-size:calc(.72rem + 5px)}
+  #liuyao-tab-panel .am-hexname{font-size:calc(.72rem + 5px)}
+  #liuyao-tab-panel .ly-hexcard h3{font-size:calc(.83rem + 5px)}
+  #liuyao-tab-panel .ly-hexmeta{font-size:calc(.7rem + 5px)}
+}
+
+/* 2026-10-22: Screenshot red outlines = control values (-1px),
+   green outlines = field labels (+2px and bold). Scope: Liuyao only. */
+body .panel .inputs > label,
+body .panel .inputs > label:not(.manual-yao-row){
+  font-size:calc(.85rem + 7px);
+  font-weight:700;
+}
+body .panel .inputs > label > input,
+body .panel .inputs > label > select,
+body .panel .inputs > label > textarea,
+body .panel .inputs > select,
+body .panel .inputs > input{
+  font-size:20px;
+  font-weight:700;
+}
+/* Dynamic date-stem, day-pillar and month-branch fields may be inserted
+   outside .inputs; match their visible controls without changing buttons. */
+body select#day-stem,
+body select#day-pillar,
+body select#month-branch,
+body input#when,
+body textarea#question,
+body select#yongshen,
+body select#mode{
+  font-size:20px;
+  font-weight:700;
+}
+/* Do not affect the separate manual six-line editor. */
+#manual.inputs > label{font-size:inherit}
+
+/* Verified-calendar compact color strip, scoped to professional panel only. */
+#liuyao-tab-panel .am-calendar-board{border:1px solid #d4dfea;background:#fff;border-radius:12px;margin:0 0 12px;overflow:hidden;color:#14283d}
+#liuyao-tab-panel .am-calendar-main{display:grid;grid-template-columns:minmax(155px,1fr) minmax(0,2fr);gap:10px;padding:10px 14px;align-items:center}
+#liuyao-tab-panel .am-calendar-time{display:flex;flex-direction:column;gap:4px;font-size:17px}
+#liuyao-tab-panel .am-calendar-time b{color:#174a82}
+#liuyao-tab-panel .am-pillars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+#liuyao-tab-panel .am-pillar{text-align:center;border-left:1px solid #e3e9f0;min-width:0}
+#liuyao-tab-panel .am-pillar-label{display:block;font-size:15px;color:#53657d}
+#liuyao-tab-panel .am-pillar strong{display:flex;justify-content:center;gap:4px;font-size:28px;line-height:1.25}
+#liuyao-tab-panel .am-five-wood{color:#168c46}#liuyao-tab-panel .am-five-fire{color:#df3030}#liuyao-tab-panel .am-five-earth{color:#a46b1a}#liuyao-tab-panel .am-five-metal{color:#ae7c00}#liuyao-tab-panel .am-five-water{color:#1967c5}
+#liuyao-tab-panel .am-calendar-foot{background:#f0f5fb;border-top:1px solid #e2e9f0;padding:7px 14px;display:flex;gap:18px;flex-wrap:wrap;font-size:16px}
+#liuyao-tab-panel .am-calendar-pending{font-size:16px;color:#64748b}
+#liuyao-tab-panel .am-date{padding:10px 14px;line-height:1.45;margin-bottom:10px}
+#liuyao-tab-panel .am-date>.am-hint{line-height:1.45;margin-top:3px}
+#liuyao-tab-panel .am-classic-pending{border:1px solid #d8e4f0;background:#f8fbff;border-radius:10px;padding:14px;color:#253a51}
+#liuyao-tab-panel .am-classic-pending p{margin:6px 0 0;color:#64748b;font-size:17px}
+/* Drafts: retain functionality, reduce oversized empty panels */
+body .panel:has(#history){padding-top:14px;padding-bottom:14px}
+body .panel:has(#history) h2{margin:0 0 8px}
+body .panel:has(#history) #history:empty{min-height:0}
+@media(max-width:620px){
+ #liuyao-tab-panel .am-calendar-main{grid-template-columns:1fr;gap:8px;padding:10px}
+ #liuyao-tab-panel .am-calendar-time{flex-direction:row;flex-wrap:wrap;gap:8px;font-size:15px}
+ #liuyao-tab-panel .am-pillar strong{font-size:23px}
+ #liuyao-tab-panel .am-pillar-label{font-size:13px}
+ #liuyao-tab-panel .am-calendar-foot{font-size:14px;padding:8px 10px;gap:8px 14px}
+ #liuyao-tab-panel .am-date{padding:10px}
+}
+
+/* 2026-10-22: compact professional chart order and 4 pillar voids */
+#liuyao-tab-panel [data-view="0"]{display:flex;flex-direction:column}
+#liuyao-tab-panel [data-view="0"]>.am-calendar-board{order:0}
+#liuyao-tab-panel [data-view="0"]>.am-export{order:1}
+#liuyao-tab-panel [data-view="0"]>.am-scroll{order:2}
+#liuyao-tab-panel [data-view="0"]>.am-hex-summary{order:3;margin-top:10px}
+#liuyao-tab-panel [data-view="0"]>.am-relation{order:4}
+#liuyao-tab-panel .am-calendar-foot{gap:10px 22px;align-items:center}
+#liuyao-tab-panel .am-void-label{display:inline-flex;gap:5px;align-items:center;font-weight:700;color:#234b74}
+#liuyao-tab-panel .am-void-value{color:#c72b39;font-size:19px}
+#liuyao-tab-panel .am-void-missing{color:#8995a4}
+#liuyao-tab-panel .am-hex-summary{background:#f7fbff}
+@media(max-width:620px){#liuyao-tab-panel .am-void-value{font-size:17px}}
+
+/* 易爻参考：紧凑横向时、日、月、年四柱，底部一行空亡；只作用于六爻结果 */
+#liuyao-tab-panel .am-yiy-board{border-radius:3px;margin:0 0 8px;background:#fff;overflow:hidden}
+#liuyao-tab-panel .am-yiy-grid{display:grid;grid-template-columns:minmax(145px,1.65fr) repeat(4,minmax(52px,1fr));gap:0;align-items:stretch}
+#liuyao-tab-panel .am-yiy-time{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 6px;gap:2px;font-size:16px;font-weight:700;white-space:nowrap}
+#liuyao-tab-panel .am-yiy-time small{font-size:12px;color:#6b7280}
+#liuyao-tab-panel .am-yiy-pillar{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;border-left:1px solid #d6dce5;padding:0 2px 5px;min-width:0}
+#liuyao-tab-panel .am-yiy-heading{background:#a3a7ab;color:#fff;width:100%;text-align:center;font-size:14px;line-height:22px;font-weight:700}
+#liuyao-tab-panel .am-yiy-heading.am-yiy-day{color:#ff4242}
+#liuyao-tab-panel .am-yiy-pillar strong{display:flex;flex-direction:column;align-items:center;font-size:30px;line-height:1.1;margin-top:3px;font-weight:800}
+#liuyao-tab-panel .am-yiy-void{display:flex;gap:9px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:4px 8px;border-top:1px solid #b9c0c9;font-size:15px;line-height:1.35;color:#172334;background:#f6f7f8}
+#liuyao-tab-panel .am-yiy-void b{color:#111827}
+#liuyao-tab-panel .am-yiy-void .am-void-value{color:#c62828;font-weight:800}
+#liuyao-tab-panel .am-yiy-pending{grid-column:span 4;text-align:center;padding:14px 4px;color:#64748b}
+@media(max-width:620px){#liuyao-tab-panel .am-yiy-grid{grid-template-columns:minmax(106px,1.5fr) repeat(4,minmax(40px,1fr))}#liuyao-tab-panel .am-yiy-time{font-size:12px;padding:3px}#liuyao-tab-panel .am-yiy-time small{font-size:10px}#liuyao-tab-panel .am-yiy-pillar strong{font-size:23px}#liuyao-tab-panel .am-yiy-heading{font-size:12px;line-height:19px}#liuyao-tab-panel .am-yiy-void{font-size:12px;gap:4px;padding:4px}}
+
+/* 2026-10-22 surgical layout: align four voids close together, and show summary below time. */
+#liuyao-tab-panel .am-yiy-void{justify-content:flex-start!important;gap:4px 14px!important;flex-wrap:wrap}
+#liuyao-tab-panel .am-yiy-void b{margin-right:3px}
+#liuyao-tab-panel .am-yiy-time{white-space:normal;align-items:flex-start;text-align:left;justify-content:center;gap:2px}
+#liuyao-tab-panel .am-yiy-time>.am-hex-summary{margin:5px 0 0!important;padding:0!important;border:0!important;background:transparent!important;font-size:14px;line-height:1.4;width:100%}
+#liuyao-tab-panel .am-yiy-time>.am-hex-summary strong{font-size:15px}
+#liuyao-tab-panel .am-yiy-time>.am-hex-summary .am-hint{font-size:12px;line-height:1.4;margin-top:2px}
+@media(max-width:620px){#liuyao-tab-panel .am-yiy-void{gap:3px 9px!important}#liuyao-tab-panel .am-yiy-time>.am-hex-summary{font-size:12px}#liuyao-tab-panel .am-yiy-time>.am-hex-summary strong{font-size:13px}#liuyao-tab-panel .am-yiy-time>.am-hex-summary .am-hint{font-size:11px}}
+
+/* 易爻式变爻专显：静爻两栏留空，变爻显示纳甲、五行和六亲 */
+#liuyao-tab-panel .am-prof th:nth-child(7),#liuyao-tab-panel .am-prof td:nth-child(7){width:86px;min-width:74px;max-width:100px;padding-left:4px;padding-right:4px}
+#liuyao-tab-panel .am-prof th:nth-child(8),#liuyao-tab-panel .am-prof td:nth-child(8){width:74px;min-width:65px;max-width:90px;padding-left:4px;padding-right:4px}
+#liuyao-tab-panel .am-prof td.am-changed-cell,#liuyao-tab-panel .am-prof td.am-changed-relative{vertical-align:middle;text-align:center}
+#liuyao-tab-panel .am-changed-najia{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;line-height:1.15;font-weight:700}
+#liuyao-tab-panel .am-changed-element{font-weight:700}
+#liuyao-tab-panel .am-prof{min-width:900px}
+@media(max-width:620px){#liuyao-tab-panel .am-prof{min-width:900px}#liuyao-tab-panel .am-prof th:nth-child(7),#liuyao-tab-panel .am-prof td:nth-child(7){min-width:70px}#liuyao-tab-panel .am-prof th:nth-child(8),#liuyao-tab-panel .am-prof td:nth-child(8){min-width:60px}}
+
+/* 六十四卦经典文本：手机优先，保持原六爻专业盘 CSS */
+#liuyao-tab-panel .am-classic-content{display:grid;gap:12px;margin-top:12px}
+#liuyao-tab-panel .am-classic-section{border:1px solid #dce6f1;border-radius:9px;padding:14px;background:#fff;color:#15263c}
+#liuyao-tab-panel .am-classic-section h4{font-size:1.1em;color:#155b9d;margin:0 0 8px;font-weight:700}
+#liuyao-tab-panel .am-classic-section p{white-space:pre-wrap;line-height:1.8;margin:6px 0}
+#liuyao-tab-panel .am-classic-line{padding:10px 0;border-top:1px solid #e5edf5}
+#liuyao-tab-panel .am-classic-line:first-of-type{border-top:0}
+#liuyao-tab-panel .am-classic-small{font-size:.9em;color:#475569;line-height:1.7}
+#liuyao-tab-panel .am-classic-source{font-size:.85em;color:#64748b;overflow-wrap:anywhere}
+@media(max-width:620px){#liuyao-tab-panel .am-classic-section{padding:10px}#liuyao-tab-panel .am-classic-content{gap:8px}}

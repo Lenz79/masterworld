@@ -148,7 +148,7 @@ except Exception:
 # ---------------------------------------------------------------------------
 class MainGatewayHandler(SimpleHTTPRequestHandler):
     """Serve only allowlisted web assets; source, tests and private files stay inaccessible."""
-    PUBLIC_ASSETS = {'/', '/index.html', '/ziwei_view.html', '/bazi_view.html', '/fengshui_view.html', '/xinggui_session.js'}
+    PUBLIC_ASSETS = {'/', '/index.html', '/ziwei_view.html', '/bazi_view.html', '/fengshui_view.html', '/xinggui_session.js', '/qimen_view.html', '/liuyao_view.html', '/liuyao_hexagram.js', '/liuyao_najia.js', '/liuyao_methods_app.js', '/liuyao_tabs_professional.js', '/liuyao_tabs_professional.css', '/zeri_view.html'}
 
     def _authenticated_user_id(self):
         """Verify the Supabase access token server-side; never trust a client user_id."""
@@ -214,6 +214,47 @@ class MainGatewayHandler(SimpleHTTPRequestHandler):
             else:
                 self._send_json({'status': 'ok', 'supabase_url': public_url,
                     'supabase_publishable_key': public_key})
+        elif urlsplit(self.path).path == '/api/zeri/events':
+            try:
+                from zeri_engine import ZeriEngine
+                self._send_json({'status': 'success', 'events': ZeriEngine.events()})
+            except Exception:
+                traceback.print_exc()
+                self._send_json({'status': 'error', 'message': '择日事项暂不可用'}, 503)
+        elif urlsplit(self.path).path == '/api/liuyao/calendar':
+            # Calendar conversion is optional; never silently approximate sexagenary dates.
+            from urllib.parse import parse_qs
+            from datetime import datetime
+            import re
+            q = parse_qs(urlsplit(self.path).query)
+            stamp = q.get('when', [''])[0]
+            if not re.fullmatch(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}', stamp):
+                self._send_json({'status':'error','message':'起卦时间格式错误'},400)
+                return
+            try:
+                dt = datetime.strptime(stamp, '%Y-%m-%dT%H:%M')
+                if not 1900 <= dt.year <= 2100:
+                    raise ValueError('日期超出范围')
+            except ValueError:
+                self._send_json({'status':'error','message':'起卦日期时间无效'},400)
+                return
+            try:
+                from lunar_python import Solar
+            except ImportError:
+                self._send_json({'status':'missing_dependency','message':'请安装 lunar_python：python -m pip install lunar_python'},503)
+                return
+            try:
+                lunar = Solar.fromYmdHms(dt.year,dt.month,dt.day,dt.hour,dt.minute,0).getLunar()
+                # Exact day GanZhi and JieQi month branch, not Gregorian-month guesses.
+                day = lunar.getDayInGanZhiExact()
+                month = lunar.getMonthZhiExact()
+                year = lunar.getYearInGanZhiExact()
+                month_gz = lunar.getMonthInGanZhiExact()
+                time_gz = lunar.getTimeInGanZhi()
+                self._send_json({'status':'ok','day':day,'month_branch':month,'year':year,'month':month_gz,'hour':time_gz,'note':'采用本地时间；日界以历法库精确日柱规则为准，未自动校正真太阳时'})
+            except Exception as err:
+                print('六爻历法换算失败:',err,flush=True)
+                self._send_json({'status':'error','message':'历法计算失败，请手动核对日柱与月建'},503)
         elif urlsplit(self.path).path == '/api/ziwei/diagnostics':
 
             import importlib.util
@@ -308,7 +349,20 @@ class MainGatewayHandler(SimpleHTTPRequestHandler):
         # ------------------------------------------------------------------
         # 路由 1：八字计算接口 -> 调度 bazi_engine
         # ------------------------------------------------------------------
-        if self.path == '/api/calculate':
+        if self.path == '/api/zeri/calculate':
+            try:
+                from zeri_engine import ZeriEngine
+                request = self._parse_json_body()
+                self._send_json(ZeriEngine.calculate(request))
+            except (ValueError, TypeError, OverflowError) as err:
+                self._send_json({'status': 'error', 'message': str(err)}, 400)
+            except RuntimeError as err:
+                self._send_json({'status': 'error', 'message': str(err)}, 503)
+            except Exception:
+                traceback.print_exc()
+                self._send_json({'status': 'error', 'message': '择日计算暂不可用'}, 500)
+
+        elif self.path == '/api/calculate':
             try:
                 if not BaziEngine:
                     raise Exception("bazi_engine.py 模块未引入，请检查文件是否存在！")

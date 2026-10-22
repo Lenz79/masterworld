@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>星轨智盘 · 择日专家</title>
+<style>
+*{box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;background:#0f172a;color:#e2e8f0;margin:0;padding:10px;font-size:19px}
+.wrap{max-width:900px;margin:0 auto}
+a.back{color:#fbbf24;text-decoration:none;font-size:17px}
+h1{color:#fbbf24;font-size:25px;margin:10px 0 4px}
+.sub{color:#94a3b8;font-size:16px;margin:0 0 14px;line-height:1.6}
+.panel{background:#1e293b;border:1px solid #334155;border-radius:10px;padding:14px;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:minmax(150px,1.1fr) minmax(0,1.25fr) minmax(0,1.25fr) 110px minmax(0,1.2fr);gap:10px;align-items:end}
+.grid>div{min-width:0}
+@media(max-width:900px){.grid{grid-template-columns:1fr 1fr}}
+.zwrap{position:relative}
+.zbtn{width:100%;text-align:left;background:#0f172a;border:1px solid #475569;color:#e2e8f0;padding:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zpanel{position:absolute;right:0;top:calc(100% + 6px);z-index:20;width:min(430px,92vw);background:#1e293b;border:1px solid #fbbf24;border-radius:10px;padding:12px;box-shadow:0 10px 30px #0008}
+.zpanel[hidden]{display:none}
+.zt{font-size:15px;color:#fbbf24;margin:6px 0}
+.zchips{display:flex;flex-wrap:wrap;gap:6px}
+.zc{padding:4px 12px;border:1px solid #475569;border-radius:14px;cursor:pointer;user-select:none;font-size:17px}
+.zc.on{background:#d97706;border-color:#d97706;color:#fff}
+.zc.on.minor{background:#0e7490;border-color:#0e7490}
+.zact{display:flex;justify-content:space-between;margin-top:12px}
+.ghost{background:#334155}
+label{display:block;font-size:15px;color:#94a3b8;margin-bottom:4px}
+select,input{width:100%;padding:8px;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#e2e8f0;font-size:17px}
+input[type=date]{color-scheme:dark}
+input[type=date]::-webkit-calendar-picker-indicator{cursor:pointer;opacity:1;width:22px;height:22px;padding:2px}
+input[type=date]::-webkit-calendar-picker-indicator:hover{background:#334155;border-radius:4px}
+button{padding:9px 18px;border:0;border-radius:6px;background:#d97706;color:#fff;font-size:17px;cursor:pointer}
+button:disabled{opacity:.5;cursor:wait}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.chip{padding:4px 10px;border-radius:14px;font-size:15px;border:1px solid #475569;cursor:pointer;user-select:none}
+.chip.on{background:#334155;border-color:#fbbf24;color:#fbbf24}
+.day{border:1px solid #334155;border-left-width:5px;border-radius:8px;margin-bottom:8px;background:#1e293b}
+.day.good{border-left-color:#22c55e}.day.ok{border-left-color:#eab308}.day.neutral{border-left-color:#64748b}.day.avoid{border-left-color:#ef4444}
+.head{padding:10px 12px;cursor:pointer;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.tag{font-size:15px;padding:2px 8px;border-radius:10px;background:#334155;margin-left:6px}
+.body{padding:0 12px 12px;font-size:16px;line-height:1.8;color:#cbd5e1;display:none}
+.day.open .body{display:block}
+.warn{color:#fca5a5}.note{color:#fcd34d}
+.hours{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.hr{padding:2px 8px;border-radius:6px;font-size:15px;background:#0f172a;border:1px solid #334155}
+.hr.bad{border-color:#ef4444;color:#fca5a5}
+.audit{font-size:15px;color:#94a3b8;line-height:1.7}
+#msg{color:#fca5a5;font-size:16px;margin-top:8px;min-height:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<a class="back" href="index.html">← 返回首页</a>
+<h1>📅 择日专家</h1>
+<p class="sub">按事项逐日筛选。依据黄历宜忌、建除、黄道黑道、冲煞，并可按生肖排除相冲、相害、相刑之日。结果为传统黄历资料筛选，不保证吉凶。</p>
+<div class="panel">
+ <div class="grid">
+  <div><label for="event">择日事项</label><select id="event"></select></div>
+  <div><label for="start">起始日期</label><input id="start" type="date"></div>
+  <div><label for="end">结束日期</label><input id="end" type="date"></div>
+  <div><label for="days">天数（1–92）</label><input id="days" type="number" min="1" max="92" value="31"></div>
+  <div class="zwrap"><label>当事人生肖（可多选）</label>
+   <button type="button" id="zbtn" class="zbtn" aria-haspopup="true" aria-expanded="false">不指定 ▾</button>
+   <div id="zpanel" class="zpanel" hidden>
+    <div class="zt">主要当事人（生肖相冲的日子会被避开）</div><div class="zchips" id="zmain"></div>
+    <div class="zt">其他相关人（仅提示，不排除日期）</div><div class="zchips" id="zminor"></div>
+    <div class="zsub sub" style="margin:8px 0 0;font-size:14px">人数不限：同生肖的人只需点一次。</div>
+    <div class="zact"><button type="button" id="zclear" class="ghost">清除</button><button type="button" id="zdone">完成</button></div>
+   </div>
+  </div>
+ </div>
+ <div style="margin-top:12px"><button id="go">开始择日</button></div>
+ <div id="msg" role="alert"></div>
+</div>
+<div id="result" hidden>
+ <div class="chips" id="filters"></div>
+ <div id="list"></div>
+ <div class="panel audit" id="audit"></div>
+</div>
+</div>
+<script>
+const LEVELS={good:'推荐',ok:'可选（有提示）',neutral:'中性',avoid:'避开'};
+let data=null,show=new Set(['good','ok']);
+const $=id=>document.getElementById(id);
+function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e}
+function line(parent,label,value,cls){if(value==null||value===''||(Array.isArray(value)&&!value.length))return;const d=el('div',cls);d.textContent=label+'：'+(Array.isArray(value)?value.join('、'):value);parent.append(d)}
+function setMsg(t){$('msg').textContent=t||''}
+const ZS=[...'鼠牛虎兔龙蛇马羊猴鸡狗猪'];const zMain=new Set(),zMinor=new Set();
+function zLabel(){
+ const m=ZS.filter(z=>zMain.has(z)).join('、'),n=ZS.filter(z=>zMinor.has(z)).join('、');
+ const t=[m&&'主：'+m,n&&'相关：'+n].filter(Boolean).join('｜')||'不指定';
+ $('zbtn').textContent=t+' ▾';$('zbtn').title=t;
+}
+function zRender(){
+ for(const [id,mine,other,cls] of [['zmain',zMain,zMinor,''],['zminor',zMinor,zMain,' minor']]){
+  const box=$(id);box.replaceChildren();
+  for(const z of ZS){const c=el('span','zc'+(mine.has(z)?' on'+cls:''),z);
+   c.onclick=()=>{mine.has(z)?mine.delete(z):(mine.add(z),other.delete(z));zRender();zLabel()};box.append(c)}
+ }
+}
+function zToggle(open){$('zpanel').hidden=!open;$('zbtn').setAttribute('aria-expanded',String(open))}
+const pad=n=>String(n).padStart(2,'0');
+const fmt=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parseDate=v=>{const [y,m,d]=(v||'').split('-').map(Number);return y?new Date(y,m-1,d):null};
+function endFromDays(){ // 起始日期或天数变动：重算结束日期
+ const s=parseDate($('start').value),n=Number($('days').value);
+ if(!s||!Number.isInteger(n))return;
+ const k=Math.min(Math.max(n,1),92);if(k!==n)$('days').value=k;
+ const e=new Date(s);e.setDate(e.getDate()+k-1);$('end').value=fmt(e);$('end').min=$('start').value;setMsg('');
+}
+function daysFromEnd(){ // 结束日期变动：重算天数
+ const s=parseDate($('start').value),e=parseDate($('end').value);
+ if(!s||!e)return;
+ let n=Math.round((e-s)/864e5)+1;
+ if(n<1){setMsg('结束日期不能早于起始日期');return}
+ if(n>92){$('days').value=92;endFromDays();setMsg('范围最多 92 天，已按 92 天计算');return}
+ $('days').value=n;setMsg('');
+}
+async function loadEvents(){
+ const r=await fetch('/api/zeri/events');const j=await r.json();
+ if(j.status!=='success')throw Error(j.message||'无法加载事项');
+ const groups={};for(const e of j.events)(groups[e.group]=groups[e.group]||[]).push(e);
+ for(const [g,list] of Object.entries(groups)){const og=document.createElement('optgroup');og.label=g;for(const e of list){const o=el('option',null,e.label);o.value=e.key;og.append(o)}$('event').append(og)}
+ const t=new Date();$('start').value=fmt(t);endFromDays();
+}
+function renderFilters(){
+ const box=$('filters');box.replaceChildren();
+ for(const k of Object.keys(LEVELS)){const c=el('span','chip'+(show.has(k)?' on':''),`${LEVELS[k]} ${data.summary[k]||0}`);c.onclick=()=>{show.has(k)?show.delete(k):show.add(k);renderFilters();renderList()};box.append(c)}
+}
+function renderList(){
+ const box=$('list');box.replaceChildren();
+ const rows=data.days.filter(d=>show.has(d.level));
+ if(!rows.length){box.append(el('div','sub','当前筛选下没有符合的日期，可放宽筛选或扩大日期范围。'));return}
+ for(const d of rows){
+  const card=el('div','day '+d.level),head=el('div','head');
+  const left=el('div');left.append(el('b',null,`${d.date}（周${d.weekday}）`),el('span','tag',d.ganzhi||''),el('span','tag',LEVELS[d.level]));
+  const right=el('div',null,[d.jian_chu&&`建除${d.jian_chu}`,d.tianshen_type].filter(Boolean).join(' · '));right.style.color='#94a3b8';
+  head.append(left,right);head.onclick=()=>card.classList.toggle('open');
+  const body=el('div','body');
+  line(body,'农历',d.lunar);line(body,'命中',d.reasons);line(body,'避开原因',d.avoids,'warn');line(body,'注意',d.cautions,'note');
+  line(body,'二十八宿',d.xiu);line(body,'天神',[d.tianshen,d.tianshen_type].filter(Boolean).join(' '));line(body,'冲煞',[d.chong,d.sha&&('煞'+d.sha)].filter(Boolean).join(' '));
+  line(body,'宜',d.yi);line(body,'忌',d.ji);line(body,'吉神宜趋',d.ji_shen);line(body,'凶煞宜忌',d.xiong_sha);line(body,'彭祖百忌',d.pengzu.filter(Boolean));
+  if(d.hours.length){body.append(el('div',null,'时辰（天神类型，仅作参考）：'));const h=el('div','hours');for(const x of d.hours){h.append(el('span','hr'+(x.clash_user||x.type==='黑道'?' bad':''),`${x.zhi}时${x.type?' '+x.type:''}${x.clash_user?' 冲':''}`))}body.append(h)}
+  card.append(head,body);box.append(card)
+ }
+}
+async function run(){
+ setMsg('');const btn=$('go');btn.disabled=true;
+ try{
+  const [y,m,d]=$('start').value.split('-').map(Number);if(!y)throw Error('请选择起始日期');
+  const body={event:$('event').value,year:y,month:m,day:d,days:Number($('days').value)};
+  if(zMain.size)body.zodiacs=ZS.filter(z=>zMain.has(z));
+  if(zMinor.size)body.zodiacs_minor=ZS.filter(z=>zMinor.has(z));
+  const r=await fetch('/api/zeri/calculate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const j=await r.json();if(j.status!=='success')throw Error(j.message||'计算失败');
+  data=j;show=new Set(['good','ok']);$('result').hidden=false;renderFilters();renderList();
+  const a=$('audit');a.replaceChildren();const au=j.calculation_audit;
+  a.append(el('div',null,'数据来源：'+au.source),el('div',null,'本模块规则：'+au.rules_added_here.join('、')),el('div',null,'未包含：'+au.not_included.join('、')),el('div',null,au.scope));
+ }catch(e){setMsg(e.message)}finally{btn.disabled=false}
+}
+$('start').addEventListener('change',endFromDays);$('days').addEventListener('input',endFromDays);$('end').addEventListener('change',daysFromEnd);
+$('zbtn').onclick=e=>{e.stopPropagation();zToggle($('zpanel').hidden)};
+$('zdone').onclick=()=>zToggle(false);
+$('zclear').onclick=()=>{zMain.clear();zMinor.clear();zRender();zLabel()};
+$('zpanel').addEventListener('click',e=>e.stopPropagation());
+document.addEventListener('click',()=>zToggle(false));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')zToggle(false)});
+zRender();zLabel();
+$('go').onclick=run;
+loadEvents().catch(e=>setMsg(e.message));
+</script>
+</body>
+</html>
