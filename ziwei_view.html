@@ -1206,6 +1206,9 @@ function drawFlyArrows(box, selectedName){
  overlay.setAttribute('aria-label','宫干四化宫内短箭头（逆水为双箭头）');
  const rect=box.getBoundingClientRect();
  const width=box.offsetWidth||rect.width,height=box.offsetHeight||rect.height;
+ // CSS zoom on phones changes viewport rects, but SVG viewBox uses unzoomed grid units.
+ const scaleX=rect.width?width/rect.width:1;
+ const scaleY=rect.height?height/rect.height:1;
  overlay.setAttribute('viewBox',`0 0 ${width} ${height}`);
  overlay.setAttribute('preserveAspectRatio','none');
  const ns='http://www.w3.org/2000/svg';
@@ -1225,7 +1228,7 @@ function drawFlyArrows(box, selectedName){
  const cells={};
  for(const item of gridMapping){
   const el=Array.from(box.children).find(e=>e.classList?.contains('palace-box')&&!e.classList.contains('center-box')&&Number(e.style.gridRow)===item.r+1&&Number(e.style.gridColumn)===item.c+1);
-  if(el){const r=el.getBoundingClientRect();cells[item.zhi]={x:r.left-rect.left,y:r.top-rect.top,w:r.width,h:r.height};}
+  if(el){const r=el.getBoundingClientRect();cells[item.zhi]={x:(r.left-rect.left)*scaleX,y:(r.top-rect.top)*scaleY,w:r.width*scaleX,h:r.height*scaleY};}
   else {const w=width/4,h=height/4;cells[item.zhi]={x:item.c*w,y:item.r*h,w,h};}
  }
  // 两种独立图层：点击宫位＝恢复跨宫长飞化线；射出／逆水＝固定短箭头。
@@ -1242,7 +1245,7 @@ function drawFlyArrows(box, selectedName){
   const candidates=[...target.querySelectorAll('.star-col > span:first-child, .p-top-left > span')];
   const match=candidates.find(e=>e.textContent.trim()===f.star);
   if(!match)return null;
-  const r=match.getBoundingClientRect();return {x:r.left-rect.left+r.width/2,y:r.top-rect.top+r.height/2};
+  const r=match.getBoundingClientRect();return {x:(r.left-rect.left+r.width/2)*scaleX,y:(r.top-rect.top+r.height/2)*scaleY};
  };
  ordinary.forEach((f,i)=>{
   const a=cells[f.from],b=cells[f.to];if(!a||!b)return;
@@ -1287,7 +1290,7 @@ function drawFlyArrows(box, selectedName){
    }
    const offset=(i-(items.length-1)/2)*10;
    if(!anchor){tailX+=-uy*offset;tailY+=ux*offset;}
-   const length=23;
+   const length=Math.min(72,Math.max(40,Math.hypot(dx,dy)*0.22));
    const tipX=tailX+ux*length,tipY=tailY+uy*length;
    const attrs={d:`M${tailX} ${tailY} L${tipX} ${tipY}`,stroke:color,'stroke-width':reverse?2.8:2.4,fill:'none','stroke-linecap':'round','marker-end':`url(#${uid}-${f.transformation})`};
    if(reverse)attrs['marker-start']=`url(#${uid}-${f.transformation})`;
@@ -1780,8 +1783,9 @@ function toggleMobileChartReading(){
  document.body.classList.toggle('mobile-chart-reading',mobileChartReading);
  document.getElementById('mobile-chart-toggle').textContent=mobileChartReading?'缩小显示完整命盘':'放大阅读（可左右滑动）';
  syncMobileChartLayout();
+ if(chart&&document.querySelector('input[name="view-mode"]:checked')?.value==='feixing')requestAnimationFrame(renderGrid);
 }
-window.addEventListener('resize',syncMobileChartLayout);
+window.addEventListener('resize',()=>{syncMobileChartLayout();if(chart&&document.querySelector('input[name="view-mode"]:checked')?.value==='feixing')requestAnimationFrame(renderGrid);});
 
 let chartFitActive=false;
 function resizeChartFit(){
