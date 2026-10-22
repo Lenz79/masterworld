@@ -866,6 +866,13 @@ body.chart-fit-active .chart-mode-bar{position:sticky;top:0;z-index:100}
 @media print{.ziwei-report-tabs{display:none!important}#full-report-content section.ziwei-tab-hidden,#full-report-content .report-palace.ziwei-subject-hidden{display:block!important}}
 
 #advanced-analysis-result{display:none!important}
+
+/* 宫内灰色分隔线保护：仅移除主星区域左侧边框，不触碰十二宫边框或飞化箭头。 */
+.ziwei-grid .palace-box.layer-feixing:not(.center-box) .p-right-main,
+.ziwei-grid .palace-box.layer-sanhe:not(.center-box) .p-right-main {
+  border-left: 0 !important;
+  border-inline-start: 0 !important;
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="xinggui_session.js"></script>
