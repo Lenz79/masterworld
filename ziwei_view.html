@@ -1290,7 +1290,7 @@ function drawFlyArrows(box, selectedName){
    }
    const offset=(i-(items.length-1)/2)*10;
    if(!anchor){tailX+=-uy*offset;tailY+=ux*offset;}
-   const length=Math.min(72,Math.max(40,Math.hypot(dx,dy)*0.22));
+   const length=Math.min(38,Math.max(24,Math.hypot(dx,dy)*0.10));
    const tipX=tailX+ux*length,tipY=tailY+uy*length;
    const attrs={d:`M${tailX} ${tailY} L${tipX} ${tipY}`,stroke:color,'stroke-width':reverse?2.8:2.4,fill:'none','stroke-linecap':'round','marker-end':`url(#${uid}-${f.transformation})`};
    if(reverse)attrs['marker-start']=`url(#${uid}-${f.transformation})`;
