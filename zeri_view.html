@@ -175,6 +175,7 @@ async function run(){
   const a=$('audit');a.replaceChildren();const au=j.calculation_audit;
   a.append(el('div',null,'数据来源：'+au.source));
   if(au.transcribed)a.append(el('div',null,'已转录：'+au.transcribed));
+  if(au.transcription_doubts&&au.transcription_doubts.length)a.append(el('div','note','转录存疑：'+au.transcription_doubts.join('；')));
   if(au.book_notes&&au.book_notes.length)a.append(el('div','note','书中不一致处：'+au.book_notes.join('；')));
   a.append(el('div',null,'本模块规则：'+(au.rules_added_here||au.rules_here).join('、')),el('div',null,'未包含：'+au.not_included.join('、')),el('div',null,au.scope));
  }catch(e){setMsg(e.message)}finally{btn.disabled=false}
