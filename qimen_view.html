@@ -1,4 +1,79 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>星轨智盘 · 奇门遁甲</title><style>*{box-sizing:border-box}body{margin:0;background:#0f172a;color:#e2e8f0;font-family:system-ui,-apple-system,sans-serif;padding:12px}.wrap{max-width:1050px;margin:auto}header{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:#1e293b;padding:12px;border-radius:10px}a{color:#38bdf8}h1{font-size:1.35rem;color:#f59e0b}h2{font-size:1rem;color:#fbbf24}.panel{background:#1e293b;border:1px solid #334155;padding:14px;border-radius:12px;margin-top:12px}.inputs{display:flex;gap:10px;flex-wrap:wrap;align-items:end}label{display:flex;flex-direction:column;gap:5px;font-size:.85rem;color:#93c5fd}input,select,textarea{background:#0f172a;color:white;border:1px solid #475569;border-radius:6px;padding:9px;max-width:100%}textarea{width:100%}button{border:0;background:#f59e0b;color:#111827;font-weight:bold;padding:10px 15px;border-radius:7px;cursor:pointer}button.secondary{background:#334155;color:#e2e8f0}.notice{color:#fbbf24;font-size:.83rem;line-height:1.7}.account{color:#34d399;font-weight:bold}.grid9{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.cell{min-height:145px;background:#101b30;border:1px solid #475569;padding:8px;border-radius:7px}.cell .top{display:flex;justify-content:space-between;color:#fbbf24;font-size:.82rem}.cell .mid{font-size:1.1rem;text-align:center;padding:12px 0;color:#7dd3fc}.cell .bottom{font-size:.8rem;color:#cbd5e1}.lines{display:flex;flex-direction:column;gap:8px}.line{display:grid;grid-template-columns:minmax(0,1fr) 115px minmax(0,1fr);gap:8px;align-items:center;background:#101b30;padding:10px;border-radius:7px}.yao{font-size:1.3rem;text-align:center;white-space:nowrap;letter-spacing:2px}.moving{color:#f59e0b}.small{font-size:.8rem;color:#94a3b8}.error{color:#f87171}@media(max-width:600px){.cell{min-height:125px;padding:5px}.cell .mid{font-size:.9rem}.line{grid-template-columns:1fr 80px 1fr;gap:3px;padding:7px}.yao{font-size:1rem;letter-spacing:0}}@media print{button,.notice{display:none}body{background:white;color:black}.panel,.cell,.line{color:black;background:white;border-color:#aaa}}</style></head><body><div class="wrap"><header><a href="index.html">← 返回主页</a><h1>☯️ 奇门遁甲 · 三式排盘工作台</h1><span id="account" class="account">验证登录中…</span></header><div class="panel"><div class="notice">当前为算法接入与交互测试版：拆补、置闰、阴盘的专业起局、置闰节气与阴盘流派规则尚未完成核验；本页不伪造自动起局结果。可手动指定阴阳遁及局数预览地盘九宫，不应据此作专业判断。</div><div class="inputs"><label>排盘方法<select id="method"><option value="拆补">拆补</option><option value="置闰">置闰</option><option value="阴盘">阴盘</option></select></label><label>起局时间<input type="datetime-local" id="when"></label><label>遁法<select id="dun"><option value="阳">阳遁</option><option value="阴">阴遁</option></select></label><label>局数<select id="ju"><option value="1">1局</option><option value="2">2局</option><option value="3">3局</option><option value="4">4局</option><option value="5">5局</option><option value="6">6局</option><option value="7">7局</option><option value="8">8局</option><option value="9">9局</option></select></label><button id="calc">手动布地盘</button><button class="secondary" onclick="window.print()">打印</button></div></div><div class="panel"><h2 id="resultTitle">九宫地盘预览</h2><div class="grid9" id="board"></div></div><div class="panel"><h2>本账号本机草稿</h2><button class="secondary" id="save">保存当前预览</button><div id="history" class="small"></div><p class="notice">草稿仅保存在本浏览器、按登录用户 ID 隔离；尚未写入 Supabase，也不属于正式云端排盘历史。</p></div></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script src="xinggui_session.js"></script><script>
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>星轨智盘 · 奇门遁甲</title><style>*{box-sizing:border-box}body{margin:0;background:#0f172a;color:#e2e8f0;font-family:system-ui,-apple-system,sans-serif;padding:12px}.wrap{max-width:1050px;margin:auto}header{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:#1e293b;padding:12px;border-radius:10px}a{color:#38bdf8}h1{font-size:1.35rem;color:#f59e0b}h2{font-size:1rem;color:#fbbf24}.panel{background:#1e293b;border:1px solid #334155;padding:14px;border-radius:12px;margin-top:12px}.inputs{display:flex;gap:10px;flex-wrap:wrap;align-items:end}label{display:flex;flex-direction:column;gap:5px;font-size:.85rem;color:#93c5fd}input,select,textarea{background:#0f172a;color:white;border:1px solid #475569;border-radius:6px;padding:9px;max-width:100%}textarea{width:100%}button{border:0;background:#f59e0b;color:#111827;font-weight:bold;padding:10px 15px;border-radius:7px;cursor:pointer}button.secondary{background:#334155;color:#e2e8f0}.notice{color:#fbbf24;font-size:.83rem;line-height:1.7}.account{color:#34d399;font-weight:bold}.grid9{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.cell{min-height:145px;background:#101b30;border:1px solid #475569;padding:8px;border-radius:7px}.cell .top{display:flex;justify-content:space-between;color:#fbbf24;font-size:.82rem}.cell .mid{font-size:1.1rem;text-align:center;padding:12px 0;color:#7dd3fc}.cell .bottom{font-size:.8rem;color:#cbd5e1}.lines{display:flex;flex-direction:column;gap:8px}.line{display:grid;grid-template-columns:minmax(0,1fr) 115px minmax(0,1fr);gap:8px;align-items:center;background:#101b30;padding:10px;border-radius:7px}.yao{font-size:1.3rem;text-align:center;white-space:nowrap;letter-spacing:2px}.moving{color:#f59e0b}.small{font-size:.8rem;color:#94a3b8}.error{color:#f87171}@media(max-width:600px){.cell{min-height:125px;padding:5px}.cell .mid{font-size:.9rem}.line{grid-template-columns:1fr 80px 1fr;gap:3px;padding:7px}.yao{font-size:1rem;letter-spacing:0}}@media print{button,.notice{display:none}body{background:white;color:black}.panel,.cell,.line{color:black;background:white;border-color:#aaa}}
+
+/* AstroMatrix Qimen mobile UI v1 — scoped visual enhancement, retain original logic */
+.qm-mobile-tabs,.qm-now,.qm-mobile-hint{display:none}
+@media(max-width:700px){
+ body{padding:0 0 78px;background:#f5f7fb;color:#1f2937}
+ .wrap{width:100%;max-width:none}
+ header{position:relative;border-radius:0;background:#328dcc;color:white;padding:12px 14px;gap:6px;min-height:60px}
+ header a{color:white;font-size:13px;text-decoration:none}
+ header h1{font-size:18px;color:white;margin:0;flex:1;text-align:center}
+ header .account{width:100%;font-size:10px;color:#e8f6ff;text-align:right;font-weight:400}
+ .panel{margin:10px 10px 0;padding:12px;border:1px solid #dbe2eb;background:#fff;border-radius:10px}
+ .panel h2{color:#176ba7}
+ .notice{color:#7c5d15;font-size:12px;line-height:1.55}
+ .qm-mobile-tabs{display:grid;grid-template-columns:1fr 1fr;position:sticky;bottom:0;z-index:10;background:#e5e7eb;box-shadow:0 -2px 8px #0001;margin-top:10px}
+ .qm-mobile-tabs button{border-radius:0;background:#e5e7eb;color:#6b7280;min-height:56px;font-size:18px}
+ .qm-mobile-tabs button.active{background:#328dcc;color:#fff}
+ .inputs{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end}
+ .inputs label{color:#202b39;font-size:15px;font-weight:700;gap:6px;min-width:0}
+ .inputs input,.inputs select{width:100%;min-width:0;height:44px;border:1px solid #cbd5e1;background:#fff;color:#1f2937;font-size:16px;padding:8px;border-radius:8px}
+ .inputs label:has(#method),.inputs label:has(#when){grid-column:1/-1}
+ .inputs #calc{grid-column:1/-1;background:#328dcc;color:white;font-size:17px;min-height:46px}
+ .inputs button.secondary{background:#e5e7eb;color:#374151}
+ .qm-now{display:block;grid-column:1/-1;background:#e0f2fe;color:#075985}
+ .qm-mobile-hint{display:block;grid-column:1/-1;font-size:12px;color:#64748b;line-height:1.5}
+ .qm-mode-date .qm-manual-field{display:none}
+ .qm-mode-custom .qm-date-field{display:none}
+ .grid9{gap:2px;background:#d1d5db;border:1px solid #d1d5db}
+ .cell{min-height:105px;min-width:0;border:0;border-radius:0;background:#fff;padding:5px 3px;overflow-wrap:anywhere}
+ .cell .top{font-size:11px;color:#374151}
+ .cell .mid{font-size:24px;font-weight:700;color:#1f2937;padding:8px 0}
+ .cell .bottom{font-size:10px;line-height:1.3;color:#64748b}
+}
+@media(max-width:360px){.cell{min-height:95px}.cell .mid{font-size:21px}.cell .bottom{font-size:9px}}
+
+/* V2 — mobile-only +6px readability adjustment; no calculation or desktop changes */
+@media(max-width:700px){
+ header h1{font-size:24px}
+ header a{font-size:19px}
+ header .account{font-size:16px}
+ .panel h2{font-size:22px}
+ .notice{font-size:18px}
+ .inputs label{font-size:21px}
+ .inputs input,.inputs select{font-size:22px}
+ .inputs #calc{font-size:23px}
+ .qm-mobile-tabs button{font-size:24px}
+ .qm-now{font-size:22px}
+ .qm-mobile-hint{font-size:18px}
+ .cell .top{font-size:17px}
+ .cell .mid{font-size:30px}
+ .cell .bottom{font-size:16px;line-height:1.2;overflow-wrap:anywhere}
+ .small{font-size:18px}
+}
+@media(max-width:360px){.cell .mid{font-size:27px}.cell .bottom{font-size:15px}}
+
+/* V3 — mobile typography only: UI +6px vs V2; nine-palace text +12px vs V2. */
+@media(max-width:700px){
+ header h1{font-size:30px}
+ header a{font-size:25px}
+ header .account{font-size:22px}
+ .panel h2{font-size:28px}
+ .notice{font-size:24px}
+ .inputs label{font-size:27px}
+ .inputs input,.inputs select{font-size:28px;min-height:56px}
+ .inputs #calc{font-size:29px;min-height:58px}
+ .qm-mobile-tabs button{font-size:30px;min-height:66px}
+ .qm-now{font-size:28px;min-height:58px}
+ .qm-mobile-hint{font-size:24px}
+ .small{font-size:24px}
+ .cell{min-height:185px;padding:7px 3px}
+ .cell .top{font-size:29px;flex-wrap:wrap;gap:2px;line-height:1.15}
+ .cell .mid{font-size:42px;line-height:1.15;padding:10px 0}
+ .cell .bottom{font-size:28px;line-height:1.2;overflow-wrap:anywhere}
+}
+@media(max-width:360px){.cell{min-height:180px}.cell .mid{font-size:39px}.cell .bottom{font-size:27px}}
+</style></head><body><div class="wrap"><header><a href="index.html">← 返回主页</a><h1>☯️ 奇门遁甲 · 三式排盘工作台</h1><span id="account" class="account">验证登录中…</span></header><div class="panel"><div class="notice">当前为算法接入与交互测试版：拆补、置闰、阴盘的专业起局、置闰节气与阴盘流派规则尚未完成核验；本页不伪造自动起局结果。可手动指定阴阳遁及局数预览地盘九宫，不应据此作专业判断。</div><div class="inputs qm-mode-date" id="qmInputs"><label class="qm-date-field">排盘方法<select id="method"><option value="拆补">拆补</option><option value="置闰">置闰</option><option value="阴盘">阴盘</option></select></label><label class="qm-date-field">起局时间<input type="datetime-local" id="when"></label><label class="qm-manual-field">遁法<select id="dun"><option value="阳">阳遁</option><option value="阴">阴遁</option></select></label><label class="qm-manual-field">局数<select id="ju"><option value="1">1局</option><option value="2">2局</option><option value="3">3局</option><option value="4">4局</option><option value="5">5局</option><option value="6">6局</option><option value="7">7局</option><option value="8">8局</option><option value="9">9局</option></select></label><button id="calc">手动布地盘</button><button type="button" class="qm-now" id="qmNow">↻ 现时</button><div class="qm-mobile-hint">当前仅提供手动地盘预览；日期模式不会自动推算阴阳遁、局数或完整九宫。</div><button class="secondary" onclick="window.print()">打印</button></div></div><div class="panel"><h2 id="resultTitle">九宫地盘预览</h2><div class="grid9" id="board"></div></div><div class="panel"><h2>本账号本机草稿</h2><button class="secondary" id="save">保存当前预览</button><div id="history" class="small"></div><p class="notice">草稿仅保存在本浏览器、按登录用户 ID 隔离；尚未写入 Supabase，也不属于正式云端排盘历史。</p></div></div><div class="qm-mobile-tabs" aria-label="起盘模式"><button type="button" class="active" id="qmDateTab" aria-pressed="true">▦ 日期</button><button type="button" id="qmCustomTab" aria-pressed="false">☷ 自选</button></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script src="xinggui_session.js"></script><script>
 let signedInId=null;
 async function initAccount(){try{await XingguiSession.ready;if(!await XingguiSession.verifyLogin()){location.replace('index.html');return false}const a=XingguiSession.account();if(!a?.id){location.replace('index.html');return false}signedInId=a.id;const p=a.profile;document.getElementById('account').textContent='👤 当前账号：'+(p?.name||p?.email||'已登录')+(p?.email?' ('+p.email+')':'');return true}catch(e){document.getElementById('account').textContent='登录验证失败：'+e.message;return false}}
 function escapeText(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -9,4 +84,15 @@ const palaces=[4,9,2,3,5,7,8,1,6],stems=['戊','己','庚','辛','壬','癸','�
 function draw(){const method=document.getElementById('method').value,dun=document.getElementById('dun').value,ju=+document.getElementById('ju').value,when=document.getElementById('when').value;if(!when){alert('请先选择起局时间');return}const map={};for(let i=0;i<9;i++){const n=((ju-1+(dun==='阳'?i:-i)+900)%9)+1;map[n]=stems[i]}document.getElementById('board').innerHTML=palaces.map(n=>'<div class="cell"><div class="top"><span>'+n+'宫</span><span>地盘</span></div><div class="mid">'+map[n]+'</div><div class="bottom">天盘／八门／九星／八神：待校验</div></div>').join('');document.getElementById('resultTitle').textContent=method+' · '+dun+ju+'局 · 地盘三奇六仪预览';current={method,dun,ju,when,map};}
 function history(){document.getElementById('history').innerHTML=historyLocal('qimen').slice(0,10).map(x=>'<div>'+escapeText(x.savedAt)+' · '+escapeText(x.method)+' · '+escapeText(x.dun)+escapeText(x.ju)+'局</div>').join('')||'暂无本机草稿'}
 document.addEventListener('DOMContentLoaded',async()=>{if(!await initAccount())return;const d=new Date(),local=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);document.getElementById('when').value=local;document.getElementById('calc').onclick=draw;document.getElementById('save').onclick=()=>{if(!current){alert('请先布盘');return}saveLocal('qimen',current);history()};draw();history()});
-</script></body></html>
+</script>
+<script>
+/* UI-only mobile controls: preserve original draw(), session, and storage behavior. */
+document.addEventListener('DOMContentLoaded',function(){
+ const box=document.getElementById('qmInputs'),a=document.getElementById('qmDateTab'),b=document.getElementById('qmCustomTab');
+ function mode(custom){box.classList.toggle('qm-mode-custom',custom);box.classList.toggle('qm-mode-date',!custom);a.classList.toggle('active',!custom);b.classList.toggle('active',custom);a.setAttribute('aria-pressed',String(!custom));b.setAttribute('aria-pressed',String(custom));document.getElementById('calc').textContent=custom?'手动布地盘':'预览地盘（非自动起局）';}
+ a.addEventListener('click',()=>mode(false));b.addEventListener('click',()=>mode(true));
+ document.getElementById('qmNow').addEventListener('click',()=>{const d=new Date();document.getElementById('when').value=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);});
+ if(window.matchMedia('(max-width:700px)').matches)mode(false);
+});
+</script>
+</body></html>
