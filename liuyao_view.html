@@ -234,6 +234,95 @@
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
 </script>
+<style id="xinggui-ly-mobile-calendar-stack-v11">
+/* Remain: 仅手机端六爻四柱显示布局；不改动排盘数据、脚本及电脑版。 */
+@media (max-width:700px){
+ #liuyao-tab-panel .am-yiy-grid{
+   display:grid!important;
+   grid-template-columns:repeat(4,minmax(0,1fr))!important;
+   gap:0!important;
+   width:100%!important;
+ }
+ #liuyao-tab-panel .am-yiy-time{
+   grid-column:1 / -1!important;
+   grid-row:1!important;
+   align-items:flex-start!important;
+   text-align:left!important;
+   padding:10px 12px 12px!important;
+   gap:3px!important;
+   white-space:normal!important;
+   border-bottom:1px solid #d6dce5!important;
+ }
+ #liuyao-tab-panel .am-yiy-time>.am-hex-summary{
+   margin-top:6px!important;
+   line-height:1.55!important;
+ }
+ #liuyao-tab-panel .am-yiy-pillar{
+   grid-row:2!important;
+   min-width:0!important;
+   border-left:1px solid #d6dce5!important;
+   padding:0 2px 8px!important;
+ }
+ #liuyao-tab-panel .am-yiy-pillar:nth-child(2){border-left:0!important}
+ #liuyao-tab-panel .am-yiy-pillar strong{font-size:26px!important;line-height:1.12!important;margin-top:5px!important}
+ #liuyao-tab-panel .am-yiy-heading{font-size:13px!important;line-height:23px!important}
+ #liuyao-tab-panel .am-yiy-pending{grid-column:1 / -1!important;grid-row:2!important}
+}
+</style>
+<style id="xinggui-ly-mobile-summary-compact-v12">
+/* Remain: only mobile presentation of hexagram summary and four pillars. */
+@media (max-width:700px){
+ #liuyao-tab-panel .am-yiy-grid{
+   grid-template-columns:repeat(4,42px)!important;
+   column-gap:8px!important;
+   row-gap:4px!important;
+   justify-content:start!important;
+   justify-items:start!important;
+   width:100%!important;
+ }
+ #liuyao-tab-panel .am-yiy-time{
+   grid-column:1 / -1!important;
+   grid-row:1!important;
+   width:100%!important;
+   box-sizing:border-box!important;
+   align-items:flex-start!important;
+   justify-content:flex-start!important;
+   text-align:left!important;
+   padding:7px 4px 8px!important;
+   gap:2px!important;
+ }
+ #liuyao-tab-panel .am-yiy-time > .am-hex-summary{
+   width:auto!important;
+   max-width:100%!important;
+   margin:3px 0 0!important;
+   padding:0!important;
+   text-align:left!important;
+ }
+ #liuyao-tab-panel .am-yiy-pillar{
+   grid-row:2!important;
+   width:42px!important;
+   min-width:42px!important;
+   max-width:42px!important;
+   box-sizing:border-box!important;
+   padding:2px 0 6px!important;
+   border-left:0!important;
+   justify-self:start!important;
+   text-align:center!important;
+ }
+ #liuyao-tab-panel .am-yiy-heading{
+   font-size:23px!important; /* V11 13px + 10px */
+   font-weight:800!important;
+   line-height:1.2!important;
+ }
+ #liuyao-tab-panel .am-yiy-pillar strong{
+   font-size:32px!important; /* V11 26px + 6px */
+   font-weight:800!important;
+   line-height:1.15!important;
+   margin-top:4px!important;
+ }
+ #liuyao-tab-panel .am-yiy-pending{grid-column:1 / -1!important;grid-row:2!important}
+}
+</style>
 </head><body><div class="wrap"><header><a href="index.html">← 返回主页</a><h1>🪙 六爻起卦 · 纳甲工作台</h1><span id="account" class="account">验证登录中…</span></header><div class="panel"><div class="inputs"><label>占问事项<textarea id="question" rows="2" placeholder="输入占问事项"></textarea></label><label>用神<select id="yongshen" aria-label="选择用神"><option value="">请选择用神</option><option value="父母">父母</option><option value="官鬼">官鬼</option><option value="兄弟">兄弟</option><option value="妻财">妻财</option><option value="子孙">子孙</option><option value="世爻">世爻（自身）</option><option value="应爻">应爻（对方）</option><option value="待定">暂不确定</option></select></label><label>起卦方式<select id="mode"><option value="coins">铜钱摇卦（逐爻）</option><option value="manual">手动六爻（逐爻指定）</option></select></label><label>起卦时间<input id="when" type="datetime-local"></label><label>日干（按万年历核对）<select id="day-stem"><option value="">请选择日干</option><option value="甲">甲</option><option value="乙">乙</option><option value="丙">丙</option><option value="丁">丁</option><option value="戊">戊</option><option value="己">己</option><option value="庚">庚</option><option value="辛">辛</option><option value="壬">壬</option><option value="癸">癸</option></select></label><button id="toss">🪙 摇一爻</button><button id="random">一键摇六爻</button><button class="secondary" id="clear">重新起卦</button></div><p class="small">从初爻（最下方）依次向上起六爻。三枚铜钱：正面记 3、反面记 2；总和 6 老阴、7 少阳、8 少阴、9 老阳。每爻等概率独立模拟三枚铜钱。</p><div id="manual" class="inputs" style="display:none"></div></div><div class="panel"><h2 id="status">等待起卦</h2><div class="lines" id="lines"></div><div id="summary" style="margin-top:12px"></div><div id="najia" style="margin-top:12px"></div><button class="secondary" onclick="window.print()">打印</button><button class="secondary" id="save">保存本机草稿</button></div><div class="panel"><h2>本账号本机草稿</h2><div id="history" class="small"></div></div></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script src="xinggui_session.js"></script><script>
 let signedInId=null;
 async function initAccount(){try{await XingguiSession.ready;if(!await XingguiSession.verifyLogin()){location.replace('index.html');return false}const a=XingguiSession.account();if(!a?.id){location.replace('index.html');return false}signedInId=a.id;const p=a.profile;document.getElementById('account').textContent='👤 当前账号：'+(p?.name||p?.email||'已登录')+(p?.email?' ('+p.email+')':'');return true}catch(e){document.getElementById('account').textContent='登录验证失败：'+e.message;return false}}
