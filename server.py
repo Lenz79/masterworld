@@ -353,11 +353,19 @@ class MainGatewayHandler(SimpleHTTPRequestHandler):
             try:
                 from zeri_engine import ZeriEngine
                 request = self._parse_json_body()
-                self._send_json(ZeriEngine.calculate(request))
+                if isinstance(request, dict) and request.get('school') == 'donggong':
+                    try:
+                        from dong_gong_engine import DongGongEngine
+                    except ImportError as err:
+                        raise RuntimeError('dong_gong_engine.py 模块未安装或无法加载') from err
+                    self._send_json(DongGongEngine.calculate(request))
+                else:
+                    self._send_json(ZeriEngine.calculate(request))
             except (ValueError, TypeError, OverflowError) as err:
                 self._send_json({'status': 'error', 'message': str(err)}, 400)
             except RuntimeError as err:
-                self._send_json({'status': 'error', 'message': str(err)}, 503)
+                code = 'MISSING_LUNAR_PYTHON' if 'lunar_python' in str(err) else 'ZERI_RUNTIME'
+                self._send_json({'status': 'error', 'code': code, 'message': str(err)}, 503)
             except Exception:
                 traceback.print_exc()
                 self._send_json({'status': 'error', 'message': '择日计算暂不可用'}, 500)
